@@ -28,7 +28,10 @@ export default function Sidebar() {
   return (
     <aside className="side">
       <div className="brand">
-        <div className="brand-mark">Divic</div>
+        <div className="brand-lockup">
+          <img src="/logo.png" alt="" width="30" height="30" />
+          <span className="brand-mark">Divic</span>
+        </div>
         <div className="brand-rule" />
         <div className="brand-sub">Two properties, Festac</div>
       </div>
