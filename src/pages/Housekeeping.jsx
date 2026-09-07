@@ -50,10 +50,10 @@ export default function Housekeeping() {
       />
 
       <div className="grid g4" style={{ marginBottom: 20 }}>
-        <Metric accent label="Ready to sell" value={counts.available || 0} note="Clean and free" />
-        <Metric label="Occupied" value={counts.occupied || 0} note="Guests in house" />
-        <Metric label="Needs cleaning" value={(counts.dirty || 0) + (counts.cleaning || 0)} note="On the list" />
-        <Metric label="Out of order" value={counts.maintenance || 0} note="Not sellable" />
+        <Metric accent label="Available rooms" value={counts.available || 0} note="Clean and empty" />
+        <Metric label="Occupied" value={counts.occupied || 0} note="Guests staying" />
+        <Metric label="Needs cleaning" value={(counts.dirty || 0) + (counts.cleaning || 0)} note="Waiting for housekeeping" />
+        <Metric label="Out of order" value={counts.maintenance || 0} note="Cannot be used" />
       </div>
 
       <ErrorNote>{actionError}</ErrorNote>

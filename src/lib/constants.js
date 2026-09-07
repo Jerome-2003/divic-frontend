@@ -26,6 +26,9 @@ export const ROLE_LABEL = {
   manager: "Manager",
   receptionist: "Receptionist",
   cleaner: "Housekeeping",
+  // The backend calls this role "facility". Bartenders and restaurant staff
+  // do not think of themselves as facilities, so the label says what they do.
+  facility: "Bar & restaurant",
 };
 
 export const STATUS_META = {
@@ -36,9 +39,15 @@ export const STATUS_META = {
   maintenance: { label: "Out of order",  cls: "st-maintenance" },
 };
 
+export const FACILITY_STATUS_META = {
+  open:        { label: "Open",              cls: "st-available" },
+  closed:      { label: "Closed",            cls: "st-maintenance" },
+  maintenance: { label: "Under maintenance", cls: "st-dirty" },
+};
+
 export const BOOKING_STATUS = {
   confirmed: "Arriving",
-  "in-house": "In house",
+  "in-house": "Staying",
   "checked-out": "Checked out",
   cancelled: "Cancelled",
   "no-show": "No show",
@@ -52,6 +61,7 @@ export const NAV = [
   { key: "rooms", label: "Housekeeping", path: "/housekeeping" },
   { key: "guests", label: "Guests", path: "/guests" },
   { key: "billing", label: "Billing", path: "/billing" },
+  { key: "pos", label: "Point of sale", path: "/pos" },
   { key: "analytics", label: "Analytics", path: "/analytics" },
   { key: "rates", label: "Rates", path: "/rates" },
   { key: "staff", label: "Staff", path: "/staff" },

@@ -6,6 +6,7 @@ import { LOCATIONS, STATUS_META } from "../lib/constants";
 import { naira, cap, today } from "../lib/format";
 import { PageHead, Metric, Card, Empty, Loading, ErrorNote, Chip } from "../components/ui";
 import ContactLines from "../components/ContactLines";
+import FacilitiesCard from "../components/FacilitiesCard";
 
 export default function Dashboard() {
   const { location, user, can } = useAuth();
@@ -15,6 +16,8 @@ export default function Dashboard() {
 
   const { data: rooms, loading: lr, error: er } = useApi(() => api.rooms(location), [location]);
   const { data: bookings, loading: lb, error: eb } = useApi(() => api.bookings(location), [location]);
+  const { data: facilities, loading: lf, error: ef, reload: reloadFacilities } =
+    useApi(() => api.facilities(location), [location]);
 
   if (lr || lb) return <Loading label="Reading today's position" />;
   if (er || eb) return <ErrorNote>{er || eb}</ErrorNote>;
@@ -41,18 +44,18 @@ export default function Dashboard() {
         <Metric label="Arriving" value={arrivals.length}
           note={arrivals.length ? "Waiting to check in" : "Nothing pending"} />
         <Metric label="Departing" value={departures.length}
-          note={departures.length ? "Settle folios before noon" : "No departures"} />
+          note={departures.length ? "Settle bills before noon" : "No departures"} />
         <Metric label="Rooms to clean" value={notReady.length}
           note={notReady.length ? "On the housekeeping list" : "Every room is ready"} />
       </div>
 
       {seesMoney && (
         <div className="grid g2" style={{ marginBottom: 20 }}>
-          <Metric label="Room revenue in house tonight"
+          <Metric label="Room revenue tonight"
             value={naira(inHouse.reduce((s, b) => s + b.rate, 0))}
-            note="Nightly value of occupied rooms" />
+            note="Nightly value of the rooms in use" />
           <Metric label="Outstanding balances" value={naira(owing)}
-            note="Across guests currently in house" />
+            note="Across guests staying tonight" />
         </div>
       )}
 
@@ -91,10 +94,19 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div style={{ marginTop: 16 }}>
+      <div className="grid g2" style={{ marginTop: 16 }}>
         <Card title={loc.name} sub={rooms.length + " rooms"} pad>
           <ContactLines location={loc} />
         </Card>
+
+        <FacilitiesCard
+          facilities={facilities}
+          loading={lf}
+          error={ef}
+          editable={can("facilities")}
+          onChanged={reloadFacilities}
+          sub={can("facilities") ? "You can change these" : undefined}
+        />
       </div>
     </>
   );
