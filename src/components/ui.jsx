@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { X, AlertCircle, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X, AlertCircle, Loader2, Eye, EyeOff } from "lucide-react";
 
 /* Shared primitives. Everything visual in the app is built from these so the
    look stays consistent when new screens are added. */
@@ -88,7 +88,7 @@ export function ErrorNote({ children }) {
 
 export function Note({ children, icon: Icon = AlertCircle }) {
   return (
-    <div className="note">
+    <div className="callout">
       <Icon size={15} style={{ flexShrink: 0, color: "var(--gold-deep)" }} />
       <span>{children}</span>
     </div>
@@ -114,6 +114,40 @@ export function Field({ label, htmlFor, children }) {
 }
 
 export const Row = ({ children }) => <div className="frow">{children}</div>;
+
+/**
+ * A password box with a reveal control. The toggle is a real button so it is
+ * keyboard reachable and takes the shared focus ring, and it is type="button"
+ * so pressing it never submits the form it sits in. The input carries extra
+ * padding on the right in theme.css, so the eye never sits over typed text.
+ */
+export function PasswordInput({ id, value, onChange, onKeyDown, autoComplete, placeholder, autoFocus }) {
+  const [shown, setShown] = useState(false);
+  const Icon = shown ? EyeOff : Eye;
+  return (
+    <div className="pw">
+      <input
+        id={id}
+        type={shown ? "text" : "password"}
+        value={value}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        autoComplete={autoComplete}
+        placeholder={placeholder}
+        autoFocus={autoFocus}
+      />
+      <button
+        type="button"
+        className="pw-toggle"
+        aria-label={shown ? "Hide password" : "Show password"}
+        aria-pressed={shown}
+        onClick={() => setShown((s) => !s)}
+      >
+        <Icon size={16} strokeWidth={1.7} aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
 
 export function Chip({ tone = "gold", children }) {
   const cls = tone.startsWith("st-") ? tone : "chip-" + tone;

@@ -85,6 +85,9 @@ export const api = {
 
   // billing
   folios: (location) => request("/api/payments/folios", { params: { location } }),
+  // One guest's bill, itemised: the room line plus every facility charge
+  // sitting on the room.
+  folio: (bookingId) => request(`/api/payments/folio/${bookingId}`),
   paymentsFor: (bookingId) => request(`/api/payments/booking/${bookingId}`),
   initPaystack: (bookingId, amount, email) =>
     request("/api/payments/paystack/initialize", { method: "POST", body: { bookingId, amount, email } }),
@@ -95,6 +98,22 @@ export const api = {
   staff: () => request("/api/staff"),
   createStaff: (body) => request("/api/staff", { method: "POST", body }),
   updateStaff: (id, body) => request(`/api/staff/${id}`, { method: "PATCH", body }),
+
+  // facilities + point of sale
+  facilities: (location) => request("/api/facilities", { params: { location } }),
+  setFacilityStatus: (id, status, note) =>
+    request(`/api/facilities/${id}`, { method: "PATCH", body: { status, note } }),
+  // Returns the room number and the guest's surname, and nothing else. There
+  // is deliberately no endpoint that lists who is in house.
+  facilityGuestLookup: (facilityId, room) =>
+    request(`/api/facilities/${facilityId}/guest-lookup`, { params: { room } }),
+  facilityCharges: (facilityId, date) =>
+    request(`/api/facilities/${facilityId}/charges`, { params: { date } }),
+  postFacilityCharge: (facilityId, payload) =>
+    request(`/api/facilities/${facilityId}/charges`, { method: "POST", body: payload }),
+  // Managers and owners only — the server refuses this from facility staff.
+  voidFacilityCharge: (facilityId, chargeId, reason) =>
+    request(`/api/facilities/${facilityId}/charges/${chargeId}/void`, { method: "POST", body: { reason } }),
 
   // analytics + audit
   summary: (location, days) => request("/api/analytics/summary", { params: { location, days } }),

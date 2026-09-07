@@ -3,7 +3,7 @@ import { KeyRound } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { LOCATIONS } from "../lib/constants";
 import { telUrl, mapUrl } from "../lib/format";
-import { ErrorNote, Field } from "../components/ui";
+import { ErrorNote, Field, PasswordInput } from "../components/ui";
 
 export default function Login() {
   const { signIn } = useAuth();
@@ -29,7 +29,8 @@ export default function Login() {
       <div className="login-wrap">
         <div className="login-art">
           <div>
-            <div className="lmark">Divic<br />Exclusive</div>
+            <img className="lmark-img" src="/logo.svg" alt="" width="92" height="92" />
+            <div className="lname">Divic Exclusive<br />Hotel</div>
             <div className="lrule" />
             <div className="lcopy">
               Front desk, housekeeping, billing and guest records for both Festac
@@ -67,7 +68,7 @@ export default function Login() {
                 onKeyDown={(e) => e.key === "Enter" && submit()} />
             </Field>
             <Field label="Password" htmlFor="p">
-              <input id="p" type="password" value={password} autoComplete="current-password"
+              <PasswordInput id="p" value={password} autoComplete="current-password"
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && submit()} />
             </Field>

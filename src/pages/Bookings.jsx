@@ -37,7 +37,7 @@ export default function Bookings() {
         <select value={status} onChange={(e) => setStatus(e.target.value)} style={{ width: 190 }}>
           <option value="">All bookings</option>
           <option value="confirmed">Arriving</option>
-          <option value="in-house">In house</option>
+          <option value="in-house">Staying</option>
           <option value="checked-out">Checked out</option>
           <option value="cancelled">Cancelled</option>
         </select>

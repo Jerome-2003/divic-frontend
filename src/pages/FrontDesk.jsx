@@ -37,9 +37,14 @@ export default function FrontDesk() {
     } catch (e) {
       // The server refuses a checkout with money owing unless it is overridden.
       if (e.status === 409 && e.payload?.balance) {
+        // The server breaks the balance out, so say where it came from —
+        // "the bar" is a different conversation from "the room".
+        const fromBar = e.payload.facilityCharges
+          ? "\n(" + naira(e.payload.facilityCharges) + " of that is bar and restaurant.)"
+          : "";
         const ok = window.confirm(
-          "This folio still owes " + naira(e.payload.balance) +
-          ".\n\nCheck out anyway and leave the balance owing?"
+          "This bill still owes " + naira(e.payload.balance) + "." + fromBar +
+          "\n\nCheck out anyway and leave the balance owing?"
         );
         if (ok) {
           try { await api.checkOut(b._id, true); await reload(); }
@@ -59,7 +64,7 @@ export default function FrontDesk() {
 
       <div className="tabs">
         <button className={tab === "arrivals" ? "on" : ""} onClick={() => setTab("arrivals")}>Arrivals ({arrivals.length})</button>
-        <button className={tab === "inhouse" ? "on" : ""} onClick={() => setTab("inhouse")}>In house ({inHouse.length})</button>
+        <button className={tab === "inhouse" ? "on" : ""} onClick={() => setTab("inhouse")}>Staying ({inHouse.length})</button>
         <button className={tab === "departures" ? "on" : ""} onClick={() => setTab("departures")}>Departures ({departures.length})</button>
       </div>
 
@@ -70,11 +75,11 @@ export default function FrontDesk() {
           <Empty heading="Nothing here right now"
             text={tab === "arrivals" ? "No guests are waiting to check in."
               : tab === "departures" ? "No one is due to check out."
-              : "No guests are in house."} />
+              : "No guests are staying right now."} />
         ) : (
           <table className="tbl">
             <thead>
-              <tr><th>Guest</th><th>Room</th><th>Stay</th><th>Folio</th><th style={{ textAlign: "right" }}>Action</th></tr>
+              <tr><th>Guest</th><th>Room</th><th>Stay</th><th>Bill</th><th style={{ textAlign: "right" }}>Action</th></tr>
             </thead>
             <tbody>
               {list.map((b) => (
@@ -93,10 +98,17 @@ export default function FrontDesk() {
                   </td>
                   <td className="mono" style={{ fontSize: 12.5 }}>{b.checkIn} → {b.checkOut}</td>
                   <td className="mono" style={{ fontSize: 12.5 }}>
-                    {naira(b.totalCharge)}
+                    {/* The room plus anything signed for at the bar — the same
+                        total the balance below is worked out from. */}
+                    {naira(b.totalCharges ?? b.totalCharge)}
                     <div style={{ fontSize: 11.5, color: b.balance > 0 ? "var(--clay)" : "var(--sage)" }}>
                       {b.balance > 0 ? naira(b.balance) + " outstanding" : "Settled"}
                     </div>
+                    {b.facilityCharges > 0 && (
+                      <div style={{ fontSize: 11, color: "var(--slate-faint)" }}>
+                        incl. {naira(b.facilityCharges)} bar
+                      </div>
+                    )}
                   </td>
                   <td style={{ textAlign: "right" }}>
                     {b.status === "confirmed" && (
