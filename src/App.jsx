@@ -16,6 +16,7 @@ import Analytics from "./pages/Analytics";
 import Rates from "./pages/Rates";
 import Staff from "./pages/Staff";
 import ActivityLog from "./pages/ActivityLog";
+import Website from "./pages/Website";
 import { Empty } from "./components/ui";
 
 /**
@@ -76,6 +77,7 @@ export default function App() {
         <Route path="/analytics"    element={<Guarded module="analytics"><Analytics /></Guarded>} />
         <Route path="/rates"        element={<Guarded module="rates"><Rates /></Guarded>} />
         <Route path="/staff"        element={<Guarded module="staff"><Staff /></Guarded>} />
+        <Route path="/website"      element={<Guarded module="content"><Website /></Guarded>} />
         <Route path="/activity"     element={<Guarded module="audit"><ActivityLog /></Guarded>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

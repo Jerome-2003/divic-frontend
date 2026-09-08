@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, CalendarDays, ConciergeBell, Globe, Sparkles, Users,
-  Receipt, Martini, TrendingUp, Tags, UserCog, ScrollText, LogOut,
+  Receipt, Martini, TrendingUp, Tags, UserCog, ScrollText, Globe2, LogOut,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { ROLE_LABEL, LOCATIONS } from "../lib/constants";
@@ -18,6 +18,7 @@ const ITEMS = [
   { module: "analytics", label: "Analytics",        path: "/analytics",    icon: TrendingUp },
   { module: "rates",     label: "Rates",            path: "/rates",        icon: Tags },
   { module: "staff",     label: "Staff",            path: "/staff",        icon: UserCog },
+  { module: "content",   label: "Website",          path: "/website",      icon: Globe2 },
   { module: "audit",     label: "Activity log",     path: "/activity",     icon: ScrollText },
 ];
 

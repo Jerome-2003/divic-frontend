@@ -87,9 +87,21 @@ export default function WebsiteRequests() {
                     {r.checkIn} → {r.checkOut}
                     <div style={{ color: "var(--slate-faint)", fontSize: 11.5 }}>{r.nights} nights</div>
                   </td>
-                  <td className="mono">{naira(r.quotedTotal)}</td>
+                  <td className="mono">
+                    {naira(r.quotedTotal)}
+                    {r.payment?.verified && (
+                      <div style={{ fontSize: 11, color: "var(--sage)" }}>
+                        paid online{r.payment.feeAmount ? " · incl. " + naira(r.payment.feeAmount) + " card fee" : ""}
+                      </div>
+                    )}
+                  </td>
                   <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                    {r.status === "pending" ? (
+                    {/* A paid request is already a confirmed booking with a room —
+                        there is nothing to accept, and offering an Accept button
+                        here would be actively misleading. */}
+                    {r.payment?.verified ? (
+                      <Chip tone="st-available">Paid · booked</Chip>
+                    ) : r.status === "pending" ? (
                       r.canAccept ? (
                         <>
                           <button className="btn btn-sm btn-gold" disabled={busyId === r._id} onClick={() => accept(r)}>

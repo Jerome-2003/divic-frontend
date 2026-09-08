@@ -1,4 +1,5 @@
 import { Building2, Phone, MapPin, Cloud, CloudOff, WifiOff } from "lucide-react";
+import NotificationBell from "./NotificationBell";
 import { useAuth } from "../context/AuthContext";
 import { LOCATIONS } from "../lib/constants";
 import { telUrl, mapUrl } from "../lib/format";
@@ -37,6 +38,7 @@ export default function Topbar({ online, pending }) {
             ? <><CloudOff size={14} /> {pending} change{pending === 1 ? "" : "s"} waiting</>
             : <><Cloud size={14} /> Live</>}
       </div>
+      <NotificationBell />
     </header>
   );
 }
