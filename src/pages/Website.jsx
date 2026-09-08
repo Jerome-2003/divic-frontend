@@ -147,12 +147,12 @@ function ContentForm({ editing, onClose, onSaved }) {
             </Field>
           </Row>
 
-          <label style={{ display: "flex", gap: 9, alignItems: "flex-start", fontSize: 13.5, cursor: "pointer" }}>
+          <label style={{ display: "flex", gap: 9, alignItems: "flex-start", fontSize: "0.8438rem", cursor: "pointer" }}>
             <input type="checkbox" checked={!!d.active} style={{ width: 16, marginTop: 2 }}
               onChange={(e) => set("active", e.target.checked)} />
             <span>
               Publish this
-              <span style={{ display: "block", fontSize: 12, color: "var(--slate-faint)" }}>
+              <span style={{ display: "block", fontSize: "0.75rem", color: "var(--slate-faint)" }}>
                 Leave it off to save a draft. Dates above still control when it shows.
               </span>
             </span>
@@ -326,13 +326,13 @@ export default function Website() {
                     <tr key={item._id}>
                       <td>
                         <div style={{ fontWeight: 500 }}>{item.title}</div>
-                        <div className="mono" style={{ fontSize: 11.5, color: "var(--slate-faint)" }}>{item.key}</div>
+                        <div className="mono" style={{ fontSize: "0.7188rem", color: "var(--slate-faint)" }}>{item.key}</div>
                       </td>
-                      <td style={{ fontSize: 12.5 }}>{item.type}</td>
-                      <td style={{ fontSize: 12.5 }}>
+                      <td style={{ fontSize: "0.7812rem" }}>{item.type}</td>
+                      <td style={{ fontSize: "0.7812rem" }}>
                         {item.location === "both" ? "Both" : LOCATIONS[item.location].name}
                       </td>
-                      <td style={{ fontSize: 12, color: "var(--slate-soft)" }}>
+                      <td style={{ fontSize: "0.75rem", color: "var(--slate-soft)" }}>
                         {item.startsAt || item.endsAt
                           ? (item.startsAt ? String(item.startsAt).slice(0, 10) : "now") + " → " +
                             (item.endsAt ? String(item.endsAt).slice(0, 10) : "no end")
@@ -370,12 +370,12 @@ export default function Website() {
                   <tr key={item._id}>
                     <td>
                       <div style={{ fontWeight: 500 }}>{item.question}</div>
-                      <div style={{ fontSize: 12, color: "var(--slate-faint)", maxWidth: 460 }}>
+                      <div style={{ fontSize: "0.75rem", color: "var(--slate-faint)", maxWidth: 460 }}>
                         {item.answer.length > 110 ? item.answer.slice(0, 110) + "…" : item.answer}
                       </div>
                     </td>
-                    <td style={{ fontSize: 12.5 }}>{item.category}</td>
-                    <td style={{ fontSize: 12.5 }}>
+                    <td style={{ fontSize: "0.7812rem" }}>{item.category}</td>
+                    <td style={{ fontSize: "0.7812rem" }}>
                       {item.location === "both" ? "Both" : LOCATIONS[item.location].name}
                     </td>
                     <td>

@@ -55,8 +55,8 @@ export default function Login() {
 
         <div className="login-form">
           <div className="login-card">
-            <h2 style={{ fontSize: 27, margin: "0 0 6px" }}>Sign in</h2>
-            <p style={{ fontSize: 13.5, color: "var(--slate-soft)", margin: "0 0 22px" }}>
+            <h2 style={{ fontSize: "1.6875rem", margin: "0 0 6px" }}>Sign in</h2>
+            <p style={{ fontSize: "0.8438rem", color: "var(--slate-soft)", margin: "0 0 22px" }}>
               Your access level is set by the account you use.
             </p>
 
@@ -79,7 +79,7 @@ export default function Login() {
               <KeyRound size={15} /> {busy ? "Signing in" : "Sign in"}
             </button>
 
-            <p style={{ fontSize: 12, color: "var(--slate-faint)", marginTop: 18, lineHeight: 1.6 }}>
+            <p style={{ fontSize: "0.75rem", color: "var(--slate-faint)", marginTop: 18, lineHeight: 1.6 }}>
               Forgotten your password? A manager or the owner can reset it from the
               staff screen.
             </p>

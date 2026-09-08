@@ -163,7 +163,7 @@ export default function PointOfSale() {
         {/* 1 — which till. Skipped entirely when there is only one. */}
         {!facility ? (
           <>
-            <div className="pos-step">WHICH TILL</div>
+            <div className="pos-step">Which till</div>
             <div className="pos-pick">
               {tills.map((f) => {
                 const Icon = TYPE_ICON[f.type] || Martini;
@@ -246,7 +246,7 @@ export default function PointOfSale() {
             {/* 2 — what was sold. Free text and an amount, deliberately not a menu. */}
             {step === "sale" && (
               <>
-                <div className="pos-step">WHAT WAS SOLD</div>
+                <div className="pos-step">What was sold</div>
                 <div className="pos-big">
                   <Field label="Description" htmlFor="pd">
                     <input id="pd" value={description} autoFocus
@@ -284,7 +284,7 @@ export default function PointOfSale() {
             {/* 3 — how it is being settled. */}
             {step === "settle" && (
               <>
-                <div className="pos-step">HOW IS IT BEING SETTLED</div>
+                <div className="pos-step">How is it being settled</div>
                 <div className="pos-pick">
                   <button className="pos-tile" onClick={() => { setSettlement("room"); setStep("room"); }}>
                     <BedDouble size={22} strokeWidth={1.6} aria-hidden="true" />
@@ -316,7 +316,7 @@ export default function PointOfSale() {
                 house: the endpoint behind this will not serve one. */}
             {step === "room" && (
               <>
-                <div className="pos-step">WHICH ROOM</div>
+                <div className="pos-step">Which room</div>
                 <div className="pos-big">
                   <Field label="Room number" htmlFor="prm">
                     <input id="prm" value={roomNumber} autoFocus
@@ -342,7 +342,7 @@ export default function PointOfSale() {
             {/* 5 — cash, card or transfer. */}
             {step === "method" && (
               <>
-                <div className="pos-step">TAKING PAYMENT BY</div>
+                <div className="pos-step">Taking payment by</div>
                 <div className="pos-pick">
                   {METHODS.map((m) => (
                     <button key={m.key}
@@ -368,7 +368,7 @@ export default function PointOfSale() {
                 anything is posted. */}
             {step === "confirm" && (
               <>
-                <div className="pos-step">CHECK THIS IS RIGHT</div>
+                <div className="pos-step">Check this is right</div>
                 <div className="pos-confirm">
                   {settlement === "room" ? (
                     <>
@@ -456,18 +456,18 @@ export default function PointOfSale() {
                 <tbody>
                   {shift.charges.map((c) => (
                     <tr key={c.id} style={c.voided ? { opacity: 0.55 } : undefined}>
-                      <td className="mono" style={{ fontSize: 12.5, whiteSpace: "nowrap" }}>
+                      <td className="mono" style={{ fontSize: "0.7812rem", whiteSpace: "nowrap" }}>
                         {prettyDateTime(c.createdAt)}
                       </td>
                       <td>
                         {c.description}
                         {c.voided && (
-                          <div style={{ fontSize: 11.5, color: "var(--wine)", marginTop: 2 }}>
+                          <div style={{ fontSize: "0.7188rem", color: "var(--wine)", marginTop: 2 }}>
                             Voided by a manager{c.voidReason ? " — " + c.voidReason : ""}
                           </div>
                         )}
                       </td>
-                      <td style={{ fontSize: 12.5, color: "var(--slate-soft)" }}>
+                      <td style={{ fontSize: "0.7812rem", color: "var(--slate-soft)" }}>
                         {c.settlement === "room" ? "On a room" : "At the till"}
                       </td>
                       <td className="mono" style={{ textAlign: "right",
@@ -505,7 +505,7 @@ export default function PointOfSale() {
 function SaleSoFar({ description, amount }) {
   return (
     <div style={{
-      marginTop: 16, fontSize: 12.5, color: "var(--slate-soft)",
+      marginTop: 16, fontSize: "0.7812rem", color: "var(--slate-soft)",
       borderTop: "1px solid var(--line-soft)", paddingTop: 12,
     }}>
       {description.trim()} · <span className="mono" style={{ color: "var(--slate)", fontWeight: 500 }}>{naira(amount)}</span>

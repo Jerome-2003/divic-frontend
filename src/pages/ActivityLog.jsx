@@ -48,19 +48,19 @@ export default function ActivityLog() {
             <tbody>
               {data.map((a) => (
                 <tr key={a._id}>
-                  <td className="mono" style={{ fontSize: 12.5, whiteSpace: "nowrap" }}>
+                  <td className="mono" style={{ fontSize: "0.7812rem", whiteSpace: "nowrap" }}>
                     {prettyDateTime(a.at)}
                   </td>
                   <td>
-                    <div style={{ fontSize: 13 }}>{a.userName}</div>
-                    <div style={{ fontSize: 11.5, color: "var(--slate-faint)" }}>
+                    <div style={{ fontSize: "0.8125rem" }}>{a.userName}</div>
+                    <div style={{ fontSize: "0.7188rem", color: "var(--slate-faint)" }}>
                       {ROLE_LABEL[a.role] || a.role}
                     </div>
                   </td>
-                  <td style={{ fontSize: 12.5 }}>
+                  <td style={{ fontSize: "0.7812rem" }}>
                     {a.location === "all" ? "Both" : LOCATIONS[a.location]?.name || "—"}
                   </td>
-                  <td style={{ fontSize: 13 }}>{a.action}</td>
+                  <td style={{ fontSize: "0.8125rem" }}>{a.action}</td>
                 </tr>
               ))}
             </tbody>

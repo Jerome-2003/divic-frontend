@@ -54,7 +54,7 @@ export default function Bookings() {
           <AlertTriangle size={17} style={{ flexShrink: 0, marginTop: 1 }} />
           <div style={{ flex: 1 }}>
             <strong>{b.guest?.name} paid online but has no room.</strong>
-            <div style={{ fontSize: 12.5, marginTop: 3 }}>
+            <div style={{ fontSize: "0.7812rem", marginTop: 3 }}>
               {b.nights} night{b.nights === 1 ? "" : "s"} from {b.checkIn}, {cap(b.roomType)} requested.
               {b.attentionReason ? " " + b.attentionReason : ""}
             </div>
@@ -81,24 +81,24 @@ export default function Bookings() {
                   <td className="mono" style={{ color: "var(--gold-deep)" }}>{b.ref}</td>
                   <td>
                     <div style={{ fontWeight: 500 }}>{b.guest?.name}</div>
-                    <div style={{ fontSize: 11.5, color: "var(--slate-faint)" }}>{cap(b.source)}</div>
+                    <div style={{ fontSize: "0.7188rem", color: "var(--slate-faint)" }}>{cap(b.source)}</div>
                   </td>
                   <td className="mono">
                     {b.roomNumber ? (
                       <>
                         {b.roomNumber}
-                        <span style={{ color: "var(--slate-faint)", fontSize: 11.5 }}> {cap(b.roomType)}</span>
+                        <span style={{ color: "var(--slate-faint)", fontSize: "0.7188rem" }}> {cap(b.roomType)}</span>
                         {b.autoAssigned && (
-                          <div style={{ fontSize: 11, color: "var(--slate-faint)" }}>chosen automatically</div>
+                          <div style={{ fontSize: "0.6875rem", color: "var(--slate-faint)" }}>chosen automatically</div>
                         )}
                       </>
                     ) : (
                       <span style={{ color: "var(--wine)" }}>No room</span>
                     )}
                   </td>
-                  <td className="mono" style={{ fontSize: 12.5 }}>
+                  <td className="mono" style={{ fontSize: "0.7812rem" }}>
                     {b.checkIn} → {b.checkOut}
-                    <div style={{ color: "var(--slate-faint)", fontSize: 11.5 }}>
+                    <div style={{ color: "var(--slate-faint)", fontSize: "0.7188rem" }}>
                       {b.nights} night{b.nights === 1 ? "" : "s"}
                     </div>
                   </td>
@@ -116,7 +116,7 @@ export default function Bookings() {
                     )}
                     {naira(b.totalCharge)}
                     {b.balance > 0 && (
-                      <div style={{ fontSize: 11.5, color: "var(--clay)" }}>{naira(b.balance)} due</div>
+                      <div style={{ fontSize: "0.7188rem", color: "var(--clay)" }}>{naira(b.balance)} due</div>
                     )}
                   </td>
                 </tr>

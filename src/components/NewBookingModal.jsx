@@ -108,12 +108,12 @@ export default function NewBookingModal({ onClose, onCreated }) {
       </Row>
 
       <div style={{ background: "var(--gold-wash)", border: "1px solid #EADFBF", borderRadius: 2,
-                    padding: "11px 14px", marginBottom: 16, fontSize: 13 }}>
+                    padding: "11px 14px", marginBottom: 16, fontSize: "0.8125rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <span style={{ color: "var(--slate-soft)" }}>{n} night{n === 1 ? "" : "s"} at {naira(rate)}</span>
           <strong className="mono">{naira(n * rate)}</strong>
         </div>
-        <div style={{ fontSize: 11.5, color: "var(--slate-soft)", marginTop: 4 }}>
+        <div style={{ fontSize: "0.7188rem", color: "var(--slate-soft)", marginTop: 4 }}>
           {free.length} {roomType} room{free.length === 1 ? "" : "s"} free for these dates
         </div>
       </div>

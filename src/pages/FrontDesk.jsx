@@ -4,7 +4,7 @@ import api from "../lib/api";
 import { useApi } from "../lib/useApi";
 import { useAuth } from "../context/AuthContext";
 import { naira, cap, telUrl, today } from "../lib/format";
-import { PageHead, Card, Empty, Loading, ErrorNote } from "../components/ui";
+import { PageHead, Card, Empty, Loading, ErrorNote, ConfirmModal } from "../components/ui";
 import NewBookingModal from "../components/NewBookingModal";
 
 export default function FrontDesk() {
@@ -13,6 +13,9 @@ export default function FrontDesk() {
   const [adding, setAdding] = useState(false);
   const [busyId, setBusyId] = useState(null);
   const [actionError, setActionError] = useState(null);
+  // The server refuses a checkout with money owing; this holds the booking and
+  // the server's own breakdown while the desk decides whether to override.
+  const [owing, setOwing] = useState(null);
 
   const { data, loading, error, reload } = useApi(() => api.bookings(location), [location]);
   const t = today();
@@ -36,24 +39,19 @@ export default function FrontDesk() {
       await reload();
     } catch (e) {
       // The server refuses a checkout with money owing unless it is overridden.
-      if (e.status === 409 && e.payload?.balance) {
-        // The server breaks the balance out, so say where it came from —
-        // "the bar" is a different conversation from "the room".
-        const fromBar = e.payload.facilityCharges
-          ? "\n(" + naira(e.payload.facilityCharges) + " of that is bar and restaurant.)"
-          : "";
-        const ok = window.confirm(
-          "This bill still owes " + naira(e.payload.balance) + "." + fromBar +
-          "\n\nCheck out anyway and leave the balance owing?"
-        );
-        if (ok) {
-          try { await api.checkOut(b._id, true); await reload(); }
-          catch (e2) { setActionError(e2.message); }
-        }
-      } else {
-        setActionError(e.message);
-      }
+      // It breaks the balance out, so the dialog can show where each figure
+      // came from — "the bar" is a different conversation from "the room".
+      if (e.status === 409 && e.payload?.balance) setOwing({ booking: b, ...e.payload });
+      else setActionError(e.message);
     } finally { setBusyId(null); }
+  };
+
+  const forceCheckOut = async () => {
+    const b = owing.booking;
+    setBusyId(b._id); setActionError(null);
+    try { await api.checkOut(b._id, true); setOwing(null); await reload(); }
+    catch (e) { setActionError(e.message); setOwing(null); }
+    finally { setBusyId(null); }
   };
 
   return (
@@ -86,7 +84,7 @@ export default function FrontDesk() {
                 <tr key={b._id}>
                   <td>
                     <div style={{ fontWeight: 500 }}>{b.guest?.name}</div>
-                    <div style={{ fontSize: 11.5 }}>
+                    <div style={{ fontSize: "0.7188rem" }}>
                       <a href={telUrl(b.guest?.phone)} style={{ borderBottom: "1px solid var(--line)", color: "var(--slate-faint)" }}>
                         {b.guest?.phone}
                       </a>
@@ -94,18 +92,18 @@ export default function FrontDesk() {
                   </td>
                   <td className="mono">
                     {b.roomNumber}
-                    <div style={{ fontSize: 11.5, color: "var(--slate-faint)" }}>{cap(b.roomType)}</div>
+                    <div style={{ fontSize: "0.7188rem", color: "var(--slate-faint)" }}>{cap(b.roomType)}</div>
                   </td>
-                  <td className="mono" style={{ fontSize: 12.5 }}>{b.checkIn} → {b.checkOut}</td>
-                  <td className="mono" style={{ fontSize: 12.5 }}>
+                  <td className="mono" style={{ fontSize: "0.7812rem" }}>{b.checkIn} → {b.checkOut}</td>
+                  <td className="mono" style={{ fontSize: "0.7812rem" }}>
                     {/* The room plus anything signed for at the bar — the same
                         total the balance below is worked out from. */}
                     {naira(b.totalCharges ?? b.totalCharge)}
-                    <div style={{ fontSize: 11.5, color: b.balance > 0 ? "var(--clay)" : "var(--sage)" }}>
+                    <div style={{ fontSize: "0.7188rem", color: b.balance > 0 ? "var(--clay)" : "var(--sage)" }}>
                       {b.balance > 0 ? naira(b.balance) + " outstanding" : "Settled"}
                     </div>
                     {b.facilityCharges > 0 && (
-                      <div style={{ fontSize: 11, color: "var(--slate-faint)" }}>
+                      <div style={{ fontSize: "0.6875rem", color: "var(--slate-faint)" }}>
                         incl. {naira(b.facilityCharges)} bar
                       </div>
                     )}
@@ -130,6 +128,48 @@ export default function FrontDesk() {
       </Card>
 
       {adding && <NewBookingModal onClose={() => setAdding(false)} onCreated={reload} />}
+
+      {owing && (
+        <ConfirmModal
+          title="This bill is not settled"
+          blurb={owing.booking.guest?.name + " · room " + owing.booking.roomNumber}
+          destructive
+          confirmLabel="Check out anyway"
+          cancelLabel="Take payment first"
+          busy={busyId === owing.booking._id}
+          onConfirm={forceCheckOut}
+          onClose={() => setOwing(null)}
+        >
+          <table className="tbl" style={{ marginBottom: 16 }}>
+            <tbody>
+              <tr>
+                <td>Room charges</td>
+                <td className="mono" style={{ textAlign: "right" }}>{naira(owing.roomCharges)}</td>
+              </tr>
+              {owing.facilityCharges > 0 && (
+                <tr>
+                  <td>Bar &amp; restaurant</td>
+                  <td className="mono" style={{ textAlign: "right" }}>{naira(owing.facilityCharges)}</td>
+                </tr>
+              )}
+              <tr>
+                <td>Paid so far</td>
+                <td className="mono" style={{ textAlign: "right" }}>{naira(owing.paid)}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: 500 }}>Still owing</td>
+                <td className="mono" style={{ textAlign: "right", fontWeight: 500, color: "var(--brick)" }}>
+                  {naira(owing.balance)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p style={{ fontSize: "0.8438rem", color: "var(--slate-soft)", margin: 0, lineHeight: 1.6 }}>
+            Checking out now leaves this balance owing against the stay. It stays on
+            the bill and shows on the billing screen until someone settles it.
+          </p>
+        </ConfirmModal>
+      )}
     </>
   );
 }
