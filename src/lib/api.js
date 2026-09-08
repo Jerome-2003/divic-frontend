@@ -121,6 +121,28 @@ export const api = {
   compare: (days) => request("/api/analytics/compare", { params: { days } }),
   audit: (params) => request("/api/audit", { params }),
 
+  // notifications
+  notifications: (location, limit) => request("/api/notifications", { params: { location, limit } }),
+  markNotificationRead: (id) => request(`/api/notifications/${id}/read`, { method: "POST" }),
+  markAllNotificationsRead: (location) =>
+    request("/api/notifications/read-all", { method: "POST", body: { location } }),
+
+  // room assignment — moves a booking, or places one that arrived paid with no room
+  moveBookingRoom: (id, roomNumber, reason) =>
+    request(`/api/bookings/${id}/room`, { method: "PATCH", body: { roomNumber, reason } }),
+
+  // website content the owner publishes to the public site
+  siteContent: () => request("/api/content"),
+  createContent: (body) => request("/api/content", { method: "POST", body }),
+  updateContent: (id, body) => request(`/api/content/${id}`, { method: "PATCH", body }),
+  deleteContent: (id) => request(`/api/content/${id}`, { method: "DELETE" }),
+
+  // what the website's FAQ assistant is allowed to know
+  faqEntries: () => request("/api/content/faq/all"),
+  createFaq: (body) => request("/api/content/faq", { method: "POST", body }),
+  updateFaq: (id, body) => request(`/api/content/faq/${id}`, { method: "PATCH", body }),
+  deleteFaq: (id) => request(`/api/content/faq/${id}`, { method: "DELETE" }),
+
   // assistant
   aiPrompts: () => request("/api/ai/prompts"),
   aiAsk: (body) => request("/api/ai/ask", { method: "POST", body }),

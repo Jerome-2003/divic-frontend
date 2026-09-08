@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, AlertTriangle, ArrowLeftRight } from "lucide-react";
 import api from "../lib/api";
 import { useApi } from "../lib/useApi";
 import { useAuth } from "../context/AuthContext";
@@ -7,6 +7,7 @@ import { LOCATIONS, BOOKING_STATUS } from "../lib/constants";
 import { naira, cap } from "../lib/format";
 import { PageHead, Card, Empty, Loading, ErrorNote, Chip } from "../components/ui";
 import NewBookingModal from "../components/NewBookingModal";
+import MoveRoomModal from "../components/MoveRoomModal";
 
 const toneFor = (status) =>
   status === "in-house" ? "st-occupied" : status === "confirmed" ? "gold" : "st-maintenance";
@@ -16,6 +17,7 @@ export default function Bookings() {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [adding, setAdding] = useState(false);
+  const [moving, setMoving] = useState(null);
 
   const { data, loading, error, reload } = useApi(
     () => api.bookings(location, { status: status || undefined, q: q || undefined }),
@@ -45,6 +47,22 @@ export default function Bookings() {
 
       <ErrorNote>{error}</ErrorNote>
 
+      {/* Paid, but no room. The guest has a contract and nowhere to sleep, so it
+          sits at the top of the page rather than in a row somewhere below. */}
+      {(data || []).filter((b) => b.needsAttention).map((b) => (
+        <div key={b._id} className="attention">
+          <AlertTriangle size={17} style={{ flexShrink: 0, marginTop: 1 }} />
+          <div style={{ flex: 1 }}>
+            <strong>{b.guest?.name} paid online but has no room.</strong>
+            <div style={{ fontSize: "0.7812rem", marginTop: 3 }}>
+              {b.nights} night{b.nights === 1 ? "" : "s"} from {b.checkIn}, {cap(b.roomType)} requested.
+              {b.attentionReason ? " " + b.attentionReason : ""}
+            </div>
+          </div>
+          <button className="btn btn-sm btn-gold" onClick={() => setMoving(b)}>Place in a room</button>
+        </div>
+      ))}
+
       <Card>
         {loading ? <Loading /> : !data?.length ? (
           <Empty heading="Nothing matches" text="Try a different search, or create a booking."
@@ -66,8 +84,17 @@ export default function Bookings() {
                     <div style={{ fontSize: "0.7188rem", color: "var(--slate-faint)" }}>{cap(b.source)}</div>
                   </td>
                   <td className="mono">
-                    {b.roomNumber}
-                    <span style={{ color: "var(--slate-faint)", fontSize: "0.7188rem" }}> {cap(b.roomType)}</span>
+                    {b.roomNumber ? (
+                      <>
+                        {b.roomNumber}
+                        <span style={{ color: "var(--slate-faint)", fontSize: "0.7188rem" }}> {cap(b.roomType)}</span>
+                        {b.autoAssigned && (
+                          <div style={{ fontSize: "0.6875rem", color: "var(--slate-faint)" }}>chosen automatically</div>
+                        )}
+                      </>
+                    ) : (
+                      <span style={{ color: "var(--wine)" }}>No room</span>
+                    )}
                   </td>
                   <td className="mono" style={{ fontSize: "0.7812rem" }}>
                     {b.checkIn} → {b.checkOut}
@@ -77,6 +104,16 @@ export default function Bookings() {
                   </td>
                   <td><Chip tone={toneFor(b.status)}>{BOOKING_STATUS[b.status]}</Chip></td>
                   <td className="mono" style={{ textAlign: "right" }}>
+                    {["confirmed", "in-house"].includes(b.status) && (
+                      <button
+                        className="btn btn-sm btn-quiet"
+                        style={{ marginRight: 6 }}
+                        onClick={() => setMoving(b)}
+                        aria-label={b.roomNumber ? "Move to another room" : "Place in a room"}
+                      >
+                        <ArrowLeftRight size={13} />
+                      </button>
+                    )}
                     {naira(b.totalCharge)}
                     {b.balance > 0 && (
                       <div style={{ fontSize: "0.7188rem", color: "var(--clay)" }}>{naira(b.balance)} due</div>
@@ -90,6 +127,7 @@ export default function Bookings() {
       </Card>
 
       {adding && <NewBookingModal onClose={() => setAdding(false)} onCreated={reload} />}
+      {moving && <MoveRoomModal booking={moving} onClose={() => setMoving(null)} onMoved={reload} />}
     </>
   );
 }

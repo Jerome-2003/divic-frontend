@@ -29,7 +29,7 @@ export default function Login() {
       <div className="login-wrap">
         <div className="login-art">
           <div>
-            <img className="lmark-img" src="/logo.svg" alt="" width="92" height="92" />
+            <img className="lmark-img" src="/logo.png" alt="" width="92" height="92" />
             <div className="lname">Divic Exclusive<br />Hotel</div>
             <div className="lrule" />
             <div className="lcopy">

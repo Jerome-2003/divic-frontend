@@ -39,6 +39,12 @@ html { background:#FAF8F5; }
   --surface-sunken:#FBF9F6; --neutral-bg:#F2F0EE;
   --clay-tint:#FCF8F3; --steel-tint:#F7FAFB;
   --gold-border:#EADFBF; --sage-border:#DCE6DA; --wine-border:#EBDCDE;
+  /* The attention banner and the urgent notification row press harder than
+     the ordinary wine chip, so they get their own edge and hover. */
+  --wine-edge:#E4CCCE; --wine-hover:#F5ECED;
+  /* A wine solid enough to carry white ink. --wine is solved as text on a
+     tint, so it is too light to be a badge fill in the dark appearance. */
+  --wine-solid:#8C5F63;
   --clay-border:#EFE0CE; --steel-border:#DDE5EB;
   /* Ink on a permanently dark ground. The login panel and the assistant button
      are dark in both themes, so these do not flip with the appearance. */
@@ -268,6 +274,8 @@ html { background:#FAF8F5; }
    monitor, where a pointer makes 29px perfectly reachable. */
 @media (max-width:900px){
   .btn,.btn-sm,.nav-item,.tabs button,.locswitch button,.ask-chip{min-height:44px;}
+  .notif-btn{width:44px;height:44px;}
+  .notif-item{min-height:44px;}
   .btn,.btn-sm{padding-top:0;padding-bottom:0;}
   .signout,.demo-row button{min-height:44px;display:inline-flex;align-items:center;}
   .divic input,.divic select,.divic textarea{min-height:44px;}
@@ -434,6 +442,71 @@ html { background:#FAF8F5; }
   .fac-act select{flex:1;}
 }
 
+/* The brand block carries the real logo mark beside the wordmark. */
+.brand-lockup{display:flex;align-items:center;gap:10px;}
+.brand-lockup img{display:block;flex-shrink:0;}
+
+/* ---- Notifications ---- */
+.notif{position:relative;}
+.notif-btn{position:relative;display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border:1px solid var(--line);border-radius:2px;background:var(--porcelain);
+  color:var(--slate-soft);}
+.notif-btn:hover{border-color:var(--gold);background:var(--gold-wash);color:var(--slate);}
+/* An urgent alert has to be distinguishable at a glance from a busy desk, not
+   only once the panel is open. */
+.notif-btn.urgent{border-color:var(--wine);color:var(--wine);}
+.notif-count{position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;padding:0 4px;
+  border-radius:9px;background:var(--gold);color:var(--on-gold);font-size:0.6562rem;font-weight:600;
+  display:flex;align-items:center;justify-content:center;}
+.notif-btn.urgent .notif-count{background:var(--wine-solid);color:#FFFFFF;}
+.notif-panel{position:absolute;right:0;top:44px;width:340px;max-width:calc(100vw - 24px);z-index:60;
+  background:var(--porcelain);border:1px solid var(--line);border-top:2px solid var(--gold);
+  border-radius:3px;box-shadow:0 14px 40px var(--shadow);}
+.notif-head{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:11px 14px;border-bottom:1px solid var(--line-soft);font-size:0.8125rem;font-weight:500;}
+.notif-list{max-height:60vh;overflow-y:auto;}
+.notif-empty{padding:26px 16px;text-align:center;font-size:0.7812rem;color:var(--slate-faint);line-height:1.6;}
+.notif-item{display:block;width:100%;text-align:left;padding:11px 14px;border-bottom:1px solid var(--line-soft);}
+.notif-item:last-child{border-bottom:none;}
+.notif-item:hover{background:var(--surface-hover);}
+.notif-item.read{opacity:.62;}
+.notif-item.urgent{background:var(--wine-bg);border-left:3px solid var(--wine);}
+.notif-item.urgent:hover{background:var(--wine-hover);}
+.notif-item-head{display:flex;align-items:center;gap:7px;}
+.notif-title{font-size:0.8125rem;font-weight:500;flex:1;line-height:1.35;}
+.notif-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+.notif-item.urgent .notif-dot{background:var(--wine);}
+.notif-body{font-size:0.75rem;color:var(--slate-soft);margin-top:4px;line-height:1.55;}
+.notif-when{font-size:0.6875rem;color:var(--slate-faint);margin-top:5px;}
+@media (max-width:640px){
+  .notif-panel{position:fixed;left:8px;right:8px;top:auto;bottom:8px;width:auto;}
+  .notif-list{max-height:52vh;}
+}
+
+/* ---- Website content editor ---- */
+.wc-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start;}
+.wc-state{display:inline-flex;align-items:center;gap:5px;font-size:0.7188rem;padding:2px 8px;border-radius:999px;}
+.wc-live{background:var(--sage-bg);color:var(--sage);}
+.wc-draft{background:var(--neutral-bg);color:var(--slate-soft);}
+.wc-sched{background:var(--gold-wash);color:var(--gold-deep);}
+.wc-exp{background:var(--wine-bg);color:var(--wine);}
+.wc-preview{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:var(--surface-raised);}
+.wc-preview-label{font-size:0.6875rem;color:var(--slate-faint);padding:8px 12px;border-bottom:1px solid var(--line-soft);
+  background:var(--porcelain);}
+.wc-preview-body{padding:18px;}
+.wc-banner{background:var(--fab-bg);color:var(--on-dark);padding:14px 16px;border-radius:2px;}
+.wc-banner h4{margin:0 0 5px;font-size:1.0625rem;}
+.wc-banner p{margin:0;font-size:0.7812rem;color:var(--on-dark-soft);line-height:1.6;}
+.wc-cta{display:inline-block;margin-top:10px;font-size:0.75rem;color:var(--gold);border-bottom:1px solid var(--gold);}
+.wc-popup{border:1px solid var(--line);border-radius:3px;background:var(--porcelain);padding:16px;
+  box-shadow:0 8px 22px var(--shadow-soft);}
+@media (max-width:900px){ .wc-grid{grid-template-columns:1fr;} }
+
+/* A paid booking with no room. The loudest thing this system can show. */
+.attention{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;padding:14px 16px;
+  background:var(--wine-bg);border:1px solid var(--wine-edge);border-left:3px solid var(--wine);
+  border-radius:3px;color:var(--wine);font-size:0.8438rem;}
+.attention strong{color:var(--slate);}
 /* ---- Dark appearance -------------------------------------------------------
    The front desk and the bar both run night shifts, and a full-screen sheet of
    #FAF8F5 at 2am is the thing people turn a monitor down to escape.
@@ -460,6 +533,7 @@ html { background:#FAF8F5; }
     --gold:#D4AF37; --gold-deep:#D4AF37; --gold-wash:#221E14; --gold-border:#4B4023;
     --sage:#759170; --sage-bg:#192417; --sage-border:#33422F;
     --wine:#A4797C; --wine-bg:#241718; --wine-border:#4A3438;
+    --wine-edge:#5C4044; --wine-hover:#251719; --wine-solid:#99686C;
     --clay:#AC7D4E; --clay-bg:#241D17; --clay-border:#4A3823;
     --steel:#798895; --steel-bg:#171E24; --steel-border:#333C44;
     --brick:#B8453A; --brick-deep:#8E3228; --brick-bg:#241817;

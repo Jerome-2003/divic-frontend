@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, CalendarDays, ConciergeBell, Globe, Sparkles, Users,
-  Receipt, Martini, TrendingUp, Tags, UserCog, ScrollText, LogOut,
+  Receipt, Martini, TrendingUp, Tags, UserCog, ScrollText, Globe2, LogOut,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { ROLE_LABEL, LOCATIONS } from "../lib/constants";
@@ -18,6 +18,7 @@ const ITEMS = [
   { module: "analytics", label: "Analytics",        path: "/analytics",    icon: TrendingUp },
   { module: "rates",     label: "Rates",            path: "/rates",        icon: Tags },
   { module: "staff",     label: "Staff",            path: "/staff",        icon: UserCog },
+  { module: "content",   label: "Website",          path: "/website",      icon: Globe2 },
   { module: "audit",     label: "Activity log",     path: "/activity",     icon: ScrollText },
 ];
 
@@ -28,7 +29,10 @@ export default function Sidebar() {
   return (
     <aside className="side">
       <div className="brand">
-        <div className="brand-mark">Divic</div>
+        <div className="brand-lockup">
+          <img src="/logo.png" alt="" width="30" height="30" />
+          <span className="brand-mark">Divic</span>
+        </div>
         <div className="brand-rule" />
         <div className="brand-sub">Two properties, Festac</div>
       </div>
