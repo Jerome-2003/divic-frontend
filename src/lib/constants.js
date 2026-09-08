@@ -21,7 +21,7 @@ export const LOCATIONS = {
   },
 };
 
-export const FLOOR_NAME = { 0: "Ground floor", 1: "First floor", 2: "Second floor", 3: "Third floor" };
+export const FLOOR_NAME = { 1: "First floor", 2: "Second floor", 3: "Third floor" };
 
 export const ROLE_LABEL = {
   owner: "Owner",

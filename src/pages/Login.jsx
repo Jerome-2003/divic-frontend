@@ -30,7 +30,7 @@ export default function Login() {
         <div className="login-art">
           <div>
             <img className="lmark-img" src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="92" height="92" />
-            <div className="lname">Divic Exclusive<br />Hotel</div>
+            <div className="lname">Divic Exclusive<br />Hotels</div>
             <div className="lrule" />
             <div className="lcopy">
               Front desk, housekeeping, billing and guest records for both Festac
