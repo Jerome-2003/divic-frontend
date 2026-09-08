@@ -14,7 +14,7 @@ export default function Splash({ waiting }) {
   return (
     <div className="divic splash">
       <div className="splash-inner">
-        <img className="splash-mark" src="/logo.png" alt="" width="104" height="104" />
+        <img className="splash-mark" src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="104" height="104" />
         <div className="splash-word serif">Divic Exclusive Hotel</div>
         <div className="splash-rule" />
         {waiting && <div className="splash-wait">Checking your sign-in</div>}
