@@ -8,14 +8,19 @@ import { useAuth } from "../context/AuthContext";
 import { LOCATIONS } from "../lib/constants";
 import { naira, cap, prettyDate } from "../lib/format";
 import { PageHead, Card, Metric, Loading, ErrorNote, Bar as ProgressBar } from "../components/ui";
+import { useThemeTokens } from "../lib/useThemeTokens";
 
-const axisStyle = { fontSize: "0.6875rem", fill: "#9A9491" };
-const tooltipStyle = {
-  border: "1px solid #E8E2D9", borderRadius: 2, fontSize: "0.7812rem", fontFamily: "Inter",
-};
+/* Module-level so the hook's effect does not resubscribe on every render. */
+const CHART_TOKENS = ["slate-faint", "line", "line-soft", "gold", "gold-wash", "slate", "porcelain"];
 
 export default function Analytics() {
   const { location, setLocation, canSwitchLocation } = useAuth();
+  const t = useThemeTokens(CHART_TOKENS);
+  const axisStyle = { fontSize: "0.6875rem", fill: t["slate-faint"] };
+  const tooltipStyle = {
+    background: t.porcelain, border: "1px solid " + t.line, borderRadius: 2,
+    fontSize: "0.7812rem", fontFamily: "Inter", color: t.slate,
+  };
   const [days, setDays] = useState(30);
   const [showBoth, setShowBoth] = useState(false);
 
@@ -97,12 +102,12 @@ export default function Analytics() {
           <div style={{ padding: "16px 12px 12px", height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={byType} margin={{ top: 4, right: 8, left: 4, bottom: 0 }}>
-                <CartesianGrid stroke="#F0EBE3" vertical={false} />
-                <XAxis dataKey="name" tick={axisStyle} axisLine={{ stroke: "#E8E2D9" }} tickLine={false} />
+                <CartesianGrid stroke={t["line-soft"]} vertical={false} />
+                <XAxis dataKey="name" tick={axisStyle} axisLine={{ stroke: t.line }} tickLine={false} />
                 <YAxis tick={axisStyle} axisLine={false} tickLine={false} width={54}
                   tickFormatter={(v) => "₦" + Math.round(v / 1000) + "k"} />
-                <Tooltip formatter={(v) => naira(v)} cursor={{ fill: "#F7F1E1" }} contentStyle={tooltipStyle} />
-                <Bar dataKey="revenue" fill="#D4AF37" radius={[2, 2, 0, 0]} />
+                <Tooltip formatter={(v) => naira(v)} cursor={{ fill: t["gold-wash"] }} contentStyle={tooltipStyle} />
+                <Bar dataKey="revenue" fill={t.gold} radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -112,13 +117,13 @@ export default function Analytics() {
           <div style={{ padding: "16px 12px 12px", height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trend} margin={{ top: 4, right: 8, left: 4, bottom: 0 }}>
-                <CartesianGrid stroke="#F0EBE3" vertical={false} />
-                <XAxis dataKey="day" tick={axisStyle} axisLine={{ stroke: "#E8E2D9" }} tickLine={false} />
+                <CartesianGrid stroke={t["line-soft"]} vertical={false} />
+                <XAxis dataKey="day" tick={axisStyle} axisLine={{ stroke: t.line }} tickLine={false} />
                 <YAxis tick={axisStyle} axisLine={false} tickLine={false} width={40}
                   tickFormatter={(v) => v + "%"} domain={[0, 100]} />
                 <Tooltip formatter={(v) => v + "%"} contentStyle={tooltipStyle} />
-                <Line type="monotone" dataKey="occupancy" stroke="#2C2A29" strokeWidth={2}
-                  dot={{ r: 3, fill: "#D4AF37", stroke: "#D4AF37" }} />
+                <Line type="monotone" dataKey="occupancy" stroke={t.slate} strokeWidth={2}
+                  dot={{ r: 3, fill: t.gold, stroke: t.gold }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
