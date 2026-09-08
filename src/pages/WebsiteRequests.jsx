@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Globe, Check, X } from "lucide-react";
 import api from "../lib/api";
 import { useApi } from "../lib/useApi";
 import { useAuth } from "../context/AuthContext";
+import { useNotifications, WEBSITE_REQUEST_TYPES } from "../context/NotificationsContext";
 import { naira, cap, telUrl, prettyDateTime } from "../lib/format";
 import { PageHead, Card, Empty, Loading, ErrorNote, Chip, Note, ConfirmModal } from "../components/ui";
 
@@ -13,6 +14,11 @@ import { PageHead, Card, Empty, Loading, ErrorNote, Chip, Note, ConfirmModal } f
  */
 export default function WebsiteRequests() {
   const { location } = useAuth();
+  const { markTypesRead } = useNotifications();
+
+  // Visiting this page is what "resolves" a website-request notification —
+  // the sidebar dot clears the same way the bell's own items do on click.
+  useEffect(() => { markTypesRead(WEBSITE_REQUEST_TYPES); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [tab, setTab] = useState("pending");
   const [busyId, setBusyId] = useState(null);
   const [actionError, setActionError] = useState(null);

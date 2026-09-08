@@ -3,6 +3,7 @@ import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import AskDivic from "./AskDivic";
 import { useAuth } from "../context/AuthContext";
+import { NotificationsProvider } from "../context/NotificationsContext";
 import { connectSocket, disconnectSocket } from "../lib/socket";
 
 export default function Shell({ children }) {
@@ -26,14 +27,16 @@ export default function Shell({ children }) {
 
   return (
     <div className="divic">
-      <div className="shell">
-        <Sidebar />
-        <div className="main">
-          <Topbar online={online} pending={pending} />
-          <main className="body">{children}</main>
+      <NotificationsProvider>
+        <div className="shell">
+          <Sidebar />
+          <div className="main">
+            <Topbar online={online} pending={pending} />
+            <main className="body">{children}</main>
+          </div>
         </div>
-      </div>
-      {can("ai") && <AskDivic />}
+        {can("ai") && <AskDivic />}
+      </NotificationsProvider>
     </div>
   );
 }

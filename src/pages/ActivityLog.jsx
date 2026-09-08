@@ -21,8 +21,8 @@ export default function ActivityLog() {
         <div style={{ display: "flex", gap: 8 }}>
           <select value={scope} onChange={(e) => setScope(e.target.value)} style={{ width: 180 }}>
             <option value="all">Both properties</option>
-            <option value="exclusive">Divic Exclusive</option>
-            <option value="urban">Divic Urban</option>
+            <option value="exclusive">{LOCATIONS.exclusive.name}</option>
+            <option value="urban">{LOCATIONS.urban.name}</option>
           </select>
           <select value={entity} onChange={(e) => setEntity(e.target.value)} style={{ width: 160 }}>
             <option value="">Everything</option>

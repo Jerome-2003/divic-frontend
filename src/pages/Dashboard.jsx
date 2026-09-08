@@ -19,6 +19,11 @@ export default function Dashboard() {
   const { data: facilities, loading: lf, error: ef, reload: reloadFacilities } =
     useApi(() => api.facilities(location), [location]);
 
+  const seesMoneyEarly = can("analytics");
+  // Fetched only for manager/owner — a receptionist never even triggers this
+  // request, which matters as much as the server-side gate on the route.
+  const { data: sales } = useApi(() => api.todaySales(location), [location], { skip: !seesMoneyEarly });
+
   if (lr || lb) return <Loading label="Reading today's position" />;
   if (er || eb) return <ErrorNote>{er || eb}</ErrorNote>;
 
@@ -38,16 +43,38 @@ export default function Dashboard() {
           { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
       />
 
-      <div className="grid g4" style={{ marginBottom: 20 }}>
-        <Metric accent label="Occupancy today" value={occupancy + "%"}
-          note={inHouse.length + " of " + rooms.length + " rooms"} />
-        <Metric label="Arriving" value={arrivals.length}
-          note={arrivals.length ? "Waiting to check in" : "Nothing pending"} />
-        <Metric label="Departing" value={departures.length}
-          note={departures.length ? "Settle bills before noon" : "No departures"} />
-        <Metric label="Rooms to clean" value={notReady.length}
-          note={notReady.length ? "On the housekeeping list" : "Every room is ready"} />
-      </div>
+      {/* For a user who can see revenue, today's sales is the very first thing
+          on the page — not something buried in Analytics. A receptionist gets
+          exactly the four cards this page has always shown, unchanged. */}
+      {seesMoney ? (
+        // Five cards, not four — today's sales is added at the front of the
+        // row rather than displacing anything a manager or owner already saw.
+        <div className="grid g4" style={{ marginBottom: 20 }}>
+          <Metric accent label="Today's sales" value={sales ? naira(sales.totalSalesToday) : "…"}
+            note={sales
+              ? naira(sales.roomSalesToday) + " rooms · " + naira(sales.facilitySalesToday) + " facilities"
+              : "Reading today's payments"} />
+          <Metric label="Occupancy today" value={occupancy + "%"}
+            note={inHouse.length + " of " + rooms.length + " rooms"} />
+          <Metric label="Arriving" value={arrivals.length}
+            note={arrivals.length ? "Waiting to check in" : "Nothing pending"} />
+          <Metric label="Departing" value={departures.length}
+            note={departures.length ? "Settle bills before noon" : "No departures"} />
+          <Metric label="Rooms to clean" value={notReady.length}
+            note={notReady.length ? "On the housekeeping list" : "Every room is ready"} />
+        </div>
+      ) : (
+        <div className="grid g4" style={{ marginBottom: 20 }}>
+          <Metric accent label="Occupancy today" value={occupancy + "%"}
+            note={inHouse.length + " of " + rooms.length + " rooms"} />
+          <Metric label="Arriving" value={arrivals.length}
+            note={arrivals.length ? "Waiting to check in" : "Nothing pending"} />
+          <Metric label="Departing" value={departures.length}
+            note={departures.length ? "Settle bills before noon" : "No departures"} />
+          <Metric label="Rooms to clean" value={notReady.length}
+            note={notReady.length ? "On the housekeeping list" : "Every room is ready"} />
+        </div>
+      )}
 
       {seesMoney && (
         <div className="grid g2" style={{ marginBottom: 20 }}>

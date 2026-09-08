@@ -3,7 +3,9 @@
 export const LOCATIONS = {
   exclusive: {
     id: "exclusive",
-    name: "Divic Exclusive",
+    // Display name only — the location key stays "exclusive" everywhere
+    // else in the app; see the matching comment in the backend constants.js.
+    name: "Divic 1",
     address: "Plot 55, 1st Avenue, E Close, Festac, Lagos",
     phone: "09169845311",
     typeOrder: ["standard", "deluxe", "superior"],
@@ -19,7 +21,7 @@ export const LOCATIONS = {
   },
 };
 
-export const FLOOR_NAME = { 0: "Ground floor", 1: "First floor", 2: "Second floor" };
+export const FLOOR_NAME = { 0: "Ground floor", 1: "First floor", 2: "Second floor", 3: "Third floor" };
 
 export const ROLE_LABEL = {
   owner: "Owner",

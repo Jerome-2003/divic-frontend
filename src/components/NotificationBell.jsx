@@ -1,49 +1,25 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bell, AlertTriangle, Check } from "lucide-react";
-import api from "../lib/api";
-import { onEvent } from "../lib/socket";
-import { useAuth } from "../context/AuthContext";
-import { prettyDateTime } from "../lib/format";
 import { useNavigate } from "react-router-dom";
+import { useNotifications } from "../context/NotificationsContext";
+import { prettyDateTime } from "../lib/format";
+import { useAuth } from "../context/AuthContext";
 
 /**
- * Alerts for the property currently being viewed.
- *
- * Sockets push new ones, but a websocket can drop quietly, and a receptionist
- * must never miss an arrival because of it — so a slow poll runs underneath as
- * a floor, not as the main mechanism.
+ * The panel. Fetching, sockets, and polling all live in NotificationsContext
+ * now — this component just renders whatever it's given, so the sidebar badge
+ * can read the same feed without a second subscription.
  *
  * There is no sound by default. A front desk that beeps every few minutes gets
  * muted within a day, and then the urgent one is missed too.
  */
 export default function NotificationBell() {
-  const { location, can } = useAuth();
-  const [items, setItems] = useState([]);
-  const [unread, setUnread] = useState(0);
+  const { can } = useAuth();
+  const { items, unreadCount, markRead, markAllRead } = useNotifications();
   const [open, setOpen] = useState(false);
   const panelRef = useRef(null);
   const nav = useNavigate();
 
-  const load = useCallback(async () => {
-    if (!can("notifications")) return;
-    try {
-      const res = await api.notifications(location, 40);
-      setItems(res.notifications || []);
-      setUnread(res.unread || 0);
-    } catch {
-      // An alert list that fails to load must not break the page under it.
-    }
-  }, [location, can]);
-
-  useEffect(() => { load(); }, [load]);
-
-  useEffect(() => {
-    const off = onEvent("notification:new", () => load());
-    const timer = setInterval(load, 60000);
-    return () => { off(); clearInterval(timer); };
-  }, [load]);
-
-  // Click-away, so the panel does not sit open over the screen behind it.
   useEffect(() => {
     if (!open) return;
     const away = (e) => { if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false); };
@@ -55,15 +31,8 @@ export default function NotificationBell() {
 
   const openItem = async (n) => {
     setOpen(false);
-    if (!n.read) {
-      try { await api.markNotificationRead(n._id); } catch { /* navigation matters more */ }
-      load();
-    }
+    if (!n.read) markRead(n._id);
     if (n.href) nav(n.href);
-  };
-
-  const markAll = async () => {
-    try { await api.markAllNotificationsRead(location); await load(); } catch { /* no-op */ }
   };
 
   if (!can("notifications")) return null;
@@ -75,18 +44,18 @@ export default function NotificationBell() {
       <button
         className={"notif-btn" + (urgentUnread ? " urgent" : "")}
         onClick={() => setOpen((v) => !v)}
-        aria-label={unread ? unread + " unread notifications" : "Notifications"}
+        aria-label={unreadCount ? unreadCount + " unread notifications" : "Notifications"}
       >
         <Bell size={16} strokeWidth={1.7} />
-        {unread > 0 && <span className="notif-count">{unread > 9 ? "9+" : unread}</span>}
+        {unreadCount > 0 && <span className="notif-count">{unreadCount > 9 ? "9+" : unreadCount}</span>}
       </button>
 
       {open && (
         <div className="notif-panel" role="dialog" aria-label="Notifications">
           <div className="notif-head">
             <span>Notifications</span>
-            {unread > 0 && (
-              <button className="btn btn-sm btn-quiet" onClick={markAll}>
+            {unreadCount > 0 && (
+              <button className="btn btn-sm btn-quiet" onClick={markAllRead}>
                 <Check size={13} /> Mark all read
               </button>
             )}

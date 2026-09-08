@@ -117,6 +117,7 @@ export const api = {
 
   // analytics + audit
   summary: (location, days) => request("/api/analytics/summary", { params: { location, days } }),
+  todaySales: (location) => request("/api/analytics/today", { params: { location } }),
   occupancy: (location, back, forward) => request("/api/analytics/occupancy", { params: { location, back, forward } }),
   compare: (days) => request("/api/analytics/compare", { params: { days } }),
   audit: (params) => request("/api/audit", { params }),

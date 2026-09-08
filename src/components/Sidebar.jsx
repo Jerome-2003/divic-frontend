@@ -4,6 +4,7 @@ import {
   Receipt, Martini, TrendingUp, Tags, UserCog, ScrollText, Globe2, LogOut,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useNotifications, WEBSITE_REQUEST_TYPES } from "../context/NotificationsContext";
 import { ROLE_LABEL, LOCATIONS } from "../lib/constants";
 
 const ITEMS = [
@@ -24,7 +25,11 @@ const ITEMS = [
 
 export default function Sidebar() {
   const { user, can, signOut } = useAuth();
+  const { unreadByType } = useNotifications();
   const items = ITEMS.filter((i) => can(i.module));
+  // A new website request is easy to miss if it only shows once the bell is
+  // opened, so it also gets a plain dot right on the nav item itself.
+  const newWebsiteRequests = unreadByType(WEBSITE_REQUEST_TYPES);
 
   return (
     <aside className="side">
@@ -48,6 +53,9 @@ export default function Sidebar() {
               className={({ isActive }) => "nav-item" + (isActive ? " on" : "")}
             >
               <Icon size={16} strokeWidth={1.6} /> {i.label}
+              {i.path === "/requests" && newWebsiteRequests > 0 && (
+                <i className="notif-dot" aria-label={newWebsiteRequests + " new"} />
+              )}
             </NavLink>
           );
         })}

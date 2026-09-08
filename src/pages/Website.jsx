@@ -26,9 +26,40 @@ function stateOf(item) {
 
 /* A rough render of what a visitor sees. Approximate is fine; publishing blind
    to a public website is not. */
+/* A YouTube/Vimeo link needs an <iframe> to embed; a direct file link plays in
+   a plain <video> tag. Detected from the URL rather than asking the user to
+   say which — one less thing to get wrong when publishing. */
+function isEmbedVideo(url) {
+  return /youtube\.com|youtu\.be|vimeo\.com/i.test(url || "");
+}
+function toEmbedUrl(url) {
+  const yt = url.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=)([\w-]+)/);
+  if (yt) return "https://www.youtube.com/embed/" + yt[1];
+  const vm = url.match(/vimeo\.com\/(\d+)/);
+  if (vm) return "https://player.vimeo.com/video/" + vm[1];
+  return url;
+}
+
+function MediaPreview({ mediaType, mediaUrl, caption }) {
+  if (!mediaType || mediaType === "none" || !mediaUrl) return null;
+  return (
+    <div className="wc-media">
+      {mediaType === "video" ? (
+        isEmbedVideo(mediaUrl)
+          ? <iframe src={toEmbedUrl(mediaUrl)} title={caption || "Video"} allowFullScreen />
+          : <video src={mediaUrl} controls />
+      ) : (
+        <img src={mediaUrl} alt={caption || ""} />
+      )}
+      {caption && <div className="wc-caption">{caption}</div>}
+    </div>
+  );
+}
+
 function Preview({ draft }) {
   const body = (
     <>
+      <MediaPreview mediaType={draft.mediaType} mediaUrl={draft.mediaUrl} caption={draft.caption} />
       <h4>{draft.title || "Untitled"}</h4>
       {draft.body && <p>{draft.body}</p>}
       {draft.ctaLabel && <span className="wc-cta">{draft.ctaLabel}</span>}
@@ -49,7 +80,8 @@ function Preview({ draft }) {
 function ContentForm({ editing, onClose, onSaved }) {
   const [d, setD] = useState(editing || {
     key: "", type: "banner", location: "both", title: "", body: "",
-    imageUrl: "", ctaLabel: "", ctaHref: "", active: false, priority: 0,
+    mediaType: "none", mediaUrl: "", caption: "",
+    ctaLabel: "", ctaHref: "", active: false, priority: 0,
     startsAt: "", endsAt: "",
   });
   const [error, setError] = useState(null);
@@ -115,6 +147,29 @@ function ContentForm({ editing, onClose, onSaved }) {
           </Field>
 
           <Row>
+            <Field label="Media" htmlFor="wmt">
+              <select id="wmt" value={d.mediaType} onChange={(e) => set("mediaType", e.target.value)}>
+                <option value="none">None</option>
+                <option value="image">Image</option>
+                <option value="video">Video</option>
+              </select>
+            </Field>
+            {d.mediaType !== "none" && (
+              <Field label={d.mediaType === "video" ? "Video URL" : "Image URL"} htmlFor="wmu">
+                <input id="wmu" value={d.mediaUrl}
+                  placeholder={d.mediaType === "video" ? "https://youtube.com/watch?v=…" : "https://…"}
+                  onChange={(e) => set("mediaUrl", e.target.value)} />
+              </Field>
+            )}
+          </Row>
+          {d.mediaType !== "none" && (
+            <Field label="Caption" htmlFor="wmc">
+              <input id="wmc" value={d.caption} maxLength={200}
+                placeholder="Optional" onChange={(e) => set("caption", e.target.value)} />
+            </Field>
+          )}
+
+          <Row>
             <Field label="Button label" htmlFor="wcl">
               <input id="wcl" value={d.ctaLabel} maxLength={40}
                 placeholder="Book now" onChange={(e) => set("ctaLabel", e.target.value)} />
@@ -129,8 +184,8 @@ function ContentForm({ editing, onClose, onSaved }) {
             <Field label="Which property" htmlFor="wl">
               <select id="wl" value={d.location} onChange={(e) => set("location", e.target.value)}>
                 <option value="both">Both properties</option>
-                <option value="exclusive">Divic Exclusive only</option>
-                <option value="urban">Divic Urban only</option>
+                <option value="exclusive">{LOCATIONS.exclusive.name} only</option>
+                <option value="urban">{LOCATIONS.urban.name} only</option>
               </select>
             </Field>
             <Field label="Priority" htmlFor="wp">
@@ -220,8 +275,8 @@ function FaqForm({ editing, onClose, onSaved }) {
         <Field label="Which property" htmlFor="fl">
           <select id="fl" value={d.location} onChange={(e) => set("location", e.target.value)}>
             <option value="both">Both properties</option>
-            <option value="exclusive">Divic Exclusive only</option>
-            <option value="urban">Divic Urban only</option>
+            <option value="exclusive">{LOCATIONS.exclusive.name} only</option>
+            <option value="urban">{LOCATIONS.urban.name} only</option>
           </select>
         </Field>
       </Row>

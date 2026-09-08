@@ -3,7 +3,7 @@ import api from "../lib/api";
 import { useApi } from "../lib/useApi";
 import { Modal, Field, Row, ErrorNote, Note, PasswordInput } from "./ui";
 import { useAuth } from "../context/AuthContext";
-import { ROLE_LABEL } from "../lib/constants";
+import { ROLE_LABEL, LOCATIONS } from "../lib/constants";
 
 const ROLE_HELP = {
   cleaner: "Housekeeping staff see only the room board for their property.",
@@ -123,8 +123,8 @@ export default function StaffFormModal({ editing, onClose, onSaved }) {
         </Field>
         <Field label="Property" htmlFor="sl">
           <select id="sl" value={f.location} onChange={(e) => setLocation(e.target.value)}>
-            <option value="exclusive">Divic Exclusive</option>
-            <option value="urban">Divic Urban</option>
+            <option value="exclusive">{LOCATIONS.exclusive.name}</option>
+            <option value="urban">{LOCATIONS.urban.name}</option>
             {["manager", "owner"].includes(f.role) && <option value="all">Both properties</option>}
           </select>
         </Field>

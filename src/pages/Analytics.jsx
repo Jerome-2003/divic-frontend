@@ -71,6 +71,16 @@ export default function Analytics() {
           note={"Over the last " + days + " days"} />
       </div>
 
+      {/* Rooms plus facilities — the only figure that combines the two. ADR
+          and RevPAR above stay room-revenue only, unconditionally. */}
+      <div className="grid g2" style={{ marginBottom: 20 }}>
+        <Metric accent label="Total revenue" value={naira(summary.totalRevenue)}
+          note={"Rooms and facilities together, over the last " + days + " days"} />
+        <Metric label="Facility revenue" value={naira(summary.facilityRevenue?.total || 0)}
+          note={naira(summary.facilityRevenue?.chargedToRooms || 0) + " charged to rooms, " +
+                naira(summary.facilityRevenue?.paidAtTill || 0) + " paid at the till"} />
+      </div>
+
       {showBoth && compare && (
         <div style={{ marginBottom: 20 }}>
           <Card title="Both properties, side by side"
@@ -129,6 +139,26 @@ export default function Analytics() {
           </div>
         </Card>
       </div>
+
+      {summary.facilityRevenue?.byFacility?.length > 0 && (
+        <div style={{ marginTop: 16 }}>
+          <Card title="Revenue by facility" sub="Bars, restaurant, pool — charged to rooms and paid at the till, combined">
+            <div style={{ padding: "16px 12px 12px", height: 260 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={summary.facilityRevenue.byFacility.map((f) => ({ name: f.name, revenue: f.revenue }))}
+                  margin={{ top: 4, right: 8, left: 4, bottom: 0 }}>
+                  <CartesianGrid stroke={t["line-soft"]} vertical={false} />
+                  <XAxis dataKey="name" tick={axisStyle} axisLine={{ stroke: t.line }} tickLine={false} />
+                  <YAxis tick={axisStyle} axisLine={false} tickLine={false} width={54}
+                    tickFormatter={(v) => "₦" + Math.round(v / 1000) + "k"} />
+                  <Tooltip formatter={(v) => naira(v)} cursor={{ fill: t["gold-wash"] }} contentStyle={tooltipStyle} />
+                  <Bar dataKey="revenue" fill={t.gold} radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </div>
+      )}
 
       <div style={{ marginTop: 16 }}>
         <Card title="Where bookings come from" pad>

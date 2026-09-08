@@ -500,6 +500,11 @@ html { background:#FAF8F5; }
 .wc-cta{display:inline-block;margin-top:10px;font-size:0.75rem;color:var(--gold);border-bottom:1px solid var(--gold);}
 .wc-popup{border:1px solid var(--line);border-radius:3px;background:var(--porcelain);padding:16px;
   box-shadow:0 8px 22px var(--shadow-soft);}
+.wc-media{margin-bottom:12px;}
+.wc-media img,.wc-media video{width:100%;height:auto;display:block;border-radius:2px;}
+.wc-media iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:2px;display:block;}
+.wc-caption{font-size:0.7188rem;color:var(--slate-faint);margin-top:6px;}
+.wc-banner .wc-caption{color:var(--on-dark-soft);}
 @media (max-width:900px){ .wc-grid{grid-template-columns:1fr;} }
 
 /* A paid booking with no room. The loudest thing this system can show. */
