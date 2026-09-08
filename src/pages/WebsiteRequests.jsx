@@ -4,7 +4,7 @@ import api from "../lib/api";
 import { useApi } from "../lib/useApi";
 import { useAuth } from "../context/AuthContext";
 import { naira, cap, telUrl, prettyDateTime } from "../lib/format";
-import { PageHead, Card, Empty, Loading, ErrorNote, Chip, Note } from "../components/ui";
+import { PageHead, Card, Empty, Loading, ErrorNote, Chip, Note, ConfirmModal } from "../components/ui";
 
 /**
  * Requests lodged by the public website. They hold no room until a receptionist
@@ -16,6 +16,7 @@ export default function WebsiteRequests() {
   const [tab, setTab] = useState("pending");
   const [busyId, setBusyId] = useState(null);
   const [actionError, setActionError] = useState(null);
+  const [declining, setDeclining] = useState(null);
 
   const { data, loading, error, reload } = useApi(() => api.requests(location, tab), [location, tab]);
 
@@ -26,12 +27,11 @@ export default function WebsiteRequests() {
     finally { setBusyId(null); }
   };
 
-  const decline = async (r) => {
-    const reason = window.prompt("Why are you declining this request?\nThe guest will be called with this reason.");
-    if (reason === null) return;
+  const decline = async (reason) => {
+    const r = declining;
     setBusyId(r._id); setActionError(null);
-    try { await api.declineRequest(r._id, reason); await reload(); }
-    catch (e) { setActionError(e.message); }
+    try { await api.declineRequest(r._id, reason); setDeclining(null); await reload(); }
+    catch (e) { setActionError(e.message); setDeclining(null); }
     finally { setBusyId(null); }
   };
 
@@ -65,11 +65,11 @@ export default function WebsiteRequests() {
                 <tr key={r._id}>
                   <td className="mono" style={{ color: "var(--gold-deep)" }}>
                     {r.reference}
-                    <div style={{ fontSize: 11, color: "var(--slate-faint)" }}>{prettyDateTime(r.createdAt)}</div>
+                    <div style={{ fontSize: "0.6875rem", color: "var(--slate-faint)" }}>{prettyDateTime(r.createdAt)}</div>
                   </td>
                   <td>
                     <div style={{ fontWeight: 500 }}>{r.guestName}</div>
-                    <div style={{ fontSize: 11.5 }}>
+                    <div style={{ fontSize: "0.7188rem" }}>
                       <a href={telUrl(r.guestPhone)} style={{ color: "var(--slate-faint)", borderBottom: "1px solid var(--line)" }}>
                         {r.guestPhone}
                       </a>
@@ -78,14 +78,14 @@ export default function WebsiteRequests() {
                   <td>
                     <Chip>{cap(r.roomType)}</Chip>
                     {r.specialRequests && (
-                      <div style={{ fontSize: 11.5, color: "var(--slate-faint)", marginTop: 4, maxWidth: 200 }}>
+                      <div style={{ fontSize: "0.7188rem", color: "var(--slate-faint)", marginTop: 4, maxWidth: 200 }}>
                         {r.specialRequests}
                       </div>
                     )}
                   </td>
-                  <td className="mono" style={{ fontSize: 12.5 }}>
+                  <td className="mono" style={{ fontSize: "0.7812rem" }}>
                     {r.checkIn} → {r.checkOut}
-                    <div style={{ color: "var(--slate-faint)", fontSize: 11.5 }}>{r.nights} nights</div>
+                    <div style={{ color: "var(--slate-faint)", fontSize: "0.7188rem" }}>{r.nights} nights</div>
                   </td>
                   <td className="mono">{naira(r.quotedTotal)}</td>
                   <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
@@ -95,14 +95,14 @@ export default function WebsiteRequests() {
                           <button className="btn btn-sm btn-gold" disabled={busyId === r._id} onClick={() => accept(r)}>
                             <Check size={13} /> Accept
                           </button>
-                          <button className="btn btn-sm btn-quiet" disabled={busyId === r._id} onClick={() => decline(r)}>
+                          <button className="btn btn-sm btn-quiet" disabled={busyId === r._id} onClick={() => setDeclining(r)}>
                             <X size={13} /> Decline
                           </button>
                         </>
                       ) : (
                         <>
                           <Chip tone="st-dirty">Nothing free</Chip>
-                          <button className="btn btn-sm btn-quiet" onClick={() => decline(r)}>Decline</button>
+                          <button className="btn btn-sm btn-quiet" onClick={() => setDeclining(r)}>Decline</button>
                         </>
                       )
                     ) : (
@@ -115,6 +115,27 @@ export default function WebsiteRequests() {
           </table>
         )}
       </Card>
+
+      {declining && (
+        <ConfirmModal
+          title={"Decline " + declining.reference}
+          blurb={declining.guestName + " · " + declining.guestPhone}
+          destructive
+          confirmLabel="Decline this request"
+          cancelLabel="Keep it pending"
+          busy={busyId === declining._id}
+          requireReason
+          reasonLabel="Why are you declining it?"
+          reasonPlaceholder="No superior room free for those dates"
+          onConfirm={decline}
+          onClose={() => setDeclining(null)}
+        >
+          <p style={{ fontSize: "0.8438rem", color: "var(--slate-soft)", margin: "0 0 14px", lineHeight: 1.6 }}>
+            {declining.guestName.split(" ")[0]} will be called and told this reason, so
+            write it as you would say it to them.
+          </p>
+        </ConfirmModal>
+      )}
 
       {tab === "pending" && (
         <div style={{ marginTop: 16 }}>

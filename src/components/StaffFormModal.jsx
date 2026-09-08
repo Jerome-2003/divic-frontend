@@ -135,9 +135,9 @@ export default function StaffFormModal({ editing, onClose, onSaved }) {
       {isFacility && (
         <Field label="Facilities they cover">
           {loadingFacilities ? (
-            <div style={{ fontSize: 12.5, color: "var(--slate-faint)" }}>Reading the facilities…</div>
+            <div style={{ fontSize: "0.7812rem", color: "var(--slate-faint)" }}>Reading the facilities…</div>
           ) : !facilities?.length ? (
-            <div style={{ fontSize: 12.5, color: "var(--slate-faint)" }}>
+            <div style={{ fontSize: "0.7812rem", color: "var(--slate-faint)" }}>
               No facilities are set up at this property yet.
             </div>
           ) : (
@@ -147,7 +147,7 @@ export default function StaffFormModal({ editing, onClose, onSaved }) {
                   key={fac.id}
                   style={{
                     display: "flex", alignItems: "center", gap: 9, padding: "7px 2px",
-                    fontSize: 13.5, color: "var(--slate)", cursor: "pointer",
+                    fontSize: "0.8438rem", color: "var(--slate)", cursor: "pointer",
                   }}
                 >
                   <input
@@ -157,7 +157,7 @@ export default function StaffFormModal({ editing, onClose, onSaved }) {
                     style={{ width: "auto", margin: 0, flexShrink: 0 }}
                   />
                   <span>{fac.name}</span>
-                  <span style={{ fontSize: 11.5, color: "var(--slate-faint)" }}>
+                  <span style={{ fontSize: "0.7188rem", color: "var(--slate-faint)" }}>
                     {fac.sellsItems ? "takes sales" : "no till"}
                   </span>
                 </label>

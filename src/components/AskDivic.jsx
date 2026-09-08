@@ -107,7 +107,7 @@ export default function AskDivic() {
               </div>
             ))}
             {prompts.length === 0 && (
-              <p style={{ fontSize: 13, color: "var(--slate-soft)" }}>
+              <p style={{ fontSize: "0.8125rem", color: "var(--slate-soft)" }}>
                 Type a question below, or check that the assistant is switched on in the server settings.
               </p>
             )}

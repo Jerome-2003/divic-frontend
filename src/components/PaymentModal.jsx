@@ -85,7 +85,7 @@ export default function PaymentModal({ folio, onClose, onPaid }) {
       <table className="tbl" style={{ marginBottom: 18 }}>
         <tbody>
           <tr>
-            <td colSpan={2} style={{ fontSize: 12, color: "var(--slate-faint)", paddingBottom: 4 }}>
+            <td colSpan={2} style={{ fontSize: "0.75rem", color: "var(--slate-faint)", paddingBottom: 4 }}>
               The room
             </td>
           </tr>
@@ -101,16 +101,16 @@ export default function PaymentModal({ folio, onClose, onPaid }) {
           {facilityCharges > 0 && (
             <>
               <tr>
-                <td colSpan={2} style={{ fontSize: 12, color: "var(--slate-faint)", paddingTop: 12, paddingBottom: 4 }}>
+                <td colSpan={2} style={{ fontSize: "0.75rem", color: "var(--slate-faint)", paddingTop: 12, paddingBottom: 4 }}>
                   Bar &amp; restaurant
                 </td>
               </tr>
               {facilityLines.map((line) => (
                 <tr key={line.id}>
-                  <td style={{ fontSize: 12.5, color: "var(--slate-soft)" }}>
+                  <td style={{ fontSize: "0.7812rem", color: "var(--slate-soft)" }}>
                     {line.facility} — {line.description}
                   </td>
-                  <td className="mono" style={{ ...right, fontSize: 12.5, color: "var(--slate-soft)" }}>
+                  <td className="mono" style={{ ...right, fontSize: "0.7812rem", color: "var(--slate-soft)" }}>
                     {naira(line.amount)}
                   </td>
                 </tr>

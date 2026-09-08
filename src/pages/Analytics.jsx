@@ -9,9 +9,9 @@ import { LOCATIONS } from "../lib/constants";
 import { naira, cap, prettyDate } from "../lib/format";
 import { PageHead, Card, Metric, Loading, ErrorNote, Bar as ProgressBar } from "../components/ui";
 
-const axisStyle = { fontSize: 11, fill: "#9A9491" };
+const axisStyle = { fontSize: "0.6875rem", fill: "#9A9491" };
 const tooltipStyle = {
-  border: "1px solid #E8E2D9", borderRadius: 2, fontSize: 12.5, fontFamily: "Inter",
+  border: "1px solid #E8E2D9", borderRadius: 2, fontSize: "0.7812rem", fontFamily: "Inter",
 };
 
 export default function Analytics() {
@@ -128,14 +128,14 @@ export default function Analytics() {
       <div style={{ marginTop: 16 }}>
         <Card title="Where bookings come from" pad>
           {sources.length === 0 ? (
-            <p style={{ fontSize: 13, color: "var(--slate-soft)", margin: 0 }}>
+            <p style={{ fontSize: "0.8125rem", color: "var(--slate-soft)", margin: 0 }}>
               No bookings in this period yet.
             </p>
           ) : sources.map(([name, count]) => {
             const pct = totalSourced ? Math.round((count / totalSourced) * 100) : 0;
             return (
               <div key={name} style={{ marginBottom: 12 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 5 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem", marginBottom: 5 }}>
                   <span>{cap(name)}</span>
                   <span className="mono" style={{ color: "var(--slate-soft)" }}>{count} · {pct}%</span>
                 </div>

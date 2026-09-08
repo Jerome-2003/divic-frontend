@@ -63,15 +63,15 @@ export default function Bookings() {
                   <td className="mono" style={{ color: "var(--gold-deep)" }}>{b.ref}</td>
                   <td>
                     <div style={{ fontWeight: 500 }}>{b.guest?.name}</div>
-                    <div style={{ fontSize: 11.5, color: "var(--slate-faint)" }}>{cap(b.source)}</div>
+                    <div style={{ fontSize: "0.7188rem", color: "var(--slate-faint)" }}>{cap(b.source)}</div>
                   </td>
                   <td className="mono">
                     {b.roomNumber}
-                    <span style={{ color: "var(--slate-faint)", fontSize: 11.5 }}> {cap(b.roomType)}</span>
+                    <span style={{ color: "var(--slate-faint)", fontSize: "0.7188rem" }}> {cap(b.roomType)}</span>
                   </td>
-                  <td className="mono" style={{ fontSize: 12.5 }}>
+                  <td className="mono" style={{ fontSize: "0.7812rem" }}>
                     {b.checkIn} → {b.checkOut}
-                    <div style={{ color: "var(--slate-faint)", fontSize: 11.5 }}>
+                    <div style={{ color: "var(--slate-faint)", fontSize: "0.7188rem" }}>
                       {b.nights} night{b.nights === 1 ? "" : "s"}
                     </div>
                   </td>
@@ -79,7 +79,7 @@ export default function Bookings() {
                   <td className="mono" style={{ textAlign: "right" }}>
                     {naira(b.totalCharge)}
                     {b.balance > 0 && (
-                      <div style={{ fontSize: 11.5, color: "var(--clay)" }}>{naira(b.balance)} due</div>
+                      <div style={{ fontSize: "0.7188rem", color: "var(--clay)" }}>{naira(b.balance)} due</div>
                     )}
                   </td>
                 </tr>

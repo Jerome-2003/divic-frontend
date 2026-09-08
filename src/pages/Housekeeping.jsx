@@ -69,9 +69,9 @@ export default function Housekeeping() {
           footer={<button className="btn" onClick={() => setSelected(null)}>Close</button>}
         >
           {selected.occupant && (
-            <div style={{ marginBottom: 18, fontSize: 13.5 }}>
+            <div style={{ marginBottom: 18, fontSize: "0.8438rem" }}>
               <div style={{ fontWeight: 500 }}>{selected.occupant.name}</div>
-              <div style={{ color: "var(--slate-soft)", fontSize: 12.5, marginTop: 3 }}>
+              <div style={{ color: "var(--slate-soft)", fontSize: "0.7812rem", marginTop: 3 }}>
                 Checking out {selected.occupant.checkOut} · {selected.occupant.ref}
               </div>
             </div>

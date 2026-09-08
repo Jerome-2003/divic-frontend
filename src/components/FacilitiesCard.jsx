@@ -60,7 +60,7 @@ function FacilityRow({ facility, editable, onChanged }) {
               placeholder="Why, and when it is back"
               onChange={(e) => setNote(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && noteChanged && save(facility.status, note)}
-              style={{ fontSize: 12.5, padding: "6px 9px" }}
+              style={{ fontSize: "0.7812rem", padding: "6px 9px" }}
             />
             <button
               className="btn btn-sm"

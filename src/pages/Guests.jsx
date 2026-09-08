@@ -40,18 +40,18 @@ export default function Guests() {
                 <tr key={g._id} style={{ cursor: "pointer" }} onClick={() => setSelectedId(g._id)}>
                   <td>
                     <div style={{ fontWeight: 500 }}>{g.name}</div>
-                    <div style={{ fontSize: 11.5, color: "var(--slate-faint)" }}>
+                    <div style={{ fontSize: "0.7188rem", color: "var(--slate-faint)" }}>
                       {g.idType !== "None" ? g.idType + " on file" : "No ID on file"}
                       {g.properties?.length > 1 && " · both properties"}
                     </div>
                   </td>
-                  <td style={{ fontSize: 12.5 }}>
+                  <td style={{ fontSize: "0.7812rem" }}>
                     <a href={telUrl(g.phone)} onClick={(e) => e.stopPropagation()}
                        style={{ borderBottom: "1px solid var(--line)" }}>{g.phone}</a>
-                    <div style={{ color: "var(--slate-faint)", fontSize: 11.5 }}>{g.email}</div>
+                    <div style={{ color: "var(--slate-faint)", fontSize: "0.7188rem" }}>{g.email}</div>
                   </td>
                   <td className="mono">{g.stays}</td>
-                  <td className="mono" style={{ fontSize: 12.5 }}>{g.lastStay || "—"}</td>
+                  <td className="mono" style={{ fontSize: "0.7812rem" }}>{g.lastStay || "—"}</td>
                   <td className="mono" style={{ textAlign: "right" }}>{naira(g.spend)}</td>
                 </tr>
               ))}
@@ -73,17 +73,17 @@ export default function Guests() {
           {detail.email && <div className="contact-line" style={{ paddingLeft: 21 }}>{detail.email}</div>}
           {detail.notes && <div style={{ margin: "14px 0" }}><Note>{detail.notes}</Note></div>}
 
-          <h3 style={{ fontSize: 18, margin: "18px 0 8px" }}>Stay history</h3>
+          <h3 style={{ fontSize: "1.125rem", margin: "18px 0 8px" }}>Stay history</h3>
           {!detail.stays?.length ? (
-            <p style={{ fontSize: 13, color: "var(--slate-soft)" }}>No stays recorded yet.</p>
+            <p style={{ fontSize: "0.8125rem", color: "var(--slate-soft)" }}>No stays recorded yet.</p>
           ) : (
             <table className="tbl">
               <tbody>
                 {detail.stays.map((b) => (
                   <tr key={b._id}>
                     <td className="mono" style={{ color: "var(--gold-deep)" }}>{b.ref}</td>
-                    <td style={{ fontSize: 12.5 }}>{LOCATIONS[b.location].name}</td>
-                    <td className="mono" style={{ fontSize: 12.5 }}>{b.checkIn}</td>
+                    <td style={{ fontSize: "0.7812rem" }}>{LOCATIONS[b.location].name}</td>
+                    <td className="mono" style={{ fontSize: "0.7812rem" }}>{b.checkIn}</td>
                     <td><Chip tone="st-maintenance">{b.status}</Chip></td>
                     <td className="mono" style={{ textAlign: "right" }}>{naira(b.totalCharge)}</td>
                   </tr>
