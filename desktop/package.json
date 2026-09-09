@@ -1,0 +1,34 @@
+{
+  "name": "divic-pms-desktop",
+  "private": true,
+  "version": "1.0.0",
+  "main": "main.cjs",
+  "scripts": {
+    "copy:dist": "node copy-dist.js",
+    "start": "npm run copy:dist && electron .",
+    "build": "npm run copy:dist && electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.divicexclusivehotels.pms",
+    "productName": "Divic Exclusive Hotels",
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "dist/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

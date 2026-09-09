@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KeyRound } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { LOCATIONS } from "../lib/constants";
@@ -11,6 +11,13 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [slowHint, setSlowHint] = useState(false);
+
+  useEffect(() => {
+    if (!busy) { setSlowHint(false); return; }
+    const t = setTimeout(() => setSlowHint(true), 4000);
+    return () => clearTimeout(t);
+  }, [busy]);
 
   const submit = async () => {
     if (!username.trim() || !password) return setError("Enter your username and password.");
@@ -78,6 +85,12 @@ export default function Login() {
               onClick={submit}>
               <KeyRound size={15} /> {busy ? "Signing in" : "Sign in"}
             </button>
+
+            {slowHint && (
+              <p style={{ fontSize: "0.75rem", color: "var(--slate-faint)", marginTop: 10, lineHeight: 1.6 }}>
+                Waking up the server — this can take up to a minute.
+              </p>
+            )}
 
             <p style={{ fontSize: "0.75rem", color: "var(--slate-faint)", marginTop: 18, lineHeight: 1.6 }}>
               Forgotten your password? A manager or the owner can reset it from the
