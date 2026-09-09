@@ -36,7 +36,7 @@ export default function Sidebar() {
       <div className="brand">
         <div className="brand-lockup">
           <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="30" height="30" /> 
-          <span className="brand-mark">Divic</span>
+          <span className="brand-mark">Divic Exclusive Hotels</span>
         </div>
         <div className="brand-rule" />
         <div className="brand-sub">Two properties, Festac</div>

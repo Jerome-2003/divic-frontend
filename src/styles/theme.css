@@ -75,7 +75,7 @@ html { background:#FAF8F5; }
 .side{width:230px;flex-shrink:0;background:var(--porcelain);border-right:1px solid var(--line);
   display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
 .brand{padding:26px 22px 20px;border-bottom:1px solid var(--line-soft);}
-.brand-mark{font-family:'Cormorant Garamond',serif;font-size:1.4375rem;line-height:1.1;color:var(--slate);}
+.brand-mark{font-family:'Cormorant Garamond',serif;font-size:1.125rem;line-height:1.2;color:var(--slate);}
 .brand-rule{width:26px;height:1px;background:var(--gold);margin:9px 0 7px;}
 .brand-sub{font-size:0.6875rem;color:var(--slate-faint);letter-spacing:.06em;}
 .nav{padding:14px 12px;flex:1;overflow-y:auto;}
@@ -443,7 +443,7 @@ html { background:#FAF8F5; }
 }
 
 /* The brand block carries the real logo mark beside the wordmark. */
-.brand-lockup{display:flex;align-items:center;gap:10px;}
+.brand-lockup{display:flex;align-items:flex-start;gap:10px;}
 .brand-lockup img{display:block;flex-shrink:0;}
 
 /* ---- Notifications ---- */

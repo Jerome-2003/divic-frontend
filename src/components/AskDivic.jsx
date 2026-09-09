@@ -77,7 +77,7 @@ export default function AskDivic() {
       <div className="ask-head">
         <Sparkles size={17} style={{ color: "var(--gold)", marginTop: 3 }} />
         <div style={{ flex: 1 }}>
-          <h3>Ask about your hotel</h3>
+          <h3>Ask DIVIC</h3>
           <p>Answers come from your own records only.</p>
         </div>
         {messages.length > 0 && (
