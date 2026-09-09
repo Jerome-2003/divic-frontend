@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, AlertTriangle, ArrowLeftRight } from "lucide-react";
+import { Plus, Search, AlertTriangle, ArrowLeftRight, CalendarClock, Clock3 } from "lucide-react";
 import api from "../lib/api";
 import { useApi } from "../lib/useApi";
 import { useAuth } from "../context/AuthContext";
@@ -8,6 +8,7 @@ import { naira, cap } from "../lib/format";
 import { PageHead, Card, Empty, Loading, ErrorNote, Chip } from "../components/ui";
 import NewBookingModal from "../components/NewBookingModal";
 import MoveRoomModal from "../components/MoveRoomModal";
+import BookingDatesModal from "../components/BookingDatesModal";
 
 const toneFor = (status) =>
   status === "in-house" ? "st-occupied" : status === "confirmed" ? "gold" : "st-maintenance";
@@ -18,6 +19,7 @@ export default function Bookings() {
   const [status, setStatus] = useState("");
   const [adding, setAdding] = useState(false);
   const [moving, setMoving] = useState(null);
+  const [editingDates, setEditingDates] = useState(null);
 
   const { data, loading, error, reload } = useApi(
     () => api.bookings(location, { status: status || undefined, q: q || undefined }),
@@ -76,7 +78,11 @@ export default function Bookings() {
               </tr>
             </thead>
             <tbody>
-              {data.map((b) => (
+              {data.map((b) => {
+                const now = new Date();
+                const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+                const checkoutAlert = b.status === "in-house" && b.checkOut === today && now.getHours() >= 12;
+                return (
                 <tr key={b._id}>
                   <td className="mono" style={{ color: "var(--gold-deep)" }}>{b.ref}</td>
                   <td>
@@ -97,9 +103,15 @@ export default function Bookings() {
                     )}
                   </td>
                   <td className="mono" style={{ fontSize: "0.7812rem" }}>
-                    {b.checkIn} → {b.checkOut}
-                    <div style={{ color: "var(--slate-faint)", fontSize: "0.7188rem" }}>
-                      {b.nights} night{b.nights === 1 ? "" : "s"}
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      {b.checkIn} → {b.checkOut}
+                      <button className="btn btn-sm btn-quiet" onClick={() => setEditingDates(b)} title={b.status === "in-house" ? "Extend or change departure" : "Change booking dates"} aria-label={b.status === "in-house" ? "Extend or change departure" : "Change booking dates"}>
+                        <CalendarClock size={13} />
+                      </button>
+                      {checkoutAlert && <span title="Check-out due by 12pm today" aria-label="Check-out due by 12pm today" style={{ color: "var(--wine)", display: "inline-flex" }}><Clock3 size={15} /></span>}
+                    </div>
+                    <div style={{ color: checkoutAlert ? "var(--wine)" : "var(--slate-faint)", fontSize: "0.7188rem" }}>
+                      {checkoutAlert ? "Check out by 12pm today" : `${b.nights} night${b.nights === 1 ? "" : "s"}`}
                     </div>
                   </td>
                   <td><Chip tone={toneFor(b.status)}>{BOOKING_STATUS[b.status]}</Chip></td>
@@ -120,7 +132,8 @@ export default function Bookings() {
                     )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         )}
@@ -128,6 +141,7 @@ export default function Bookings() {
 
       {adding && <NewBookingModal onClose={() => setAdding(false)} onCreated={reload} />}
       {moving && <MoveRoomModal booking={moving} onClose={() => setMoving(null)} onMoved={reload} />}
+      {editingDates && <BookingDatesModal booking={editingDates} onClose={() => setEditingDates(null)} onSaved={reload} />}
     </>
   );
 }

@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, CalendarDays, ConciergeBell, Globe, Sparkles, Users,
   Receipt, Martini, TrendingUp, Tags, UserCog, ScrollText, Globe2, LogOut,
-  Moon, Sun,
+  Moon, Sun, ListTodo,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -23,6 +23,7 @@ const ITEMS = [
   { module: "staff",     label: "Staff",            path: "/staff",        icon: UserCog },
   { module: "content",   label: "Website",          path: "/website",      icon: Globe2 },
   { module: "audit",     label: "Activity log",     path: "/activity",     icon: ScrollText },
+  { module: "todos",     label: "To-do list",        path: "/todos",        icon: ListTodo },
 ];
 
 export default function Sidebar() {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Plus, Trash2, Globe2, MessageCircleQuestion } from "lucide-react";
 import api from "../lib/api";
 import { useApi } from "../lib/useApi";
@@ -78,6 +78,8 @@ function Preview({ draft }) {
 }
 
 function ContentForm({ editing, onClose, onSaved }) {
+  const fileRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
   const [d, setD] = useState(editing || {
     key: "", type: "banner", location: "both", title: "", body: "",
     mediaType: "none", mediaUrl: "", caption: "",
@@ -89,6 +91,24 @@ function ContentForm({ editing, onClose, onSaved }) {
 
   const set = (k, v) => setD({ ...d, [k]: v });
   const dateValue = (v) => (v ? String(v).slice(0, 10) : "");
+
+  const chooseMedia = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const wanted = d.mediaType === "video" ? "video/" : "image/";
+    if (!file.type.startsWith(wanted)) return setError(`Choose a ${d.mediaType} file.`);
+    if (file.size > 8 * 1024 * 1024) return setError("Media files must be 8 MB or smaller.");
+    setUploading(true); setError(null);
+    try {
+      const reader = new FileReader();
+      reader.onload = () => { set("mediaUrl", String(reader.result)); setUploading(false); };
+      reader.onerror = () => { setError("The selected file could not be read from your device."); setUploading(false); };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      setError(err.message || "Could not read that media file."); setUploading(false);
+    }
+  };
 
   const submit = async () => {
     if (!d.key.trim()) return setError("Give this a short key, like promo-december.");
@@ -155,10 +175,21 @@ function ContentForm({ editing, onClose, onSaved }) {
               </select>
             </Field>
             {d.mediaType !== "none" && (
-              <Field label={d.mediaType === "video" ? "Video URL" : "Image URL"} htmlFor="wmu">
-                <input id="wmu" value={d.mediaUrl}
-                  placeholder={d.mediaType === "video" ? "https://youtube.com/watch?v=…" : "https://…"}
+              <Field label={d.mediaType === "video" ? "Video" : "Image"} htmlFor="wmu">
+                <input id="wmu" value={d.mediaUrl.startsWith("data:") ? "Local file selected" : d.mediaUrl}
+                  placeholder={d.mediaType === "video" ? "Paste a video URL or choose a file" : "Paste an image URL or choose a file"}
+                  readOnly={d.mediaUrl.startsWith("data:")}
                   onChange={(e) => set("mediaUrl", e.target.value)} />
+                <div style={{ display: "flex", gap: 8, marginTop: 7, alignItems: "center" }}>
+                  <button type="button" className="btn btn-sm btn-quiet" onClick={() => fileRef.current?.click()} disabled={uploading}>
+                    {uploading ? "Reading file…" : "Choose from this device"}
+                  </button>
+                  {d.mediaUrl.startsWith("data:") && (
+                    <button type="button" className="btn btn-sm btn-quiet" onClick={() => set("mediaUrl", "")}>Remove local file</button>
+                  )}
+                </div>
+                <input ref={fileRef} type="file" accept={d.mediaType === "video" ? "video/*" : "image/*"}
+                  onChange={chooseMedia} style={{ display: "none" }} />
               </Field>
             )}
           </Row>

@@ -17,6 +17,7 @@ import Rates from "./pages/Rates";
 import Staff from "./pages/Staff";
 import ActivityLog from "./pages/ActivityLog";
 import Website from "./pages/Website";
+import Todos from "./pages/Todos";
 import { Empty } from "./components/ui";
 
 /**
@@ -79,6 +80,7 @@ export default function App() {
         <Route path="/staff"        element={<Guarded module="staff"><Staff /></Guarded>} />
         <Route path="/website"      element={<Guarded module="content"><Website /></Guarded>} />
         <Route path="/activity"     element={<Guarded module="audit"><ActivityLog /></Guarded>} />
+        <Route path="/todos"       element={<Guarded module="todos"><Todos /></Guarded>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Shell>

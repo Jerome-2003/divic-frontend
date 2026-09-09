@@ -41,6 +41,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signOut = useCallback(() => {
+    if (!window.confirm("Do you want to sign out?")) return;
     clearToken();
     setUser(null);
     setPermissions([]);

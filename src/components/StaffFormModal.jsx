@@ -125,7 +125,7 @@ export default function StaffFormModal({ editing, onClose, onSaved }) {
           <select id="sl" value={f.location} onChange={(e) => setLocation(e.target.value)}>
             <option value="exclusive">{LOCATIONS.exclusive.name}</option>
             <option value="urban">{LOCATIONS.urban.name}</option>
-            {["manager", "owner"].includes(f.role) && <option value="all">Both properties</option>}
+            {["manager", "owner", "receptionist"].includes(f.role) && <option value="all">Both properties</option>}
           </select>
         </Field>
       </Row>

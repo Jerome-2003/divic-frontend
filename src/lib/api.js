@@ -71,6 +71,7 @@ export const api = {
   createBooking: (payload) => request("/api/bookings", { method: "POST", body: payload }),
   checkIn: (id) => request(`/api/bookings/${id}/check-in`, { method: "POST" }),
   checkOut: (id, allowUnpaid) => request(`/api/bookings/${id}/check-out`, { method: "POST", body: { allowUnpaid } }),
+  updateBookingDates: (id, checkIn, checkOut, reason) => request(`/api/bookings/${id}/dates`, { method: "PATCH", body: { checkIn, checkOut, reason } }),
   cancelBooking: (id, reason) => request(`/api/bookings/${id}/cancel`, { method: "POST", body: { reason } }),
 
   // website requests
@@ -143,6 +144,12 @@ export const api = {
   createFaq: (body) => request("/api/content/faq", { method: "POST", body }),
   updateFaq: (id, body) => request(`/api/content/faq/${id}`, { method: "PATCH", body }),
   deleteFaq: (id) => request(`/api/content/faq/${id}`, { method: "DELETE" }),
+
+  // shared to-do list
+  todos: (location) => request("/api/todos", { params: { location } }),
+  createTodo: (location, text) => request("/api/todos", { method: "POST", body: { location, text } }),
+  updateTodo: (id, body) => request(`/api/todos/${id}`, { method: "PATCH", body }),
+  deleteTodo: (id) => request(`/api/todos/${id}`, { method: "DELETE" }),
 
   // assistant
   aiPrompts: () => request("/api/ai/prompts"),
