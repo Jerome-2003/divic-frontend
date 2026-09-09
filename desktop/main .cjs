@@ -4,6 +4,11 @@ const http = require("http");
 const fs = require("fs");
 
 const DIST_DIR = path.join(__dirname, "dist");
+// Fixed on purpose — a random port (listen(0, ...)) would give the app a
+// different origin on every launch, which CORS on the backend has no way to
+// allow. Pinning it means this one origin (http://localhost:PORT) can be
+// added to the backend's CLIENT_ORIGIN once and it just keeps working.
+const PORT = 47521;
 
 const MIME_TYPES = {
   ".html": "text/html",
@@ -45,9 +50,9 @@ function startStaticServer() {
       fs.createReadStream(filePath).pipe(res);
     });
 
-    // Port 0 = let the OS pick a free port, so this never collides with
-    // anything else already running on the machine.
-    server.listen(0, "127.0.0.1", () => resolve(server.address().port));
+    // Bound to a fixed port (see PORT above) instead of an OS-assigned one,
+    // so this app's origin never changes between launches.
+    server.listen(PORT, "127.0.0.1", () => resolve(PORT));
   });
 }
 
@@ -68,7 +73,7 @@ async function createWindow() {
   });
 
   win.setMenuBarVisibility(false);
-  win.loadURL(`http://127.0.0.1:${port}/`);
+  win.loadURL(`http://localhost:${port}/`);
 }
 
 app.whenReady().then(() => {

@@ -6,6 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FAF8F5" />
     <title>Divic Exclusive Hotels</title>
+    <script>
+      // Runs before anything paints, so the app never flashes the wrong
+      // theme for a beat before React mounts. Mirrors ThemeContext.jsx.
+      (function () {
+        try {
+          var stored = localStorage.getItem("divic.theme");
+          var dark = stored ? stored === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+          document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+        } catch (e) {}
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet"

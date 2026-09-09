@@ -5,7 +5,7 @@ html, body, #root { margin: 0; padding: 0; min-height: 100%; }
 /* The app paints --cream on .divic, but overscroll and the area behind a short
    page belong to the document — without this they stayed white in dark mode. */
 html { background:#FAF8F5; }
-@media (prefers-color-scheme: dark) { html { background:#161514; } }
+html[data-theme="dark"] { background:#161514; }
 
 .divic {
   --cream:#FAF8F5; --porcelain:#FFFFFF; --gold:#D4AF37; --gold-deep:#79601E;
@@ -87,8 +87,9 @@ html { background:#FAF8F5; }
 .side-foot{padding:14px 16px;border-top:1px solid var(--line-soft);}
 .who{font-size:0.8125rem;font-weight:500;}
 .who-role{font-size:0.7188rem;color:var(--slate-faint);margin-top:1px;}
-.signout{display:flex;align-items:center;gap:7px;font-size:0.7812rem;color:var(--slate-soft);margin-top:11px;}
+.signout{display:flex;align-items:center;gap:7px;font-size:0.7812rem;color:var(--slate-soft);}
 .signout:hover{color:var(--wine);}
+.foot-actions{display:flex;align-items:center;gap:8px;margin-top:11px;}
 
 .main{flex:1;min-width:0;display:flex;flex-direction:column;}
 .top{display:flex;align-items:center;gap:14px;padding:14px 30px;background:var(--porcelain);
@@ -291,7 +292,7 @@ html { background:#FAF8F5; }
   .nav{display:flex;gap:4px;overflow-x:auto;padding:8px 12px;flex:1 1 100%;}
   .nav-item{white-space:nowrap;}
   .side-foot{border-top:none;flex:1 1 100%;display:flex;align-items:center;gap:14px;}
-  .signout{margin-top:0;margin-left:auto;}
+  .foot-actions{margin-top:0;margin-left:auto;}
   .body,.top{padding-left:16px;padding-right:16px;}
   .frow{grid-template-columns:1fr;}
 }
@@ -526,29 +527,32 @@ html { background:#FAF8F5; }
 
    The gold stays #D4AF37 in both. It is the brand, it carries the same dark
    ink on a button in both appearances, and it reads as gold on cream and on
-   near-black alike. */
-@media (prefers-color-scheme: dark) {
-  .divic {
-    color-scheme:dark;
-    --cream:#161514; --porcelain:#1F1D1C;
-    --surface-2:#262322; --surface-hover:#2A2726;
-    --surface-raised:#232120; --surface-sunken:#1A1918;
-    --line:#3A3633; --line-soft:#2B2827;
-    --slate:#ECE8E3; --slate-soft:#ADA7A4; --slate-faint:#928C88;
-    --gold:#D4AF37; --gold-deep:#D4AF37; --gold-wash:#221E14; --gold-border:#4B4023;
-    --sage:#759170; --sage-bg:#192417; --sage-border:#33422F;
-    --wine:#A4797C; --wine-bg:#241718; --wine-border:#4A3438;
-    --wine-edge:#5C4044; --wine-hover:#251719; --wine-solid:#99686C;
-    --clay:#AC7D4E; --clay-bg:#241D17; --clay-border:#4A3823;
-    --steel:#798895; --steel-bg:#171E24; --steel-border:#333C44;
-    --brick:#B8453A; --brick-deep:#8E3228; --brick-bg:#241817;
-    --occ-fill:#302B1A; --occ-ink-soft:#B5AEA0; --occ-line:rgba(212,175,55,.26);
-    --neutral-bg:#2A2726; --clay-tint:#1D1A16; --steel-tint:#161A1D;
-    /* Shadows do almost nothing on a dark ground; depth comes from the surface
-       ramp above, so these only deepen rather than trying to lift. */
-    --shadow:rgba(0,0,0,.55); --shadow-soft:rgba(0,0,0,.4); --shadow-float:rgba(0,0,0,.62);
-  }
-  /* The room board's clean tiles are white-on-cream in the light theme. On dark
-     they need the surface ramp, not white. */
-  .divic .room.available,.divic .lg-tile.available{--room-fill:var(--surface-raised);}
+   near-black alike.
+
+   Driven by the data-theme attribute (see ThemeContext.jsx) rather than the
+   OS media query directly, so the in-app toggle can override the system
+   setting. The attribute is initialised from the OS preference the first
+   time someone visits, then from their own explicit choice after that. */
+html[data-theme="dark"] .divic {
+  color-scheme:dark;
+  --cream:#161514; --porcelain:#1F1D1C;
+  --surface-2:#262322; --surface-hover:#2A2726;
+  --surface-raised:#232120; --surface-sunken:#1A1918;
+  --line:#3A3633; --line-soft:#2B2827;
+  --slate:#ECE8E3; --slate-soft:#ADA7A4; --slate-faint:#928C88;
+  --gold:#D4AF37; --gold-deep:#D4AF37; --gold-wash:#221E14; --gold-border:#4B4023;
+  --sage:#759170; --sage-bg:#192417; --sage-border:#33422F;
+  --wine:#A4797C; --wine-bg:#241718; --wine-border:#4A3438;
+  --wine-edge:#5C4044; --wine-hover:#251719; --wine-solid:#99686C;
+  --clay:#AC7D4E; --clay-bg:#241D17; --clay-border:#4A3823;
+  --steel:#798895; --steel-bg:#171E24; --steel-border:#333C44;
+  --brick:#B8453A; --brick-deep:#8E3228; --brick-bg:#241817;
+  --occ-fill:#302B1A; --occ-ink-soft:#B5AEA0; --occ-line:rgba(212,175,55,.26);
+  --neutral-bg:#2A2726; --clay-tint:#1D1A16; --steel-tint:#161A1D;
+  /* Shadows do almost nothing on a dark ground; depth comes from the surface
+     ramp above, so these only deepen rather than trying to lift. */
+  --shadow:rgba(0,0,0,.55); --shadow-soft:rgba(0,0,0,.4); --shadow-float:rgba(0,0,0,.62);
 }
+/* The room board's clean tiles are white-on-cream in the light theme. On dark
+   they need the surface ramp, not white. */
+html[data-theme="dark"] .divic .room.available,html[data-theme="dark"] .divic .lg-tile.available{--room-fill:var(--surface-raised);}

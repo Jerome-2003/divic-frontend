@@ -2,8 +2,10 @@ import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, CalendarDays, ConciergeBell, Globe, Sparkles, Users,
   Receipt, Martini, TrendingUp, Tags, UserCog, ScrollText, Globe2, LogOut,
+  Moon, Sun,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { useNotifications, WEBSITE_REQUEST_TYPES } from "../context/NotificationsContext";
 import { ROLE_LABEL, LOCATIONS } from "../lib/constants";
 
@@ -25,6 +27,7 @@ const ITEMS = [
 
 export default function Sidebar() {
   const { user, can, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const { unreadByType } = useNotifications();
   const items = ITEMS.filter((i) => can(i.module));
   // A new website request is easy to miss if it only shows once the bell is
@@ -69,7 +72,14 @@ export default function Sidebar() {
             {user.location !== "all" && " · " + LOCATIONS[user.location].name.replace("Divic ", "")}
           </div>
         </div>
-        <button className="signout" onClick={signOut}><LogOut size={14} /> Sign out</button>
+        <div className="foot-actions">
+          <button className="signout" onClick={signOut}><LogOut size={14} /> Sign out</button>
+          <button className="notif-btn" onClick={toggleTheme}
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
+            {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
+        </div>
       </div>
     </aside>
   );
