@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, CalendarDays, ConciergeBell, Globe, Sparkles, Users,
@@ -8,6 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useNotifications, WEBSITE_REQUEST_TYPES } from "../context/NotificationsContext";
 import { ROLE_LABEL, LOCATIONS } from "../lib/constants";
+import { ConfirmModal } from "./ui";
 
 const ITEMS = [
   { module: "dashboard", label: "Dashboard",        path: "/",             icon: LayoutDashboard },
@@ -34,6 +36,9 @@ export default function Sidebar() {
   // A new website request is easy to miss if it only shows once the bell is
   // opened, so it also gets a plain dot right on the nav item itself.
   const newWebsiteRequests = unreadByType(WEBSITE_REQUEST_TYPES);
+  // A stray click here would end the shift mid-task, so it asks first rather
+  // than acting immediately.
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false);
 
   return (
     <aside className="side">
@@ -74,7 +79,9 @@ export default function Sidebar() {
           </div>
         </div>
         <div className="foot-actions">
-          <button className="signout" onClick={signOut}><LogOut size={14} /> Sign out</button>
+          <button className="signout" onClick={() => setConfirmingSignOut(true)}>
+            <LogOut size={14} /> Sign out
+          </button>
           <button className="notif-btn" onClick={toggleTheme}
             title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
@@ -82,6 +89,18 @@ export default function Sidebar() {
           </button>
         </div>
       </div>
+
+      {confirmingSignOut && (
+        <ConfirmModal
+          title="Sign out?"
+          blurb="You will need to sign in again to get back in."
+          destructive
+          confirmLabel="Sign out"
+          busy={false}
+          onConfirm={signOut}
+          onClose={() => setConfirmingSignOut(false)}
+        />
+      )}
     </aside>
   );
 }
