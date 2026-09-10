@@ -145,9 +145,9 @@ export const api = {
   updateFaq: (id, body) => request(`/api/content/faq/${id}`, { method: "PATCH", body }),
   deleteFaq: (id) => request(`/api/content/faq/${id}`, { method: "DELETE" }),
 
-  // shared to-do list
-  todos: (location) => request("/api/todos", { params: { location } }),
-  createTodo: (location, text) => request("/api/todos", { method: "POST", body: { location, text } }),
+  // personal to-do list — the server scopes this to the signed-in user
+  todos: () => request("/api/todos"),
+  createTodo: (text) => request("/api/todos", { method: "POST", body: { text } }),
   updateTodo: (id, body) => request(`/api/todos/${id}`, { method: "PATCH", body }),
   deleteTodo: (id) => request(`/api/todos/${id}`, { method: "DELETE" }),
 

@@ -2,21 +2,18 @@ import { useState } from "react";
 import { Check, Plus, Trash2 } from "lucide-react";
 import api from "../lib/api";
 import { useApi } from "../lib/useApi";
-import { useAuth } from "../context/AuthContext";
-import { LOCATIONS } from "../lib/constants";
 import { PageHead, Card, Empty, Loading, ErrorNote } from "../components/ui";
 
 export default function Todos() {
-  const { location } = useAuth();
   const [text, setText] = useState("");
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
-  const { data, loading, reload } = useApi(() => api.todos(location), [location]);
+  const { data, loading, reload } = useApi(() => api.todos(), []);
 
   const add = async () => {
     if (!text.trim()) return;
     setBusy(true); setError(null);
-    try { await api.createTodo(location, text.trim()); setText(""); await reload(); }
+    try { await api.createTodo(text.trim()); setText(""); await reload(); }
     catch (e) { setError(e.message); }
     finally { setBusy(false); }
   };
@@ -36,7 +33,7 @@ export default function Todos() {
 
   return (
     <>
-      <PageHead title="To-do list" blurb={`Shared tasks for ${LOCATIONS[location].name}. Everyone with access to this property can update them.`} />
+      <PageHead title="To-do list" blurb="Your personal to-do list. Only you can see, update, and complete these tasks." />
       <ErrorNote>{error}</ErrorNote>
       <Card>
         <div style={{ display: "flex", gap: 8, padding: 14, borderBottom: "1px solid var(--line)" }}>
@@ -45,7 +42,7 @@ export default function Todos() {
           <button className="btn btn-gold" onClick={add} disabled={busy || !text.trim()}><Plus size={15} /> Add</button>
         </div>
         {loading ? <Loading /> : !data?.length ? (
-          <Empty heading="Nothing on the list" text="Add a task for the team to work through." />
+          <Empty heading="Nothing on the list" text="Add a task to keep track of what you need to get done." />
         ) : (
           <div style={{ display: "grid" }}>
             {data.map((item) => (
@@ -57,7 +54,7 @@ export default function Todos() {
                 <div style={{ flex: 1, textDecoration: item.completed ? "line-through" : "none", color: item.completed ? "var(--slate-faint)" : "var(--slate)" }}>
                   <div>{item.text}</div>
                   <div style={{ fontSize: "0.6875rem", color: "var(--slate-faint)", marginTop: 3 }}>
-                    Added by {item.createdBy?.name || "staff"}{item.completedBy?.name ? ` · completed by ${item.completedBy.name}` : ""}
+                    Added by you{item.completed ? " · completed" : ""}
                   </div>
                 </div>
                 <button className="btn btn-sm btn-quiet" onClick={() => remove(item)} aria-label="Delete task"><Trash2 size={13} /></button>
