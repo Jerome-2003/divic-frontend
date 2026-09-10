@@ -56,6 +56,8 @@ export default function MoveRoomModal({ booking, onClose, onMoved }) {
   // Same type first — a guest who paid for a crown should be offered a crown.
   const sameType = (rooms || []).filter((r) => r.type === booking.roomType);
   const otherType = (rooms || []).filter((r) => r.type !== booking.roomType);
+  const chosen = (rooms || []).find((r) => r.number === roomNumber);
+  const changingType = !!chosen && chosen.type !== booking.roomType;
 
   return (
     <Modal
@@ -107,10 +109,11 @@ export default function MoveRoomModal({ booking, onClose, onMoved }) {
             </select>
           </Field>
 
-          {roomNumber && otherType.some((r) => r.number === roomNumber) && (
+          {changingType && (
             <Note>
-              This is not the room type they paid for. The rate on the booking does
-              not change automatically — sort out any difference at the desk.
+              This is not the room type they paid for. Moving them re-prices the
+              stay at the {cap(chosen.type)} rate for the nights left on the
+              booking — check the new total on the billing screen afterwards.
             </Note>
           )}
 
