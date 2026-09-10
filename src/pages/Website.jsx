@@ -29,6 +29,13 @@ function stateOf(item) {
 /* A YouTube/Vimeo link needs an <iframe> to embed; a direct file link plays in
    a plain <video> tag. Detected from the URL rather than asking the user to
    say which — one less thing to get wrong when publishing. */
+function mediaSrc(url) {
+  if (!url) return url;
+  if (/^https:\/\//i.test(url) || /^data:/i.test(url) || /^blob:/i.test(url)) return url;
+  const base = (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+  return base + (url.startsWith("/") ? url : "/" + url);
+}
+
 function isEmbedVideo(url) {
   return /youtube\.com|youtu\.be|vimeo\.com/i.test(url || "");
 }
@@ -46,10 +53,10 @@ function MediaPreview({ mediaType, mediaUrl, caption }) {
     <div className="wc-media">
       {mediaType === "video" ? (
         isEmbedVideo(mediaUrl)
-          ? <iframe src={toEmbedUrl(mediaUrl)} title={caption || "Video"} allowFullScreen />
-          : <video src={mediaUrl} controls />
+          ? <iframe src={toEmbedUrl(mediaSrc(mediaUrl))} title={caption || "Video"} allowFullScreen />
+          : <video src={mediaSrc(mediaUrl)} controls />
       ) : (
-        <img src={mediaUrl} alt={caption || ""} />
+        <img src={mediaSrc(mediaUrl)} alt={caption || ""} />
       )}
       {caption && <div className="wc-caption">{caption}</div>}
     </div>
@@ -102,7 +109,16 @@ function ContentForm({ editing, onClose, onSaved }) {
     setUploading(true); setError(null);
     try {
       const reader = new FileReader();
-      reader.onload = () => { set("mediaUrl", String(reader.result)); setUploading(false); };
+      reader.onload = async () => {
+        try {
+          const result = await api.uploadContentMedia(String(reader.result), d.mediaType);
+          set("mediaUrl", result.mediaUrl);
+        } catch (err) {
+          setError(err.message || "The selected media could not be uploaded.");
+        } finally {
+          setUploading(false);
+        }
+      };
       reader.onerror = () => { setError("The selected file could not be read from your device."); setUploading(false); };
       reader.readAsDataURL(file);
     } catch (err) {
@@ -176,16 +192,15 @@ function ContentForm({ editing, onClose, onSaved }) {
             </Field>
             {d.mediaType !== "none" && (
               <Field label={d.mediaType === "video" ? "Video" : "Image"} htmlFor="wmu">
-                <input id="wmu" value={d.mediaUrl.startsWith("data:") ? "Local file selected" : d.mediaUrl}
+                <input id="wmu" value={d.mediaUrl}
                   placeholder={d.mediaType === "video" ? "Paste a video URL or choose a file" : "Paste an image URL or choose a file"}
-                  readOnly={d.mediaUrl.startsWith("data:")}
                   onChange={(e) => set("mediaUrl", e.target.value)} />
                 <div style={{ display: "flex", gap: 8, marginTop: 7, alignItems: "center" }}>
                   <button type="button" className="btn btn-sm btn-quiet" onClick={() => fileRef.current?.click()} disabled={uploading}>
                     {uploading ? "Reading file…" : "Choose from this device"}
                   </button>
-                  {d.mediaUrl.startsWith("data:") && (
-                    <button type="button" className="btn btn-sm btn-quiet" onClick={() => set("mediaUrl", "")}>Remove local file</button>
+                  {d.mediaUrl && (
+                    <button type="button" className="btn btn-sm btn-quiet" onClick={() => set("mediaUrl", "")}>Remove media</button>
                   )}
                 </div>
                 <input ref={fileRef} type="file" accept={d.mediaType === "video" ? "video/*" : "image/*"}

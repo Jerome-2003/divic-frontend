@@ -138,6 +138,7 @@ export const api = {
   createContent: (body) => request("/api/content", { method: "POST", body }),
   updateContent: (id, body) => request(`/api/content/${id}`, { method: "PATCH", body }),
   deleteContent: (id) => request(`/api/content/${id}`, { method: "DELETE" }),
+  uploadContentMedia: (dataUrl, mediaType) => request("/api/content/media-upload", { method: "POST", body: { dataUrl, mediaType } }),
 
   // what the website's FAQ assistant is allowed to know
   faqEntries: () => request("/api/content/faq/all"),
