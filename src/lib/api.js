@@ -57,6 +57,7 @@ export const api = {
   me: () => request("/api/auth/me"),
   changePassword: (currentPassword, newPassword) =>
     request("/api/auth/change-password", { method: "POST", body: { currentPassword, newPassword } }),
+  markTourSeen: () => request("/api/auth/me/tour-seen", { method: "PUT" }),
 
   // rooms + rates
   rooms: (location) => request("/api/rooms", { params: { location } }),

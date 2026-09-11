@@ -5,21 +5,21 @@ import { TOUR_STEPS } from "../data/tourSteps";
 
 const TutorialContext = createContext(null);
 
-const seenKey = (userId) => `divic.tour.seen.${userId}`;
-
 /**
  * Drives the guided tour: which step is current, the filtered (permission-
  * aware) step list, and navigation between steps. TutorialOverlay is the
  * only thing that renders from this — this file has no UI of its own.
  *
- * Offered once per account, automatically, the first time that account signs
- * in on this browser (tracked in localStorage, not on the server — skipping
- * or finishing it here should never need a round trip). After that it only
- * runs when someone deliberately restarts it from the sidebar.
+ * Offered once per account, automatically, the first time that account has
+ * ever signed in anywhere — tracked as `user.tourSeenAt` on the account
+ * itself (see AuthContext.markTourSeen), not in this browser's storage. A
+ * receptionist who dismisses it at the front desk should not see it again
+ * just for signing in on their phone. After the first time, it only runs
+ * when someone deliberately restarts it from the sidebar.
  */
 export function TutorialProvider({ children }) {
   const navigate = useNavigate();
-  const { user, can } = useAuth();
+  const { user, can, markTourSeen } = useAuth();
   const [active, setActive] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [offered, setOffered] = useState(false);
@@ -32,19 +32,12 @@ export function TutorialProvider({ children }) {
   useEffect(() => {
     if (!user || offered || steps.length === 0) return;
     setOffered(true);
-    let seen = false;
-    try { seen = localStorage.getItem(seenKey(user.id)) === "1"; } catch { /* private mode */ }
-    if (!seen) {
+    if (!user.tourSeenAt) {
       setStepIndex(0);
       setActive(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, steps.length]);
-
-  const markSeen = useCallback(() => {
-    if (!user) return;
-    try { localStorage.setItem(seenKey(user.id), "1"); } catch { /* private mode */ }
-  }, [user]);
 
   const start = useCallback(() => {
     setStepIndex(0);
@@ -53,8 +46,8 @@ export function TutorialProvider({ children }) {
 
   const end = useCallback(() => {
     setActive(false);
-    markSeen();
-  }, [markSeen]);
+    markTourSeen().catch(() => { /* the tour just stays offered next sign-in */ });
+  }, [markTourSeen]);
 
   const next = useCallback(() => {
     if (stepIndex + 1 >= steps.length) { end(); return; }

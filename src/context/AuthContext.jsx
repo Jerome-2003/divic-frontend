@@ -52,11 +52,19 @@ export function AuthProvider({ children }) {
   const can = useCallback((key) => permissions.includes(key), [permissions]);
   const canSwitchLocation = user?.location === "all";
 
+  // Tracked on the account, not the browser — this only ever needs to move
+  // forward, so a request that fails or arrives late is not worth retrying;
+  // the tour just stays offered until one gets through.
+  const markTourSeen = useCallback(async () => {
+    const { tourSeenAt } = await api.markTourSeen();
+    setUser((u) => (u ? { ...u, tourSeenAt } : u));
+  }, []);
+
   return (
     <AuthContext.Provider value={{
       user, permissions, loading, can,
       location, setLocation, canSwitchLocation,
-      signIn, signOut,
+      signIn, signOut, markTourSeen,
     }}>
       {children}
     </AuthContext.Provider>
