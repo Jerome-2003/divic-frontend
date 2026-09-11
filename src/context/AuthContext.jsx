@@ -40,8 +40,10 @@ export function AuthProvider({ children }) {
     return u;
   }, []);
 
+  // The confirmation itself lives in Sidebar's own ConfirmModal, which calls
+  // this only once the user has already said yes there — a second, native
+  // confirm() here would just ask the same question twice.
   const signOut = useCallback(() => {
-    if (!window.confirm("Do you want to sign out?")) return;
     clearToken();
     setUser(null);
     setPermissions([]);
