@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import AskDivic from "./AskDivic";
+import TutorialOverlay from "./TutorialOverlay";
 import { useAuth } from "../context/AuthContext";
 import { NotificationsProvider } from "../context/NotificationsContext";
+import { TutorialProvider } from "../context/TutorialContext";
 import { connectSocket, disconnectSocket } from "../lib/socket";
 
 export default function Shell({ children }) {
@@ -28,14 +30,17 @@ export default function Shell({ children }) {
   return (
     <div className="divic">
       <NotificationsProvider>
-        <div className="shell">
-          <Sidebar />
-          <div className="main">
-            <Topbar online={online} pending={pending} />
-            <main className="body">{children}</main>
+        <TutorialProvider>
+          <div className="shell">
+            <Sidebar />
+            <div className="main">
+              <Topbar online={online} pending={pending} />
+              <main className="body">{children}</main>
+            </div>
           </div>
-        </div>
-        {can("ai") && <AskDivic />}
+          {can("ai") && <AskDivic />}
+          <TutorialOverlay />
+        </TutorialProvider>
       </NotificationsProvider>
     </div>
   );

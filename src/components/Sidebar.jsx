@@ -3,10 +3,11 @@ import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, CalendarDays, ConciergeBell, Globe, Sparkles, Users,
   Receipt, Martini, TrendingUp, Tags, UserCog, ScrollText, Globe2, LogOut,
-  Moon, Sun, ListTodo,
+  Moon, Sun, ListTodo, HelpCircle,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { useTutorial } from "../context/TutorialContext";
 import { useNotifications, WEBSITE_REQUEST_TYPES } from "../context/NotificationsContext";
 import { ROLE_LABEL, LOCATIONS } from "../lib/constants";
 import { ConfirmModal } from "./ui";
@@ -31,6 +32,7 @@ const ITEMS = [
 export default function Sidebar() {
   const { user, can, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { start: startTour } = useTutorial();
   const { unreadByType } = useNotifications();
   const items = ITEMS.filter((i) => can(i.module));
   // A new website request is easy to miss if it only shows once the bell is
@@ -59,6 +61,7 @@ export default function Sidebar() {
               key={i.path}
               to={i.path}
               end={i.path === "/"}
+              data-tour={"nav-" + i.module}
               className={({ isActive }) => "nav-item" + (isActive ? " on" : "")}
             >
               <Icon size={16} strokeWidth={1.6} /> {i.label}
@@ -81,6 +84,11 @@ export default function Sidebar() {
         <div className="foot-actions">
           <button className="signout" onClick={() => setConfirmingSignOut(true)}>
             <LogOut size={14} /> Sign out
+          </button>
+          <button className="notif-btn" onClick={startTour}
+            title="Take the guided tour"
+            aria-label="Take the guided tour">
+            <HelpCircle size={15} />
           </button>
           <button className="notif-btn" onClick={toggleTheme}
             title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
