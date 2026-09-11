@@ -216,7 +216,7 @@ html[data-theme="dark"] { background:#161514; }
   background:var(--room-fill);color:var(--room-accent);}
 
 /* modal */
-.scrim{position:fixed;inset:0;background:rgba(44,42,41,.42);display:flex;align-items:flex-start;
+.scrim{position:fixed;inset:0;background:rgba(44,42,41,.42);display:flex;align-items:center;
   justify-content:center;padding:40px 18px;z-index:60;overflow-y:auto;}
 .modal{background:var(--porcelain);border-radius:3px;width:100%;max-width:560px;
   box-shadow:0 18px 50px var(--shadow);border-top:3px solid var(--gold);}
