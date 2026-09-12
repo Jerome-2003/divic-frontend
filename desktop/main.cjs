@@ -65,6 +65,12 @@ async function createWindow() {
     minWidth: 1024,
     minHeight: 700,
     title: "Divic Exclusive Hotels",
+    // The installer/.exe's own icon comes from build.win.icon in package.json
+    // (electron-builder embeds that into the binary itself) — this is the
+    // separate setting for the window while the app is actually running: the
+    // taskbar button and the title bar, including when launched directly via
+    // `npm start` rather than the packaged installer.
+    icon: path.join(__dirname, "build", "icon.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,

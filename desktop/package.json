@@ -18,13 +18,15 @@
     "files": [
       "main.cjs",
       "preload.cjs",
+      "build/icon.ico",
       "dist/**/*"
     ],
     "directories": {
       "output": "release"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
