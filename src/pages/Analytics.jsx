@@ -45,7 +45,7 @@ export default function Analytics() {
   return (
     <>
       <PageHead title="Analytics"
-        blurb="Occupancy and revenue for this property. Managers and the owner only.">
+        blurb="Occupancy and revenue for this property, as they stand today. For a fixed month or year you can print and file, see Records.">
         <div style={{ display: "flex", gap: 8 }}>
           <select value={days} onChange={(e) => setDays(Number(e.target.value))} style={{ width: 140 }}>
             <option value={7}>Last 7 days</option>

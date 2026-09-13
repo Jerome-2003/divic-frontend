@@ -261,6 +261,28 @@ html[data-theme="dark"] { background:#161514; }
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;}
 .tabs button{padding:9px 15px;font-size:0.8438rem;color:var(--slate-soft);border-bottom:2px solid transparent;margin-bottom:-1px;}
 .tabs button.on{color:var(--slate);border-bottom-color:var(--gold);font-weight:500;}
+/* The website-requests tab carries the same amber mark its rows do, so the
+   thing it leads to is recognisable before you click it. */
+.tabs button.tab-web{display:inline-flex;align-items:center;gap:6px;color:var(--gold-deep);}
+.tabs button.tab-web.on{border-bottom-color:var(--gold-deep);}
+/* A second row of tabs nested inside a panel that is itself on a tab. */
+.tabs.tabs-sub{border-bottom:0;margin-bottom:12px;}
+.tabs.tabs-sub button{padding:6px 12px;font-size:0.7812rem;}
+
+/* A request is not a booking: it holds no room, nobody has spoken to the
+   guest, and a stranger on the internet lodged it. The amber edge is there so
+   that is never a detail you have to read the row to notice. */
+.wr-row > td:first-child{box-shadow:inset 3px 0 0 var(--gold);}
+.wr-mark{display:inline-flex;align-items:center;gap:4px;font-size:0.6875rem;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--gold-deep);}
+
+/* Picking which room types an offer covers. Buttons rather than checkboxes:
+   there are never more than five, and none selected has to read as "all of
+   them", which a row of empty boxes does not. */
+.chip-pick{display:flex;flex-wrap:wrap;gap:6px;}
+.chip-btn{padding:5px 11px;border:1px solid var(--line);border-radius:999px;font-size:0.7812rem;
+  color:var(--slate-soft);background:transparent;}
+.chip-btn.on{border-color:var(--gold);background:var(--gold-wash);color:var(--gold-deep);font-weight:500;}
 /* Renamed from .note: Metric's caption is also .note, and `.metric .note`
    only outranks this rule for the properties it declares — so every metric
    caption in the app was picking up this gold box, padding and flex. */
@@ -644,10 +666,69 @@ html[data-theme="dark"] .divic .room.available,html[data-theme="dark"] .divic .l
    the sidebar, the modal chrome, the buttons that triggered this — is hidden
    rather than restyled, because a print stylesheet that tries to lay out the
    whole app is a stylesheet nobody can keep correct. */
+/* ---------------- the filed record ----------------
+   An A4 document rather than a screen. Printed on white with black text
+   whatever theme the app is in — a report is filed and read on paper, where
+   the dark theme would be a page of ink and an unreadable photocopy. */
+.report-frame{background:var(--line-soft);padding:20px;overflow-x:auto;}
+.report-paper{background:#FFFFFF;color:#1A1A1A;width:100%;max-width:210mm;margin:0 auto;
+  padding:16mm 14mm;font-family:'Inter',system-ui,sans-serif;font-size:0.75rem;line-height:1.55;
+  box-shadow:0 1px 3px rgba(0,0,0,.12);}
+
+.rp-head{display:flex;align-items:flex-start;gap:16px;}
+.rp-head img{flex-shrink:0;}
+.rp-titles{flex:1;}
+.rp-house{font-size:0.6875rem;letter-spacing:.14em;text-transform:uppercase;color:#6B6664;}
+.rp-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.75rem;font-weight:300;
+  margin:4px 0 2px;line-height:1.1;color:#1A1A1A;}
+.rp-period{font-size:0.875rem;color:#8A6D3B;}
+.rp-stamp{text-align:right;font-size:0.6562rem;color:#6B6664;line-height:1.7;flex-shrink:0;}
+.rp-rule{height:1px;background:#D9CFB6;margin:14px 0 0;}
+
+.rp-section{margin-top:22px;break-inside:avoid;}
+.rp-h2{font-size:0.6875rem;letter-spacing:.12em;text-transform:uppercase;color:#6B6664;
+  font-weight:500;margin:0 0 10px;}
+
+.rp-figures{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#E6E0D4;
+  border:1px solid #E6E0D4;}
+.rp-fig{background:#FFFFFF;padding:11px 13px;}
+.rp-fig-label{font-size:0.625rem;color:#6B6664;text-transform:uppercase;letter-spacing:.07em;}
+.rp-fig-value{font-size:1.125rem;margin-top:3px;font-variant-numeric:tabular-nums;}
+.rp-fig.lead .rp-fig-value{font-size:1.5rem;color:#8A6D3B;}
+
+.rp-table{width:100%;border-collapse:collapse;font-size:0.6875rem;}
+.rp-table th{text-align:left;font-weight:500;color:#6B6664;text-transform:uppercase;
+  letter-spacing:.06em;font-size:0.5938rem;padding:0 8px 6px 0;border-bottom:1px solid #D9CFB6;}
+.rp-table td{padding:6px 8px 6px 0;border-bottom:1px solid #EFEAE0;}
+.rp-table .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.rp-table .strong{font-weight:500;}
+.rp-table .rp-total td{border-top:1px solid #D9CFB6;border-bottom:0;font-weight:500;padding-top:8px;}
+.rp-none{color:#6B6664;font-style:italic;padding:12px 0;}
+.rp-foot{font-size:0.6562rem;color:#6B6664;margin:9px 0 0;line-height:1.65;}
+.rp-sign{margin-top:26px;}
+.rp-sign p{font-size:0.625rem;color:#6B6664;margin:10px 0 0;letter-spacing:.03em;}
+
+@media (max-width:640px){
+  .report-frame{padding:0;}
+  .report-paper{padding:20px 16px;}
+  .rp-head{flex-wrap:wrap;}
+  .rp-stamp{text-align:left;}
+  .rp-figures{grid-template-columns:repeat(2,1fr);}
+}
+
 @media print{
   body *{visibility:hidden !important;}
   #receipt-paper, #receipt-paper *{visibility:visible !important;}
   #receipt-paper{position:absolute;left:0;top:0;width:80mm;max-width:80mm;padding:4mm;}
+  /* The report prints the same way the bar receipt does — everything hidden
+     but the sheet itself — so "Save as PDF" in the print dialog produces the
+     document and nothing around it. */
+  #report-paper, #report-paper *{visibility:visible !important;}
+  /* @page's 6mm is the bar receipt's; the rest of an A4 margin is padding
+     here, so one print rule serves a thermal roll and a filed document. */
+  #report-paper{position:absolute;left:0;top:0;width:100%;max-width:none;
+    padding:8mm 7mm;box-shadow:none;}
+  .report-frame{padding:0;background:none;overflow:visible;}
   .no-print{display:none !important;}
   .scrim{position:static;background:none;padding:0;overflow:visible;}
   .modal{box-shadow:none;border:0;max-width:none;}

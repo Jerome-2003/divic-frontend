@@ -42,14 +42,18 @@ export const TOUR_STEPS = [
       "Walk-in booking, for a guest without a reservation.",
       "Arrivals, Staying and Departures tabs, each with a live count.",
       "Check in and Check out buttons appear right where you need them.",
+      "Website requests and Bills are tabs here too — the next two stops.",
     ],
     note: "Checking out with an unpaid bill asks you to take payment first, or override with a reason.",
   },
   {
     module: "bookings",
-    path: "/requests",
+    path: "/front-desk?tab=requests",
+    // The tour points at the sidebar, and this tab has no sidebar entry of its
+    // own — it belongs to the front desk, so it spotlights the front desk.
+    anchor: "/front-desk",
     label: "Website requests",
-    blurb: "Booking requests submitted on the hotel website, before they become real bookings.",
+    blurb: "A tab on the front desk: booking requests submitted on the hotel website, before they become real bookings. Every row carries the website mark, so you can never mistake one for a guest with a room.",
     features: [
       "Accept assigns the first free room of that type and confirms the booking.",
       "Decline asks for a reason, so you can explain it to the guest by phone.",
@@ -81,9 +85,10 @@ export const TOUR_STEPS = [
   },
   {
     module: "billing",
-    path: "/billing",
-    label: "Billing",
-    blurb: "Every stay's bill, and what's still owed.",
+    path: "/front-desk?tab=billing",
+    anchor: "/front-desk",
+    label: "Bills",
+    blurb: "A tab on the front desk: every stay's bill, and what's still owed — next to the checkout that needs it settled.",
     features: [
       "Sorted by the largest balance first, so nothing slips.",
       "Room charges and bar/restaurant charges shown separately.",
@@ -138,6 +143,19 @@ export const TOUR_STEPS = [
       "Charts break revenue down by room type and by facility.",
     ],
     note: "Compare properties is there if you work across both branches.",
+  },
+  {
+    module: "analytics",
+    path: "/records",
+    label: "Records",
+    blurb: "The filed record of a month or a whole year — the page you print at a month end.",
+    features: [
+      "Pick a month, or a whole year broken down month by month.",
+      "Room revenue, bar/pool/gym takings and money collected, on one sheet.",
+      "Both properties together and each on its own, if you oversee both.",
+      "Save as PDF or print produces the branded document, ready to file.",
+    ],
+    note: "Revenue is what the period sold; collected is what actually arrived. They rarely match, and the report says why.",
   },
   {
     module: "rates",
