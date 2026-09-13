@@ -38,7 +38,7 @@ export default function Records() {
   const { user } = useAuth();
   const thisYear = new Date().getUTCFullYear();
 
-  const [kind, setKind] = useState("month");
+  const [kind, setKind] = useState("range");
   const [month, setMonth] = useState(lastMonth());
   const [year, setYear] = useState(String(thisYear));
   const [from, setFrom] = useState(addDays(today(), -6));
@@ -84,8 +84,8 @@ export default function Records() {
       <PageHead
         title="Records"
         blurb={user.location === "all"
-          ? "Sales and performance across both properties — a month, a year, or any run of days."
-          : "Sales and performance for this property — a month, a year, or any run of days."}
+          ? "Sales and performance across both properties. Pick any two dates — the 9th to the 22nd of September, a single Saturday, a whole month — or take a named month or year."
+          : "Sales and performance for this property. Pick any two dates — the 9th to the 22nd of September, a single Saturday, a whole month — or take a named month or year."}
       >
         <button className="btn btn-gold" disabled={!data} onClick={takeCopy}>
           <Printer size={15} /> Save as PDF or print
@@ -95,54 +95,81 @@ export default function Records() {
       {due.length > 0 && <ReportDuePrompt due={due} onOpen={openDue} />}
 
       <Card>
-        <Row>
-          <Field label="Cover" htmlFor="rk">
-            <select id="rk" value={kind} onChange={(e) => setKind(e.target.value)}>
-              <option value="month">One month</option>
-              <option value="year">A whole year</option>
-              <option value="range">Any dates I choose</option>
-            </select>
-          </Field>
+        <div className="card-pad">
+          {/* Three buttons rather than a dropdown. Choosing your own dates is
+              the everyday use of this page, and it was one option down a select
+              that opened on "One month" — which is to say invisible. */}
+          <div className="tabs tabs-sub" style={{ marginBottom: 14 }}>
+            <button className={kind === "range" ? "on" : ""} onClick={() => setKind("range")}>
+              Choose the dates
+            </button>
+            <button className={kind === "month" ? "on" : ""} onClick={() => setKind("month")}>
+              A whole month
+            </button>
+            <button className={kind === "year" ? "on" : ""} onClick={() => setKind("year")}>
+              A whole year
+            </button>
+          </div>
+
           {kind === "month" ? (
-            <Field label="Which month" htmlFor="rm">
-              <input id="rm" type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
-            </Field>
+            <Row>
+              <Field label="Which month" htmlFor="rm">
+                <input id="rm" type="month" value={month} max={today().slice(0, 7)}
+                  onChange={(e) => setMonth(e.target.value)} />
+              </Field>
+              <div />
+            </Row>
           ) : kind === "year" ? (
-            <Field label="Which year" htmlFor="ry">
-              <select id="ry" value={year} onChange={(e) => setYear(e.target.value)}>
-                {years.map((y) => <option key={y} value={y}>{y}</option>)}
-              </select>
-            </Field>
+            <Row>
+              <Field label="Which year" htmlFor="ry">
+                <select id="ry" value={year} onChange={(e) => setYear(e.target.value)}>
+                  {years.map((y) => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </Field>
+              <div />
+            </Row>
           ) : (
             <>
-              <Field label="From" htmlFor="rf">
-                <input id="rf" type="date" value={from} max={to}
-                  onChange={(e) => setFrom(e.target.value)} />
-              </Field>
-              <Field label="To" htmlFor="rt">
-                <input id="rt" type="date" value={to} min={from} max={today()}
-                  onChange={(e) => setTo(e.target.value)} />
-              </Field>
+              <Row>
+                <Field label="First day" htmlFor="rf">
+                  <input id="rf" type="date" value={from} max={to}
+                    onChange={(e) => setFrom(e.target.value)} />
+                </Field>
+                <Field label="Last day" htmlFor="rt">
+                  <input id="rt" type="date" value={to} min={from} max={today()}
+                    onChange={(e) => setTo(e.target.value)} />
+                </Field>
+              </Row>
+              {/* Said out loud, because an end date that is or is not counted is
+                  the thing everyone assumes differently. */}
+              <p className="tc-meta" style={{ margin: "2px 0 12px" }}>
+                Both days are counted — the 9th to the 22nd is fourteen days, not thirteen.
+              </p>
+              <div className="quick-range">
+                {[
+                  ["Today", 0], ["Last 7 days", 6], ["Last 14 days", 13],
+                  ["Last 30 days", 29], ["Last 90 days", 89],
+                ].map(([label, back]) => (
+                  <button
+                    key={label}
+                    type="button"
+                    className={"chip-btn" + (from === addDays(today(), -back) && to === today() ? " on" : "")}
+                    onClick={() => { setFrom(addDays(today(), -back)); setTo(today()); }}
+                  >
+                    {label}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  className="chip-btn"
+                  onClick={() => { setFrom(today().slice(0, 8) + "01"); setTo(today()); }}
+                >
+                  This month so far
+                </button>
+              </div>
             </>
           )}
-        </Row>
-
-        {kind === "range" && (
-          <div className="quick-range">
-            {[
-              ["Today", 0], ["Last 7 days", 6], ["Last 14 days", 13], ["Last 30 days", 29], ["Last 90 days", 89],
-            ].map(([label, back]) => (
-              <button
-                key={label}
-                type="button"
-                className={"chip-btn" + (from === addDays(today(), -back) && to === today() ? " on" : "")}
-                onClick={() => { setFrom(addDays(today(), -back)); setTo(today()); }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        )}
+        </div>
       </Card>
 
       <div style={{ marginTop: 16 }}>
