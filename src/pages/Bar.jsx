@@ -1,20 +1,23 @@
 import { useState } from "react";
 import {
-  ArrowLeft, Martini, Plus, Trash2, UtensilsCrossed, Receipt as ReceiptIcon, Settings2,
+  ArrowLeft, Martini, Plus, UtensilsCrossed, Settings2, TrendingUp, X,
 } from "lucide-react";
 import api from "../lib/api";
 import { useApi } from "../lib/useApi";
 import { useOverride } from "../lib/useOverride";
 import { useAuth } from "../context/AuthContext";
-import { naira, prettyDateTime } from "../lib/format";
-import { PageHead, Card, Field, Empty, Loading, ErrorNote, Note, Chip, Modal } from "../components/ui";
-import SettleDialog from "../components/SettleDialog";
+import { naira } from "../lib/format";
+import { PageHead, Field, Empty, Loading, ErrorNote, Note, Modal } from "../components/ui";
 import Receipt from "../components/Receipt";
 import StaffFacilitiesCard from "../components/StaffFacilitiesCard";
+import OrderList from "../components/till/OrderList";
+import OrderWorkspace from "../components/till/OrderWorkspace";
+import MenuManager from "../components/till/MenuManager";
+import SalesCard from "../components/till/SalesCard";
 
 /**
- * The bar and restaurant screen: open a table, put the order on it, settle it,
- * print the bill.
+ * The till at a bar or the restaurant: today's orders down one side, the menu
+ * and the running bill on the other.
  *
  * A table is a running tab rather than a single sale, because that is how a bar
  * actually works — drinks arrive over an evening and the guest pays once at the
@@ -24,6 +27,11 @@ import StaffFacilitiesCard from "../components/StaffFacilitiesCard";
  * Restaurants use this same screen. The job is identical — tables, orders, one
  * bill — and giving it a second near-identical page would mean fixing every bug
  * twice.
+ *
+ * Both panels are visible at once on a laptop at the counter. On a handheld,
+ * which is what most of a shift is worked on, the list is the screen and
+ * choosing an order replaces it — two panes side by side at 400px wide is two
+ * panes neither of which can be used.
  */
 export default function Bar() {
   const { location, user } = useAuth();
@@ -68,7 +76,8 @@ export default function Bar() {
   }
 
   return (
-    <BarFloor
+    <Till
+      key={facility.id}
       facility={facility}
       isManager={isManager}
       onSwitch={mine.length > 1 ? () => setPickedId(null) : null}
@@ -76,75 +85,66 @@ export default function Bar() {
   );
 }
 
-/** One facility's floor: its open tables, and whichever one is being worked. */
-function BarFloor({ facility, isManager, onSwitch }) {
-  const [openTabId, setOpenTabId] = useState(null);
-  const [receipt, setReceipt] = useState(null);
-  const [editingMenu, setEditingMenu] = useState(false);
-  const [adding, setAdding] = useState(false);
-  const [tableName, setTableName] = useState("");
-  const [guestName, setGuestName] = useState("");
-  const [err, setErr] = useState(null);
-
-  const { data: tabs, reload: reloadTabs } = useApi(() => api.tabs(facility.id, "open"), [facility.id]);
-  const { data: settled, reload: reloadSettled } = useApi(() => api.tabs(facility.id, "settled"), [facility.id]);
-  const { data: menu, reload: reloadMenu } = useApi(() => api.menu(facility.id), [facility.id]);
+function Till({ facility, isManager, onSwitch }) {
+  // One fetch for the whole day, open and settled alike. Two lists meant two
+  // things that could disagree about the same order.
+  const { data: orders, reload } = useApi(() => api.tabs(facility.id, "all"), [facility.id]);
+  const { data: menu, reload: reloadMenu } = useApi(() => api.menu(facility.id, true), [facility.id]);
   const { runWithOverride, overrideDialog } = useOverride();
 
-  const current = (tabs || []).find((t) => t.id === openTabId);
+  const [selectedId, setSelectedId] = useState(null);
+  const [filter, setFilter] = useState("all");
+  const [query, setQuery] = useState("");
+  const [opening, setOpening] = useState(false);
+  const [editingMenu, setEditingMenu] = useState(false);
+  const [showSales, setShowSales] = useState(false);
+  const [receipt, setReceipt] = useState(null);
+  const [err, setErr] = useState(null);
 
-  const openTable = async () => {
+  const list = orders || [];
+  const selected = list.find((o) => o.id === selectedId) || null;
+  const takings = list
+    .filter((o) => o.status === "settled" && !o.voided)
+    .reduce((s, o) => s + o.total, 0);
+
+  const openTable = async ({ tableName, guestName, roomNumber }) => {
     setErr(null);
     try {
       const tab = await runWithOverride((extra) => api.openTab(facility.id, {
-        tableName: tableName.trim(),
-        guestName: guestName.trim() || undefined,
-        ...extra,
+        tableName, guestName: guestName || undefined, roomNumber: roomNumber || undefined, ...extra,
       }));
-      setAdding(false);
-      setTableName("");
-      setGuestName("");
-      await reloadTabs();
-      setOpenTabId(tab.id);
+      setOpening(false);
+      await reload();
+      setSelectedId(tab.id);
     } catch (e) {
       if (!e.cancelled) setErr(e.message);
+      throw e;
     }
   };
 
-  const takings = (settled || []).reduce((s, t) => s + t.total, 0);
-
-  if (current) {
-    return (
-      <>
-        <TableOrder
-          facility={facility}
-          tab={current}
-          menu={menu || []}
-          onBack={() => { setOpenTabId(null); reloadTabs(); }}
-          onChanged={reloadTabs}
-          onSettled={(r) => {
-            setOpenTabId(null);
-            setReceipt(r);
-            reloadTabs();
-            reloadSettled();
-          }}
-        />
-        {receipt && <Receipt receipt={receipt} onClose={() => setReceipt(null)} />}
-      </>
-    );
-  }
+  const canOpen = facility.status === "open";
 
   return (
     <>
-      <PageHead title={facility.name} blurb="Open tables. Tap one to add to the order or settle it.">
+      <PageHead
+        title={facility.name}
+        blurb={list.length
+          ? list.filter((o) => o.state === "unpaid").length + " open · " + naira(takings) + " taken today"
+          : "Open a table when a guest sits down."}
+      >
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {onSwitch && <button className="btn" onClick={onSwitch}><ArrowLeft size={15} /> Switch</button>}
           {isManager && (
-            <button className="btn" onClick={() => setEditingMenu(true)}>
-              <Settings2 size={15} /> Menu
-            </button>
+            <>
+              <button className={"btn" + (showSales ? " btn-gold" : "")} onClick={() => setShowSales(!showSales)}>
+                <TrendingUp size={15} /> Takings
+              </button>
+              <button className="btn" onClick={() => setEditingMenu(true)}>
+                <Settings2 size={15} /> Menu
+              </button>
+            </>
           )}
-          <button className="btn btn-gold" onClick={() => setAdding(true)}>
+          <button className="btn btn-gold" onClick={() => setOpening(true)} disabled={!canOpen}>
             <Plus size={15} /> Open a table
           </button>
         </div>
@@ -152,97 +152,81 @@ function BarFloor({ facility, isManager, onSwitch }) {
 
       <ErrorNote>{err}</ErrorNote>
 
-      {facility.status !== "open" && (
-        <div style={{ marginBottom: 16 }}>
-          <Note>{facility.name} is {facility.status === "maintenance" ? "under maintenance" : "closed"}, so it cannot take a new order.</Note>
-        </div>
-      )}
-
-      {!menu?.length && (
+      {!canOpen && (
         <div style={{ marginBottom: 16 }}>
           <Note>
-            {facility.name} has no menu yet.{" "}
-            {isManager ? "Add items with the Menu button before taking orders." : "Ask a manager to add the items and prices."}
+            {facility.name} is {facility.status === "maintenance" ? "under maintenance" : "closed"},
+            so it cannot take a new order. Tables already open can still be settled.
           </Note>
         </div>
       )}
 
-      {(tabs || []).length === 0 ? (
-        <Empty heading="No open tables" text="When a guest sits down, open a table for them and add their order to it." />
-      ) : (
-        <div className="tab-grid">
-          {tabs.map((t) => (
-            <button key={t.id} className="tab-card" onClick={() => setOpenTabId(t.id)}>
-              <span className="tc-name">{t.tableName}</span>
-              <span className="tc-meta">
-                {t.guestName ? t.guestName + " · " : ""}
-                {t.lines.length} item{t.lines.length === 1 ? "" : "s"}
-              </span>
-              <span className="tc-total mono">{naira(t.total)}</span>
-            </button>
-          ))}
+      {isManager && !menu?.length && (
+        <div style={{ marginBottom: 16 }}>
+          <Note>
+            {facility.name} has no menu yet. Add items with the Menu button before taking orders.
+          </Note>
         </div>
       )}
 
-      <div style={{ marginTop: 26 }}>
-        <Card title="Settled today" sub={naira(takings) + " across " + (settled || []).length}>
-          {(settled || []).length === 0 ? (
-            <div className="card-pad"><span className="tc-meta">Nothing settled yet today.</span></div>
-          ) : (
-            <table className="tbl">
-              <thead>
-                <tr><th>Table</th><th>Items</th><th>Settled</th><th style={{ textAlign: "right" }}>Total</th></tr>
-              </thead>
-              <tbody>
-                {settled.map((t) => (
-                  <tr key={t.id}>
-                    <td style={{ fontWeight: 500 }}>{t.tableName}</td>
-                    <td>{t.lines.length}</td>
-                    <td>
-                      <Chip tone={t.settlement === "room" ? "gold" : "sage"}>
-                        {t.settlement === "room" ? "On a room" : "Paid"}
-                      </Chip>
-                      <span className="tc-meta"> {prettyDateTime(t.settledAt)}</span>
-                    </td>
-                    <td style={{ textAlign: "right" }} className="mono">{naira(t.total)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </Card>
-      </div>
-
-      {adding && (
-        <Modal
-          title="Open a table"
-          blurb={"A new running order at " + facility.name + "."}
-          onClose={() => setAdding(false)}
-          footer={<>
-            <button className="btn" onClick={() => setAdding(false)}>Cancel</button>
-            <button className="btn btn-gold" onClick={openTable} disabled={!tableName.trim()}>Open</button>
-          </>}
-        >
-          <Field label="Table" htmlFor="table-name">
-            <input
-              id="table-name" value={tableName} autoFocus placeholder="Table 4"
-              onChange={(e) => setTableName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && tableName.trim()) openTable(); }}
-            />
-          </Field>
-          <Field label="Guest name (optional)" htmlFor="table-guest">
-            <input id="table-guest" value={guestName} onChange={(e) => setGuestName(e.target.value)} />
-          </Field>
-        </Modal>
+      {showSales && isManager && (
+        <div style={{ marginBottom: 18 }}>
+          <SalesCard facility={facility} />
+        </div>
       )}
+
+      <div className={"till" + (selected ? " has-open" : "")}>
+        <OrderList
+          orders={list}
+          filter={filter}
+          onFilter={setFilter}
+          query={query}
+          onQuery={setQuery}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          onNew={() => setOpening(true)}
+          canOpen={canOpen}
+        />
+
+        <div className="till-main">
+          {selected ? (
+            <>
+              {/* On a handheld the list is the screen, so there has to be a
+                  way back to it that is not the browser's. */}
+              <button className="till-back" onClick={() => setSelectedId(null)}>
+                <X size={15} /> Back to today&rsquo;s orders
+              </button>
+              <OrderWorkspace
+                facility={facility}
+                tab={selected}
+                menu={menu || []}
+                isManager={isManager}
+                onChanged={reload}
+                onMenuChanged={reloadMenu}
+                onSettled={async (r) => { setReceipt(r); await reload(); }}
+              />
+            </>
+          ) : (
+            <div className="till-idle">
+              <Empty
+                heading={list.length ? "Pick an order" : "Nothing open yet"}
+                text={list.length
+                  ? "Choose one from today's orders to add to it, settle it, or look at what was on it."
+                  : "When a guest sits down, open a table for them and add their order to it."}
+              />
+            </div>
+          )}
+        </div>
+      </div>
 
       <StaffFacilitiesCard />
 
+      {opening && (
+        <OpenTable facility={facility} onOpen={openTable} onClose={() => setOpening(false)} />
+      )}
+
       {editingMenu && (
-        <MenuManager
-          facility={facility}
-          onClose={() => { setEditingMenu(false); reloadMenu(); }}
-        />
+        <MenuManager facility={facility} onClose={() => { setEditingMenu(false); reloadMenu(); }} />
       )}
 
       {receipt && <Receipt receipt={receipt} onClose={() => setReceipt(null)} />}
@@ -251,215 +235,61 @@ function BarFloor({ facility, isManager, onSwitch }) {
   );
 }
 
-/** One table's order: tap from the menu on the left, the running bill on the right. */
-function TableOrder({ facility, tab, menu, onBack, onChanged, onSettled }) {
-  const { runWithOverride, overrideDialog } = useOverride();
-  const [busy, setBusy] = useState(false);
-  const [settling, setSettling] = useState(false);
-  const [err, setErr] = useState(null);
-
-  const add = async (item) => {
-    setErr(null);
-    setBusy(true);
-    try {
-      await runWithOverride((extra) => api.addTabLine(facility.id, tab.id, { menuItemId: item.id, qty: 1, ...extra }));
-      await onChanged();
-    } catch (e) { if (!e.cancelled) setErr(e.message); } finally { setBusy(false); }
-  };
-
-  const remove = async (lineId) => {
-    setErr(null);
-    setBusy(true);
-    try {
-      await runWithOverride(() => api.removeTabLine(facility.id, tab.id, lineId));
-      await onChanged();
-    } catch (e) { if (!e.cancelled) setErr(e.message); } finally { setBusy(false); }
-  };
-
-  const settle = async ({ settlement, bookingId, paymentMethod }) => {
-    setErr(null);
-    setBusy(true);
-    try {
-      const res = await runWithOverride((extra) =>
-        api.settleTab(facility.id, tab.id, { settlement, bookingId, paymentMethod, ...extra }));
-      setSettling(false);
-      onSettled(res.receipt);
-    } catch (e) {
-      if (!e.cancelled) setErr(e.message);
-      setBusy(false);
-    }
-  };
-
-  const byCategory = ["drink", "food", "other"]
-    .map((c) => ({ category: c, items: menu.filter((i) => i.category === c) }))
-    .filter((g) => g.items.length);
-
-  return (
-    <>
-      <PageHead title={tab.tableName} blurb={tab.guestName ? tab.guestName + " · " + facility.name : facility.name}>
-        <button className="btn" onClick={onBack}><ArrowLeft size={15} /> All tables</button>
-      </PageHead>
-
-      <ErrorNote>{err}</ErrorNote>
-
-      <div className="grid g2" style={{ alignItems: "start" }}>
-        <Card title="Add to the order">
-          <div className="card-pad">
-            {byCategory.length === 0 ? (
-              <span className="tc-meta">No items on this menu yet.</span>
-            ) : byCategory.map((g) => (
-              <div key={g.category} style={{ marginBottom: 16 }}>
-                <div className="ask-group" style={{ marginTop: 0 }}>
-                  {g.category === "drink" ? "Drinks" : g.category === "food" ? "Food" : "Other"}
-                </div>
-                <div className="menu-pick">
-                  {g.items.map((i) => (
-                    <button key={i.id} onClick={() => add(i)} disabled={busy}>
-                      <span className="mp-name">{i.name}</span>
-                      <span className="mp-price mono">{naira(i.price)}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        <Card title="This table" sub={tab.lines.length + " item" + (tab.lines.length === 1 ? "" : "s")}>
-          <div className="card-pad">
-            {tab.lines.length === 0 ? (
-              <span className="tc-meta">Nothing ordered yet. Tap an item to add it.</span>
-            ) : (
-              <>
-                {tab.lines.map((l) => (
-                  <div key={l.id} className="order-line">
-                    <span className="ol-qty mono">{l.qty}&times;</span>
-                    <span className="ol-name">{l.name}</span>
-                    <span className="mono">{naira(l.lineTotal)}</span>
-                    <button
-                      className="btn btn-sm btn-quiet"
-                      onClick={() => remove(l.id)}
-                      disabled={busy}
-                      aria-label={"Remove " + l.name}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
-                <div className="pos-total" style={{ marginTop: 14 }}>
-                  <span>Total</span>
-                  <strong className="mono">{naira(tab.total)}</strong>
-                </div>
-                <button
-                  className="btn btn-gold btn-big"
-                  style={{ width: "100%", marginTop: 14 }}
-                  onClick={() => setSettling(true)}
-                  disabled={busy}
-                >
-                  <ReceiptIcon size={16} /> Settle &amp; print
-                </button>
-              </>
-            )}
-          </div>
-        </Card>
-      </div>
-
-      {settling && (
-        <SettleDialog
-          facility={facility}
-          amount={tab.total}
-          title={"Settle " + tab.tableName}
-          blurb="Once settled the table closes and the receipt prints. A charge can only be voided by a manager afterwards."
-          busy={busy}
-          onSettle={settle}
-          onClose={() => setSettling(false)}
-        />
-      )}
-      {overrideDialog}
-    </>
-  );
-}
-
-/** Manager-only: what this facility sells, and for how much. */
-function MenuManager({ facility, onClose }) {
-  const { data: items, reload } = useApi(() => api.menu(facility.id, true), [facility.id]);
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("drink");
-  const [err, setErr] = useState(null);
+/** Opening a table, optionally against a guest's room from the outset. */
+function OpenTable({ facility, onOpen, onClose }) {
+  const [tableName, setTableName] = useState("");
+  const [guestName, setGuestName] = useState("");
+  const [roomNumber, setRoomNumber] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const add = async () => {
-    setErr(null);
+  const go = async () => {
+    if (!tableName.trim() || busy) return;
     setBusy(true);
     try {
-      await api.addMenuItem(facility.id, { name: name.trim(), price: Number(price), category });
-      setName("");
-      setPrice("");
-      await reload();
-    } catch (e) { setErr(e.message); } finally { setBusy(false); }
-  };
-
-  const toggle = async (item) => {
-    setErr(null);
-    try {
-      await api.updateMenuItem(facility.id, item.id, { active: !item.active });
-      await reload();
-    } catch (e) { setErr(e.message); }
+      await onOpen({
+        tableName: tableName.trim(),
+        guestName: guestName.trim(),
+        roomNumber: roomNumber.trim(),
+      });
+    } catch { /* the page shows it */ } finally { setBusy(false); }
   };
 
   return (
     <Modal
-      title={facility.name + " menu"}
-      blurb="What this facility sells and for how much. Taking an item off the list keeps it on past receipts."
+      title="Open a table"
+      blurb={"A new running order at " + facility.name + "."}
       onClose={onClose}
-      wide
-      footer={<button className="btn btn-gold" onClick={onClose}>Done</button>}
-    >
-      <ErrorNote>{err}</ErrorNote>
-
-      <div className="frow" style={{ gridTemplateColumns: "2fr 1fr 1fr auto", alignItems: "end", gap: 10 }}>
-        <Field label="Item" htmlFor="mi-name">
-          <input id="mi-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Star lager" />
-        </Field>
-        <Field label="Price" htmlFor="mi-price">
-          <input id="mi-price" value={price} inputMode="numeric" onChange={(e) => setPrice(e.target.value)} placeholder="2500" />
-        </Field>
-        <Field label="Kind" htmlFor="mi-cat">
-          <select id="mi-cat" value={category} onChange={(e) => setCategory(e.target.value)}>
-            <option value="drink">Drink</option>
-            <option value="food">Food</option>
-            <option value="other">Other</option>
-          </select>
-        </Field>
-        <button className="btn btn-gold" onClick={add} disabled={busy || !name.trim() || !price}>
-          <Plus size={15} /> Add
+      footer={<>
+        <button className="btn" onClick={onClose} disabled={busy}>Cancel</button>
+        <button className="btn btn-gold" onClick={go} disabled={busy || !tableName.trim()}>
+          {busy ? "Opening" : "Open"}
         </button>
+      </>}
+    >
+      <Field label="Table" htmlFor="table-name">
+        <input
+          id="table-name" value={tableName} autoFocus placeholder="Table 4"
+          onChange={(e) => setTableName(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && tableName.trim()) go(); }}
+        />
+      </Field>
+      <div className="frow">
+        <Field label="Guest name (optional)" htmlFor="table-guest">
+          <input id="table-guest" value={guestName} onChange={(e) => setGuestName(e.target.value)} />
+        </Field>
+        <Field label="Room (optional)" htmlFor="table-room">
+          <input
+            id="table-room" value={roomNumber} inputMode="numeric" placeholder="204"
+            onChange={(e) => setRoomNumber(e.target.value)}
+          />
+        </Field>
       </div>
-
-      {(items || []).length === 0 ? (
-        <Empty heading="Nothing on the menu yet" text="Add the drinks and food this facility sells, with the price for each." />
-      ) : (
-        <table className="tbl" style={{ marginTop: 12 }}>
-          <thead>
-            <tr><th>Item</th><th>Kind</th><th style={{ textAlign: "right" }}>Price</th><th /></tr>
-          </thead>
-          <tbody>
-            {items.map((i) => (
-              <tr key={i.id} style={i.active ? undefined : { opacity: 0.5 }}>
-                <td style={{ fontWeight: 500 }}>{i.name}</td>
-                <td>{i.category}</td>
-                <td style={{ textAlign: "right" }} className="mono">{naira(i.price)}</td>
-                <td style={{ textAlign: "right" }}>
-                  <button className="btn btn-sm" onClick={() => toggle(i)}>
-                    {i.active ? "Take off" : "Put back"}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <Note>
+        A room attached now shows on the order card all evening, so anyone picking the
+        table up knows whose it is. Nothing is charged to it until the bill is settled,
+        and a table can be opened without one — plenty of people at the bar are not
+        staying here.
+      </Note>
     </Modal>
   );
 }
