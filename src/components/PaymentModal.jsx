@@ -79,9 +79,11 @@ export default function PaymentModal({ folio, onClose, onPaid }) {
     >
       <ErrorNote>{error}</ErrorNote>
 
-      {/* The room and the bar are two different debts and are shown as two
-          different sections. A guest querying the total needs to see which is
-          which, not one blended figure. */}
+      {/* The room and anything signed to it are two different debts and are
+          shown as two sections. A guest querying the total needs to see which
+          is which — and which facility each line came from — not one blended
+          figure under one facility's name. Nothing they paid for at a till is
+          here at all; that is settled with the facility. */}
       <table className="tbl" style={{ marginBottom: 18 }}>
         <tbody>
           <tr>
@@ -102,7 +104,7 @@ export default function PaymentModal({ folio, onClose, onPaid }) {
             <>
               <tr>
                 <td colSpan={2} style={{ fontSize: "0.75rem", color: "var(--slate-faint)", paddingTop: 12, paddingBottom: 4 }}>
-                  Bar &amp; restaurant
+                  Signed to the room
                 </td>
               </tr>
               {facilityLines.map((line) => (
@@ -116,7 +118,7 @@ export default function PaymentModal({ folio, onClose, onPaid }) {
                 </tr>
               ))}
               <tr>
-                <td style={{ fontWeight: 500 }}>Bar &amp; restaurant charges</td>
+                <td style={{ fontWeight: 500 }}>Signed to the room</td>
                 <td className="mono" style={{ ...right, fontWeight: 500 }}>{naira(facilityCharges)}</td>
               </tr>
             </>
