@@ -71,8 +71,9 @@ export default function FrontDesk() {
       await reload();
     } catch (e) {
       // The server refuses a checkout with money owing unless it is overridden.
-      // It breaks the balance out, so the dialog can show where each figure
-      // came from — "the bar" is a different conversation from "the room".
+      // It breaks the balance out and names the facilities, so the dialog can
+      // show where each figure came from — an unpaid gym term is a different
+      // conversation from an unpaid room.
       if (e.status === 409 && e.payload?.balance) setOwing({ booking: b, ...e.payload });
       else setActionError(e.message);
     } finally { setBusyId(null); }
@@ -149,15 +150,17 @@ export default function FrontDesk() {
                   </td>
                   <td className="mono" style={{ fontSize: "0.7812rem" }}>{b.checkIn} → {b.checkOut}</td>
                   <td className="mono" style={{ fontSize: "0.7812rem" }}>
-                    {/* The room plus anything signed for at the bar — the same
-                        total the balance below is worked out from. */}
+                    {/* The room plus anything signed to it — the same total the
+                        balance below is worked out from. Money paid at a
+                        facility till is not in here and never was. */}
                     {naira(b.totalCharges ?? b.totalCharge)}
                     <div style={{ fontSize: "0.7188rem", color: b.balance > 0 ? "var(--clay)" : "var(--sage)" }}>
                       {b.balance > 0 ? naira(b.balance) + " outstanding" : "Settled"}
                     </div>
                     {b.facilityCharges > 0 && (
                       <div style={{ fontSize: "0.6875rem", color: "var(--slate-faint)" }}>
-                        incl. {naira(b.facilityCharges)} bar
+                        incl. {naira(b.facilityCharges)} signed from{" "}
+                        {(b.facilityBreakdown || []).map((l) => l.name).join(", ") || "a facility"}
                       </div>
                     )}
                   </td>
@@ -200,9 +203,18 @@ export default function FrontDesk() {
                 <td>Room charges</td>
                 <td className="mono" style={{ textAlign: "right" }}>{naira(owing.roomCharges)}</td>
               </tr>
-              {owing.facilityCharges > 0 && (
+              {/* Named one line per facility. "There is ₦40,000 owing" is not
+                  enough to decide on an override; "₦40,000 of it is the gym"
+                  is. */}
+              {(owing.facilityBreakdown || []).map((l) => (
+                <tr key={String(l.facilityId)}>
+                  <td>{l.name} <span className="tc-meta">signed to the room</span></td>
+                  <td className="mono" style={{ textAlign: "right" }}>{naira(l.amount)}</td>
+                </tr>
+              ))}
+              {owing.facilityCharges > 0 && !(owing.facilityBreakdown || []).length && (
                 <tr>
-                  <td>Bar &amp; restaurant</td>
+                  <td>Signed to the room</td>
                   <td className="mono" style={{ textAlign: "right" }}>{naira(owing.facilityCharges)}</td>
                 </tr>
               )}
@@ -220,7 +232,7 @@ export default function FrontDesk() {
           </table>
           <p style={{ fontSize: "0.8438rem", color: "var(--slate-soft)", margin: 0, lineHeight: 1.6 }}>
             Checking out now leaves this balance owing against the stay. It stays on
-            the bill and shows on the billing screen until someone settles it.
+            the bill and shows on the Bills tab until someone settles it.
           </p>
         </ConfirmModal>
       )}

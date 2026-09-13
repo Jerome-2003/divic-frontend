@@ -91,9 +91,10 @@ export const TOUR_STEPS = [
     blurb: "A tab on the front desk: every stay's bill, and what's still owed — next to the checkout that needs it settled.",
     features: [
       "Sorted by the largest balance first, so nothing slips.",
-      "Room charges and bar/restaurant charges shown separately.",
+      "These are room bills. What a guest paid for at the bar, pool or gym till is settled there and never appears here.",
+      "What they signed to their room does appear, named by the facility it came from.",
+      "Bill opens the itemised version, line by line, for a guest querying a figure.",
       "Take payment records cash, card or transfer — or sends a Paystack link.",
-      "A bill shows Paid in full once it's settled.",
     ],
   },
   {

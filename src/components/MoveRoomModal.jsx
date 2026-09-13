@@ -113,7 +113,7 @@ export default function MoveRoomModal({ booking, onClose, onMoved }) {
             <Note>
               This is not the room type they paid for. Moving them re-prices the
               stay at the {cap(chosen.type)} rate for the nights left on the
-              booking — check the new total on the billing screen afterwards.
+              booking — check the new total on the front desk's Bills tab afterwards.
             </Note>
           )}
 

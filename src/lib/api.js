@@ -97,6 +97,9 @@ export const api = {
 
   // billing
   folios: (location) => request("/api/payments/folios", { params: { location } }),
+  // One guest's bill, itemised: the room line, then every facility charge they
+  // signed to the room, named and dated.
+  folio: (bookingId) => request(`/api/payments/folio/${bookingId}`),
   // One guest's bill, itemised: the room line plus every facility charge
   // sitting on the room.
   folio: (bookingId) => request(`/api/payments/folio/${bookingId}`),
