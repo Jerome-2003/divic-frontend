@@ -4,6 +4,7 @@ import { useApi } from "../lib/useApi";
 import { useAuth } from "../context/AuthContext";
 import { PageHead, Empty, Loading, ErrorNote } from "./ui";
 import StaffFacilitiesCard from "./StaffFacilitiesCard";
+import FacilityPicker from "./FacilityPicker";
 
 /**
  * The wrapper the Pool and Gym screens share: find this property's facilities
@@ -37,18 +38,7 @@ export default function FacilityScreen({ type, title, blurb, emptyText, children
   const facility = mine.find((f) => f.id === pickedId) || (mine.length === 1 ? mine[0] : null);
 
   if (!facility) {
-    return (
-      <>
-        <PageHead title={title} blurb="Which one?" />
-        <div className="menu-pick">
-          {mine.map((f) => (
-            <button key={f.id} className="pos-tile" onClick={() => setPickedId(f.id)}>
-              <span className="pt-name">{f.name}</span>
-            </button>
-          ))}
-        </div>
-      </>
-    );
+    return <FacilityPicker title={"Which " + type + " are you working?"} facilities={mine} onPick={setPickedId} />;
   }
 
   return (
