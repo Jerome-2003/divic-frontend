@@ -11,7 +11,9 @@ import WebsiteRequests from "./pages/WebsiteRequests";
 import Housekeeping from "./pages/Housekeeping";
 import Guests from "./pages/Guests";
 import Billing from "./pages/Billing";
-import PointOfSale from "./pages/PointOfSale";
+import Bar from "./pages/Bar";
+import Pool from "./pages/Pool";
+import Gym from "./pages/Gym";
 import Analytics from "./pages/Analytics";
 import Rates from "./pages/Rates";
 import Staff from "./pages/Staff";
@@ -60,7 +62,7 @@ export default function App() {
      otherwise bounce between "/" and its own home for ever. */
   const home = can("dashboard") ? <Dashboard />
     : can("rooms") ? <Navigate to="/housekeeping" replace />
-    : can("pos") ? <Navigate to="/pos" replace />
+    : can("pos") ? <Navigate to="/bar" replace />
     : <Empty heading="Nothing to show you yet"
         text="This account has no screens assigned. Ask your manager to check its role." />;
 
@@ -74,7 +76,9 @@ export default function App() {
         <Route path="/housekeeping" element={<Guarded module="rooms"><Housekeeping /></Guarded>} />
         <Route path="/guests"       element={<Guarded module="guests"><Guests /></Guarded>} />
         <Route path="/billing"      element={<Guarded module="billing"><Billing /></Guarded>} />
-        <Route path="/pos"          element={<Guarded module="pos"><PointOfSale /></Guarded>} />
+        <Route path="/bar"          element={<Guarded module="pos"><Bar /></Guarded>} />
+        <Route path="/pool"         element={<Guarded module="pos"><Pool /></Guarded>} />
+        <Route path="/gym"          element={<Guarded module="pos"><Gym /></Guarded>} />
         <Route path="/analytics"    element={<Guarded module="analytics"><Analytics /></Guarded>} />
         <Route path="/rates"        element={<Guarded module="rates"><Rates /></Guarded>} />
         <Route path="/staff"        element={<Guarded module="staff"><Staff /></Guarded>} />

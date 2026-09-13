@@ -131,6 +131,7 @@ export default function Dashboard() {
           loading={lf}
           error={ef}
           editable={can("facilities")}
+          canPrice={["manager", "owner"].includes(user.role)}
           onChanged={reloadFacilities}
           sub={can("facilities") ? "You can change these" : undefined}
         />
