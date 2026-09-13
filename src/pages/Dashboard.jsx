@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { LOCATIONS, STATUS_META } from "../lib/constants";
 import { naira, cap, today } from "../lib/format";
 import { PageHead, Metric, Card, Empty, Loading, ErrorNote, Chip } from "../components/ui";
+import ReportDuePrompt from "../components/ReportDuePrompt";
 import ContactLines from "../components/ContactLines";
 import FacilitiesCard from "../components/FacilitiesCard";
 
@@ -34,6 +35,8 @@ export default function Dashboard() {
   const occupancy = rooms.length ? Math.round((inHouse.length / rooms.length) * 100) : 0;
   const owing = inHouse.reduce((s, b) => s + Math.max(0, b.balance), 0);
   const seesMoney = can("analytics");
+  const dueApi = useApi(() => api.reportsDue(), [], { skip: !seesMoney });
+  const due = dueApi.data?.due || [];
 
   return (
     <>
@@ -42,6 +45,10 @@ export default function Dashboard() {
         blurb={loc.name + " · " + new Date().toLocaleDateString("en-NG",
           { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
       />
+
+      {/* Asked here as well as on Records, because a month end is easy to
+          miss and this is the page a manager opens first. */}
+      {seesMoney && due.length > 0 && <ReportDuePrompt due={due} />}
 
       {/* For a user who can see revenue, today's sales is the very first thing
           on the page — not something buried in Analytics. A receptionist gets

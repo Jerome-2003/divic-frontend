@@ -97,18 +97,20 @@ export const TOUR_STEPS = [
       "Take payment records cash, card or transfer — or sends a Paystack link.",
     ],
   },
-  {
+    {
     module: "pos",
     path: "/bar",
     label: "Bar",
-    blurb: "Tables and their orders, at the bar or the restaurant.",
+    blurb: "The till at a bar or the restaurant: today's orders down one side, the menu and the running bill on the other.",
     features: [
-      "Open a table when a guest sits down, then tap items onto their order.",
-      "Prices come from this bar's own menu — each one prices separately.",
-      "Settle to a room or take payment, then print the receipt.",
-      "Managers set what's on the menu with the Menu button.",
+      "Open a table when a guest sits down — with their room, if they are staying here.",
+      "Tap items onto the order; the plus and minus set how many.",
+      "Filter by Open, On a room or Paid, or search a table, room or surname.",
+      "Settle to one payment, or split the bill across people and methods.",
+      "Mark something unavailable the moment it runs out, without finding a manager.",
+      "Print the receipt, or Send it as text for the guest's phone.",
     ],
-    note: "Once settled there's no undo — only a manager can void a charge.",
+    note: "Prices come from this facility's menu and are read by the server — nothing here can set its own price. Only a manager can undo a bill after the money is taken.",
   },
   {
     module: "pos",

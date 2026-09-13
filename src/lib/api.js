@@ -61,6 +61,9 @@ export const api = {
 
   // The filed record of a month or a year, across the business.
   performanceReport: (params) => request("/api/analytics/report", { params }),
+  // Which closed months and years this person has not taken a copy of yet.
+  reportsDue: () => request("/api/analytics/report/due"),
+  markReportTaken: (kind, period) => request("/api/analytics/report/due", { method: "POST", body: { kind, period } }),
 
   // rooms + rates
   rooms: (location) => request("/api/rooms", { params: { location } }),
@@ -138,16 +141,31 @@ export const api = {
     request(`/api/facilities/${facilityId}/menu`, { method: "POST", body }),
   updateMenuItem: (facilityId, itemId, body) =>
     request(`/api/facilities/${facilityId}/menu/${itemId}`, { method: "PATCH", body }),
+  // Availability only, and open to whoever is working the bar — the person who
+  // knows the Star ran out is behind the counter, not in the office.
+  setItemAvailable: (facilityId, itemId, active) =>
+    request(`/api/facilities/${facilityId}/menu/${itemId}/availability`, { method: "PATCH", body: { active } }),
 
-  tabs: (facilityId, status) => request(`/api/facilities/${facilityId}/tabs`, { params: { status } }),
+  tabs: (facilityId, status, date) =>
+    request(`/api/facilities/${facilityId}/tabs`, { params: { status, date } }),
+  updateTab: (facilityId, tabId, body) =>
+    request(`/api/facilities/${facilityId}/tabs/${tabId}`, { method: "PATCH", body }),
   openTab: (facilityId, body) => request(`/api/facilities/${facilityId}/tabs`, { method: "POST", body }),
   addTabLine: (facilityId, tabId, body) =>
     request(`/api/facilities/${facilityId}/tabs/${tabId}/lines`, { method: "POST", body }),
   removeTabLine: (facilityId, tabId, lineId) =>
     request(`/api/facilities/${facilityId}/tabs/${tabId}/lines/${lineId}`, { method: "DELETE" }),
+  setTabLineQty: (facilityId, tabId, lineId, qty) =>
+    request(`/api/facilities/${facilityId}/tabs/${tabId}/lines/${lineId}`, { method: "PATCH", body: { qty } }),
   // Resolves with the tab plus everything the printed receipt needs.
   settleTab: (facilityId, tabId, body) =>
     request(`/api/facilities/${facilityId}/tabs/${tabId}/settle`, { method: "POST", body }),
+  // Undoing a bill after the money was taken — a manager's decision only.
+  voidTab: (facilityId, tabId, reason) =>
+    request(`/api/facilities/${facilityId}/tabs/${tabId}/void`, { method: "POST", body: { reason } }),
+  // One facility's own takings, for the manager working it.
+  facilitySales: (facilityId, from, to) =>
+    request(`/api/facilities/${facilityId}/sales`, { params: { from, to } }),
 
   // pool + gym: who came in, and what they paid
   facilityVisits: (facilityId, date) =>
