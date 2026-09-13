@@ -653,12 +653,32 @@ html[data-theme="dark"] .divic .room.available,html[data-theme="dark"] .divic .l
 .tab-card .tc-total{margin-top:auto;font-size:1.125rem;}
 .tab-card.empty{border-left-color:var(--line);}
 
-.menu-pick{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
-.menu-pick button{border:1px solid var(--line);border-radius:2px;background:var(--surface-raised);
-  padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:3px;min-height:56px;}
-.menu-pick button:hover{border-color:var(--gold);background:var(--gold-wash);}
-.menu-pick .mp-name{font-size:0.875rem;}
-.menu-pick .mp-price{font-size:0.75rem;color:var(--gold-deep);}
+/* "Which one are you working?" — the whole screen, not a control in a corner.
+   It is the only thing on the page and the only decision to make, so it sits
+   where the eye already is. Two small tiles in the top-left of an empty page
+   read as a stray widget rather than as the question being asked. */
+.picker{min-height:58vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:32px 16px;}
+.picker-h{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(1.5rem,3.4vw,2rem);
+  font-weight:300;margin:0;}
+.picker-sub{font-size:0.8125rem;color:var(--slate-soft);margin:10px 0 0;max-width:38ch;line-height:1.6;}
+.picker-grid{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:28px;}
+/* Large targets: this is chosen once at the start of a shift, often on a
+   handheld, and getting it wrong means working the wrong till. */
+.picker-tile{width:190px;min-height:150px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:11px;padding:22px 18px;background:var(--porcelain);
+  border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:3px;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);transition:border-color .12s,box-shadow .12s,transform .12s;}
+.picker-tile:hover{border-color:var(--gold);box-shadow:0 3px 10px rgba(0,0,0,.09);transform:translateY(-1px);}
+.picker-tile > svg{color:var(--gold-deep);}
+.pk-name{font-size:1rem;font-weight:500;line-height:1.3;}
+.pk-closed{font-size:0.6875rem;color:var(--wine);text-transform:uppercase;letter-spacing:.05em;}
+
+@media (max-width:520px){
+  .picker{min-height:auto;padding-top:20px;}
+  .picker-grid{width:100%;}
+  .picker-tile{width:100%;min-height:112px;}
+}
 
 .order-line{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line-soft);}
 .order-line .ol-name{flex:1;font-size:0.875rem;}

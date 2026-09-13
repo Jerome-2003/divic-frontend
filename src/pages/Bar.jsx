@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  ArrowLeft, Martini, Plus, UtensilsCrossed, Settings2, TrendingUp, X,
+  ArrowLeft, Plus, Settings2, TrendingUp, X,
 } from "lucide-react";
 import api from "../lib/api";
 import { useApi } from "../lib/useApi";
@@ -10,6 +10,7 @@ import { naira } from "../lib/format";
 import { PageHead, Field, Empty, Loading, ErrorNote, Note, Modal } from "../components/ui";
 import Receipt from "../components/Receipt";
 import StaffFacilitiesCard from "../components/StaffFacilitiesCard";
+import FacilityPicker from "../components/FacilityPicker";
 import OrderList from "../components/till/OrderList";
 import OrderWorkspace from "../components/till/OrderWorkspace";
 import MenuManager from "../components/till/MenuManager";
@@ -60,19 +61,7 @@ export default function Bar() {
   }
 
   if (!facility) {
-    return (
-      <>
-        <PageHead title="Bar" blurb="Which one are you working?" />
-        <div className="menu-pick">
-          {mine.map((f) => (
-            <button key={f.id} className="pos-tile" onClick={() => setPickedId(f.id)}>
-              {f.type === "restaurant" ? <UtensilsCrossed size={18} /> : <Martini size={18} />}
-              <span className="pt-name">{f.name}</span>
-            </button>
-          ))}
-        </div>
-      </>
-    );
+    return <FacilityPicker title="Which bar are you working?" facilities={mine} onPick={setPickedId} />;
   }
 
   return (
