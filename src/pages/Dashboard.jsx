@@ -20,10 +20,16 @@ export default function Dashboard() {
   const { data: facilities, loading: lf, error: ef, reload: reloadFacilities } =
     useApi(() => api.facilities(location), [location]);
 
-  const seesMoneyEarly = can("analytics");
-  // Fetched only for manager/owner — a receptionist never even triggers this
-  // request, which matters as much as the server-side gate on the route.
-  const { data: sales } = useApi(() => api.todaySales(location), [location], { skip: !seesMoneyEarly });
+  // Every hook this component uses is called here, above the early returns
+  // below. React counts them per render, so one placed after a `return` runs
+  // on some renders and not others — which is a crash on the render where the
+  // count changes, not a subtle bug.
+  const seesMoney = can("analytics");
+  // Fetched only for manager/owner — a receptionist never even triggers these
+  // requests, which matters as much as the server-side gate on the routes.
+  const { data: sales } = useApi(() => api.todaySales(location), [location], { skip: !seesMoney });
+  const dueApi = useApi(() => api.reportsDue(), [], { skip: !seesMoney });
+  const due = dueApi.data?.due || [];
 
   if (lr || lb) return <Loading label="Reading today's position" />;
   if (er || eb) return <ErrorNote>{er || eb}</ErrorNote>;
@@ -34,9 +40,6 @@ export default function Dashboard() {
   const notReady = rooms.filter((r) => ["dirty", "cleaning", "maintenance"].includes(r.status));
   const occupancy = rooms.length ? Math.round((inHouse.length / rooms.length) * 100) : 0;
   const owing = inHouse.reduce((s, b) => s + Math.max(0, b.balance), 0);
-  const seesMoney = can("analytics");
-  const dueApi = useApi(() => api.reportsDue(), [], { skip: !seesMoney });
-  const due = dueApi.data?.due || [];
 
   return (
     <>
