@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Plus, Trash2, Globe2, MessageCircleQuestion } from "lucide-react";
 import api from "../lib/api";
 import { useApi } from "../lib/useApi";
+import { uploadMedia, isLostUpload } from "../lib/uploadMedia";
 import { LOCATIONS } from "../lib/constants";
 import { prettyDateTime } from "../lib/format";
 import { PageHead, Card, Modal, Field, Row, Empty, Loading, ErrorNote, Note, Chip } from "../components/ui";
@@ -86,7 +87,10 @@ function Preview({ draft }) {
 
 function ContentForm({ editing, onClose, onSaved }) {
   const fileRef = useRef(null);
-  const [uploading, setUploading] = useState(false);
+  // null when idle, otherwise 0-100 — a video takes long enough that a bar is
+  // the difference between "working" and "frozen".
+  const [progress, setProgress] = useState(null);
+  const uploading = progress !== null;
   const [d, setD] = useState(editing || {
     key: "", type: "banner", location: "both", title: "", body: "",
     mediaType: "none", mediaUrl: "", caption: "",
@@ -103,26 +107,14 @@ function ContentForm({ editing, onClose, onSaved }) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    const wanted = d.mediaType === "video" ? "video/" : "image/";
-    if (!file.type.startsWith(wanted)) return setError(`Choose a ${d.mediaType} file.`);
-    if (file.size > 8 * 1024 * 1024) return setError("Media files must be 8 MB or smaller.");
-    setUploading(true); setError(null);
+    setProgress(0); setError(null);
     try {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          const result = await api.uploadContentMedia(String(reader.result), d.mediaType);
-          set("mediaUrl", result.mediaUrl);
-        } catch (err) {
-          setError(err.message || "The selected media could not be uploaded.");
-        } finally {
-          setUploading(false);
-        }
-      };
-      reader.onerror = () => { setError("The selected file could not be read from your device."); setUploading(false); };
-      reader.readAsDataURL(file);
+      const { mediaUrl } = await uploadMedia(file, d.mediaType, { onProgress: setProgress });
+      set("mediaUrl", mediaUrl);
     } catch (err) {
-      setError(err.message || "Could not read that media file."); setUploading(false);
+      setError(err.message || "The selected media could not be uploaded.");
+    } finally {
+      setProgress(null);
     }
   };
 
@@ -197,12 +189,23 @@ function ContentForm({ editing, onClose, onSaved }) {
                   onChange={(e) => set("mediaUrl", e.target.value)} />
                 <div style={{ display: "flex", gap: 8, marginTop: 7, alignItems: "center" }}>
                   <button type="button" className="btn btn-sm btn-quiet" onClick={() => fileRef.current?.click()} disabled={uploading}>
-                    {uploading ? "Reading file…" : "Choose from this device"}
+                    {uploading ? `Uploading… ${progress}%` : "Choose from this device"}
                   </button>
-                  {d.mediaUrl && (
+                  {d.mediaUrl && !uploading && (
                     <button type="button" className="btn btn-sm btn-quiet" onClick={() => set("mediaUrl", "")}>Remove media</button>
                   )}
                 </div>
+                {uploading && (
+                  <div className="up-bar" aria-hidden="true"><span style={{ width: progress + "%" }} /></div>
+                )}
+                {isLostUpload(d.mediaUrl) && (
+                  <div style={{ marginTop: 8 }}>
+                    <Note>
+                      This file was uploaded the old way and is no longer on the server, so the
+                      website shows nothing in its place. Choose it from this device again.
+                    </Note>
+                  </div>
+                )}
                 <input ref={fileRef} type="file" accept={d.mediaType === "video" ? "video/*" : "image/*"}
                   onChange={chooseMedia} style={{ display: "none" }} />
               </Field>
@@ -428,6 +431,9 @@ export default function Website() {
                       <td>
                         <div style={{ fontWeight: 500 }}>{item.title}</div>
                         <div className="mono" style={{ fontSize: "0.7188rem", color: "var(--slate-faint)" }}>{item.key}</div>
+                        {isLostUpload(item.mediaUrl) && (
+                          <div className="wc-lost">Its picture is missing — open this and upload it again.</div>
+                        )}
                       </td>
                       <td style={{ fontSize: "0.7812rem" }}>{item.type}</td>
                       <td style={{ fontSize: "0.7812rem" }}>

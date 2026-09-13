@@ -506,6 +506,13 @@ html[data-theme="dark"] { background:#161514; }
 .wc-media iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:2px;display:block;}
 .wc-caption{font-size:0.7188rem;color:var(--slate-faint);margin-top:6px;}
 .wc-banner .wc-caption{color:var(--on-dark-soft);}
+
+/* Uploading a video takes long enough that a spinner reads as a freeze. */
+.up-bar{height:4px;border-radius:2px;background:var(--line-soft);overflow:hidden;margin-top:8px;}
+.up-bar span{display:block;height:100%;background:var(--gold);transition:width .2s ease;}
+/* Media from before uploads went to Cloudinary: the record is fine, the file
+   behind it is not. */
+.wc-lost{font-size:0.7188rem;color:var(--wine);margin-top:4px;}
 @media (max-width:900px){ .wc-grid{grid-template-columns:1fr;} }
 
 /* A paid booking with no room. The loudest thing this system can show. */
