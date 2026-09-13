@@ -267,6 +267,8 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, user, o
           receipt={receiptFor(tab, facility, user?.name)}
           mode={printing === "bill" ? "bill" : "receipt"}
           reprint={printing === "reprint"}
+          // Both buttons that open this say "print", so it prints.
+          autoPrint
           onClose={() => setPrinting(null)}
         />
       )}
