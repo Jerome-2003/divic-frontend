@@ -8,10 +8,14 @@ import { Field, Empty, ErrorNote, Modal } from "../ui";
 /**
  * Manager-only: what this facility sells, and for how much.
  *
- * Pricing is a manager's decision, the same as room rates — a bartender sells
- * from the list, they do not write it. What a bartender *can* do is say an item
- * has run out, and that lives on the order screen where they are standing when
- * they find out, not in here.
+ * This is the only place the menu can be changed, and it opens for a manager
+ * or the owner alone. Everyone else sells from the list: they can add an item
+ * to a table, and nothing else. What a facility sells and for how much is a
+ * pricing decision, the same as room rates.
+ *
+ * Taking an item off is the same decision as its price and lives here with it.
+ * It stops the item being sold without removing it from receipts already
+ * printed, which still have to read correctly a month later.
  */
 export default function MenuManager({ facility, onClose }) {
   const { data: items, reload } = useApi(() => api.menu(facility.id, true), [facility.id]);
@@ -43,7 +47,7 @@ export default function MenuManager({ facility, onClose }) {
   return (
     <Modal
       title={facility.name + " menu"}
-      blurb="What this facility sells and for how much. Taking an item off the list keeps it on past receipts — whoever is working the bar can also mark something unavailable from the order screen when it runs out."
+      blurb="What this facility sells and for how much. Only you and the owner can change this; everyone else sells from the list. Taking an item off stops it being sold without removing it from past receipts."
       onClose={onClose}
       wide
       footer={<button className="btn btn-gold" onClick={onClose}>Done</button>}

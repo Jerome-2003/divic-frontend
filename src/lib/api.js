@@ -141,10 +141,6 @@ export const api = {
     request(`/api/facilities/${facilityId}/menu`, { method: "POST", body }),
   updateMenuItem: (facilityId, itemId, body) =>
     request(`/api/facilities/${facilityId}/menu/${itemId}`, { method: "PATCH", body }),
-  // Availability only, and open to whoever is working the bar — the person who
-  // knows the Star ran out is behind the counter, not in the office.
-  setItemAvailable: (facilityId, itemId, active) =>
-    request(`/api/facilities/${facilityId}/menu/${itemId}/availability`, { method: "PATCH", body: { active } }),
 
   tabs: (facilityId, status, date) =>
     request(`/api/facilities/${facilityId}/tabs`, { params: { status, date } }),

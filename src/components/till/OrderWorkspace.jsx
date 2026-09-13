@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Minus, Plus, Trash2, Receipt as ReceiptIcon, BedDouble, Ban, EyeOff, Eye, Search, Printer,
+  Minus, Plus, Trash2, Receipt as ReceiptIcon, BedDouble, Ban, Search, Printer,
 } from "lucide-react";
 import api from "../../lib/api";
 import { useOverride } from "../../lib/useOverride";
@@ -27,10 +27,14 @@ const CATEGORIES = [
  * commonest correction at a bar and tapping a tile three times is a poor way
  * to make it.
  *
- * An item marked unavailable stays on screen, greyed, instead of disappearing.
- * A bartender who has just marked the Star off needs to see that they did.
+ * Nothing here can change the menu. Whoever is working the till sells from the
+ * list; what is on it and what it costs is a manager's decision, the same as
+ * room rates. An item a manager has taken off stays on screen, greyed and
+ * unsellable, rather than disappearing — a tile that vanishes looks like a
+ * fault, and staff need to be able to tell a guest it is off rather than
+ * hunting for something that is no longer there.
  */
-export default function OrderWorkspace({ facility, tab, menu, isManager, user, onChanged, onSettled, onMenuChanged }) {
+export default function OrderWorkspace({ facility, tab, menu, isManager, user, onChanged, onSettled }) {
   const { runWithOverride, overrideDialog } = useOverride();
   const [busy, setBusy] = useState(false);
   const [settling, setSettling] = useState(false);
@@ -60,9 +64,6 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, user, o
 
   const removeLine = (line) =>
     guard(() => runWithOverride(() => api.removeTabLine(facility.id, tab.id, line.id)));
-
-  const toggleItem = (item) =>
-    guard(async () => { await api.setItemAvailable(facility.id, item.id, !item.active); await onMenuChanged(); });
 
   const settle = async (parts) => {
     setErr(null);
@@ -136,29 +137,17 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, user, o
                 <h4>{g.label}</h4>
                 <div className="wsm-grid">
                   {g.items.map((i) => (
-                    <div key={i.id} className={"mtile" + (i.active ? "" : " off")}>
-                      <button
-                        className="mtile-main"
-                        onClick={() => add(i)}
-                        disabled={busy || !i.active}
-                        title={i.active ? "Add " + i.name : i.name + " is marked unavailable"}
-                      >
-                        <span className="mt-name">{i.name}</span>
-                        <span className="mt-price mono">{naira(i.price)}</span>
-                        {!i.active && <span className="mt-off">Unavailable</span>}
-                      </button>
-                      {/* Whoever is working the bar can say what has run out.
-                          Price and name stay a manager's decision. */}
-                      <button
-                        className="mtile-toggle"
-                        onClick={() => toggleItem(i)}
-                        disabled={busy}
-                        aria-label={i.active ? "Mark " + i.name + " unavailable" : "Put " + i.name + " back on"}
-                        title={i.active ? "Mark unavailable" : "Put back on"}
-                      >
-                        {i.active ? <EyeOff size={13} /> : <Eye size={13} />}
-                      </button>
-                    </div>
+                    <button
+                      key={i.id}
+                      className={"mtile" + (i.active ? "" : " off")}
+                      onClick={() => add(i)}
+                      disabled={busy || !i.active}
+                      title={i.active ? "Add " + i.name : i.name + " is off the menu — a manager can put it back"}
+                    >
+                      <span className="mt-name">{i.name}</span>
+                      <span className="mt-price mono">{naira(i.price)}</span>
+                      {!i.active && <span className="mt-off">Off the menu</span>}
+                    </button>
                   ))}
                 </div>
               </div>

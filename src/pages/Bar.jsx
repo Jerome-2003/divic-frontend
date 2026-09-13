@@ -204,7 +204,6 @@ function Till({ facility, isManager, user, onSwitch }) {
                 isManager={isManager}
                 user={user}
                 onChanged={reload}
-                onMenuChanged={reloadMenu}
                 onSettled={async (r) => { setReceipt(r); await reload(); }}
               />
             </>
