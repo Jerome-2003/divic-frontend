@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Printer, X, Share2, Copy, Check } from "lucide-react";
 import { naira, prettyDateTime } from "../lib/format";
 import { LOCATIONS } from "../lib/constants";
@@ -89,14 +89,52 @@ const methodLabel = (m) =>
  * @param reprint  A second copy of a receipt already given, marked as such so
  *                 two pieces of paper for one order cannot be mistaken for two
  *                 orders when the drawer is counted.
+ * @param autoPrint Opens the printer dialog as soon as the paper is ready.
+ *                 Every button that leads here says "print", so it prints —
+ *                 showing the page and making somebody find a second Print
+ *                 button is a promise the label did not make. Cancelling the
+ *                 dialog leaves the preview up, so Send and a second attempt
+ *                 are both still there.
  */
-export default function Receipt({ receipt, mode = "receipt", reprint = false, onClose }) {
+export default function Receipt({ receipt, mode = "receipt", reprint = false, autoPrint = false, onClose }) {
+  const logoRef = useRef(null);
+  const printed = useRef(false);
+
   // Escape closes it; the print dialog itself is modal above this.
   useEffect(() => {
     const esc = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", esc);
     return () => window.removeEventListener("keydown", esc);
   }, [onClose]);
+
+  useEffect(() => {
+    if (!autoPrint || !receipt || printed.current) return undefined;
+    let cancelled = false;
+
+    /**
+     * The logo has to be decoded before the dialog opens or the printed page
+     * goes out without it — the browser renders the print view from what is on
+     * screen at that instant, and a half-loaded image is simply missing. Two
+     * animation frames after that let the layout settle.
+     */
+    const go = async () => {
+      const img = logoRef.current;
+      try {
+        if (img && !img.complete) await img.decode();
+      } catch {
+        // A logo that will not load is not a reason to withhold the bill.
+      }
+      if (cancelled) return;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (cancelled || printed.current) return;
+        printed.current = true;
+        window.print();
+      }));
+    };
+    go();
+
+    return () => { cancelled = true; };
+  }, [autoPrint, receipt]);
 
   if (!receipt) return null;
   const loc = LOCATIONS[receipt.location] || {};
@@ -110,7 +148,7 @@ export default function Receipt({ receipt, mode = "receipt", reprint = false, on
             <h3>{isBill ? "Bill for " + receipt.tableName : "Receipt " + receipt.receiptNo}</h3>
             <p>
               {isBill
-                ? "Nothing has been paid yet — print this to show the guest what they owe."
+                ? "Nothing has been paid yet. Hand this to the guest, then take the payment."
                 : receipt.tableName + " · " + receipt.facility}
             </p>
           </div>
@@ -122,7 +160,7 @@ export default function Receipt({ receipt, mode = "receipt", reprint = false, on
         {/* The only part that reaches paper — see .receipt-paper in theme.css. */}
         <div className="receipt-paper" id="receipt-paper">
           <div className="receipt-brand">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="54" height="54" />
+            <img ref={logoRef} src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="54" height="54" />
             <div className="receipt-name">Divic Exclusive Hotels</div>
             <div className="receipt-sub">{loc.name || receipt.location}</div>
             {loc.address && <div className="receipt-sub">{loc.address}</div>}
@@ -213,7 +251,7 @@ export default function Receipt({ receipt, mode = "receipt", reprint = false, on
           <button className="btn" onClick={onClose}>Close</button>
           <ShareButton receipt={receipt} locName={loc.name} isBill={isBill} />
           <button className="btn btn-gold" onClick={() => window.print()}>
-            <Printer size={15} /> {isBill ? "Print the bill" : "Print"}
+            <Printer size={15} /> {autoPrint ? "Print again" : isBill ? "Print the bill" : "Print"}
           </button>
         </div>
       </div>

@@ -219,7 +219,8 @@ function Till({ facility, isManager, user, onSwitch }) {
         <MenuManager facility={facility} onClose={() => { setEditingMenu(false); reloadMenu(); }} />
       )}
 
-      {receipt && <Receipt receipt={receipt} onClose={() => setReceipt(null)} />}
+      {/* "Settle & print" is what was pressed, so the dialog opens by itself. */}
+      {receipt && <Receipt receipt={receipt} autoPrint onClose={() => setReceipt(null)} />}
       {overrideDialog}
     </>
   );
