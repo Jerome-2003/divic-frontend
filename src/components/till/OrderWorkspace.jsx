@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Minus, Plus, Trash2, Receipt as ReceiptIcon, BedDouble, Ban, EyeOff, Eye, Search,
+  Minus, Plus, Trash2, Receipt as ReceiptIcon, BedDouble, Ban, EyeOff, Eye, Search, Printer,
 } from "lucide-react";
 import api from "../../lib/api";
 import { useOverride } from "../../lib/useOverride";
@@ -8,6 +8,8 @@ import { naira, prettyDateTime } from "../../lib/format";
 import { Field, ErrorNote, Note, Empty, Modal, ConfirmModal } from "../ui";
 import SettleDialog from "../SettleDialog";
 import SplitDialog from "./SplitDialog";
+import Receipt from "../Receipt";
+import receiptFor from "./receiptFor";
 
 const CATEGORIES = [
   { key: "drink", label: "Drinks" },
@@ -28,13 +30,15 @@ const CATEGORIES = [
  * An item marked unavailable stays on screen, greyed, instead of disappearing.
  * A bartender who has just marked the Star off needs to see that they did.
  */
-export default function OrderWorkspace({ facility, tab, menu, isManager, onChanged, onSettled, onMenuChanged }) {
+export default function OrderWorkspace({ facility, tab, menu, isManager, user, onChanged, onSettled, onMenuChanged }) {
   const { runWithOverride, overrideDialog } = useOverride();
   const [busy, setBusy] = useState(false);
   const [settling, setSettling] = useState(false);
   const [splitting, setSplitting] = useState(false);
   const [attaching, setAttaching] = useState(false);
   const [voiding, setVoiding] = useState(false);
+  // A printed copy on screen: the bill before payment, or a second receipt after.
+  const [printing, setPrinting] = useState(null);
   const [err, setErr] = useState(null);
 
   const settled = tab.status === "settled";
@@ -112,7 +116,11 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, onChang
       <ErrorNote>{err}</ErrorNote>
 
       {settled ? (
-        <SettledOrder tab={tab} isManager={isManager} onVoid={() => setVoiding(true)} busy={busy} />
+        <SettledOrder
+          tab={tab} isManager={isManager} busy={busy}
+          onVoid={() => setVoiding(true)}
+          onReprint={() => setPrinting("reprint")}
+        />
       ) : (
         <div className="ws-body">
           <section className="ws-menu">
@@ -197,6 +205,14 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, onChang
                   onClick={() => setSplitting(true)} disabled={busy}>
                   Split this bill
                 </button>
+                {/* The bill goes out before the money comes in. A guest asked
+                    to pay a figure they have never seen written down is a
+                    guest who queries it, and a "receipt" printed for money not
+                    yet taken is the paper that gets waved at a manager later. */}
+                <button className="btn" style={{ width: "100%", marginTop: 8 }}
+                  onClick={() => setPrinting("bill")} disabled={busy}>
+                  <Printer size={15} /> Print the bill first
+                </button>
               </>
             )}
           </section>
@@ -257,13 +273,22 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, onChang
         </ConfirmModal>
       )}
 
+      {printing && (
+        <Receipt
+          receipt={receiptFor(tab, facility, user?.name)}
+          mode={printing === "bill" ? "bill" : "receipt"}
+          reprint={printing === "reprint"}
+          onClose={() => setPrinting(null)}
+        />
+      )}
+
       {overrideDialog}
     </div>
   );
 }
 
 /** A closed order: what it was, how it was settled, and the manager's undo. */
-function SettledOrder({ tab, isManager, onVoid, busy }) {
+function SettledOrder({ tab, isManager, onVoid, onReprint, busy }) {
   return (
     <div className="ws-settled">
       {tab.voided && (
@@ -308,11 +333,20 @@ function SettledOrder({ tab, isManager, onVoid, busy }) {
         Receipt {tab.receiptNo} · settled by {tab.settledBy || "—"} at {prettyDateTime(tab.settledAt)}
       </p>
 
-      {isManager && !tab.voided && (
-        <button className="btn" style={{ marginTop: 16 }} onClick={onVoid} disabled={busy}>
-          <Ban size={14} /> Void this order
-        </button>
-      )}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 16 }}>
+        {/* The receipt used to exist only in the moment the table closed. A
+            guest who comes back for it an hour later is the ordinary case. */}
+        {!tab.voided && (
+          <button className="btn" onClick={onReprint} disabled={busy}>
+            <Printer size={14} /> Print the receipt again
+          </button>
+        )}
+        {isManager && !tab.voided && (
+          <button className="btn" onClick={onVoid} disabled={busy}>
+            <Ban size={14} /> Void this order
+          </button>
+        )}
+      </div>
     </div>
   );
 }
