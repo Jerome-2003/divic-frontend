@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, CalendarDays, ConciergeBell, Globe, Sparkles, Users,
   Receipt, Martini, TrendingUp, Tags, UserCog, ScrollText, Globe2, LogOut,
-  Moon, Sun, ListTodo, HelpCircle,
+  Moon, Sun, ListTodo, HelpCircle, Waves, Dumbbell,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -20,7 +20,9 @@ const ITEMS = [
   { module: "rooms",     label: "Housekeeping",     path: "/housekeeping", icon: Sparkles },
   { module: "guests",    label: "Guests",           path: "/guests",       icon: Users },
   { module: "billing",   label: "Billing",          path: "/billing",      icon: Receipt },
-  { module: "pos",       label: "Point of sale",    path: "/pos",          icon: Martini },
+  { module: "pos",       label: "Bar",              path: "/bar",          icon: Martini },
+  { module: "pos",       label: "Pool",             path: "/pool",         icon: Waves },
+  { module: "pos",       label: "Gym",              path: "/gym",          icon: Dumbbell },
   { module: "analytics", label: "Analytics",        path: "/analytics",    icon: TrendingUp },
   { module: "rates",     label: "Rates",            path: "/rates",        icon: Tags },
   { module: "staff",     label: "Staff",            path: "/staff",        icon: UserCog },
@@ -61,7 +63,7 @@ export default function Sidebar() {
               key={i.path}
               to={i.path}
               end={i.path === "/"}
-              data-tour={"nav-" + i.module}
+              data-tour={"nav-" + i.path}
               className={({ isActive }) => "nav-item" + (isActive ? " on" : "")}
             >
               <Icon size={16} strokeWidth={1.6} /> {i.label}

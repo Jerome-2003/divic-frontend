@@ -116,6 +116,43 @@ export const api = {
   // Managers and owners only — the server refuses this from facility staff.
   voidFacilityCharge: (facilityId, chargeId, reason) =>
     request(`/api/facilities/${facilityId}/charges/${chargeId}/void`, { method: "POST", body: { reason } }),
+  setFacilityEntryFee: (id, status, entryFee) =>
+    request(`/api/facilities/${id}`, { method: "PATCH", body: { status, entryFee } }),
+
+  // bar + restaurant: the menu, and each table's running order
+  menu: (facilityId, all) => request(`/api/facilities/${facilityId}/menu`, { params: { all } }),
+  addMenuItem: (facilityId, body) =>
+    request(`/api/facilities/${facilityId}/menu`, { method: "POST", body }),
+  updateMenuItem: (facilityId, itemId, body) =>
+    request(`/api/facilities/${facilityId}/menu/${itemId}`, { method: "PATCH", body }),
+
+  tabs: (facilityId, status) => request(`/api/facilities/${facilityId}/tabs`, { params: { status } }),
+  openTab: (facilityId, body) => request(`/api/facilities/${facilityId}/tabs`, { method: "POST", body }),
+  addTabLine: (facilityId, tabId, body) =>
+    request(`/api/facilities/${facilityId}/tabs/${tabId}/lines`, { method: "POST", body }),
+  removeTabLine: (facilityId, tabId, lineId) =>
+    request(`/api/facilities/${facilityId}/tabs/${tabId}/lines/${lineId}`, { method: "DELETE" }),
+  // Resolves with the tab plus everything the printed receipt needs.
+  settleTab: (facilityId, tabId, body) =>
+    request(`/api/facilities/${facilityId}/tabs/${tabId}/settle`, { method: "POST", body }),
+
+  // pool + gym: who came in, and what they paid
+  facilityVisits: (facilityId, date) =>
+    request(`/api/facilities/${facilityId}/visits`, { params: { date } }),
+  logFacilityVisit: (facilityId, body) =>
+    request(`/api/facilities/${facilityId}/visits`, { method: "POST", body }),
+  endFacilityVisit: (facilityId, visitId) =>
+    request(`/api/facilities/${facilityId}/visits/${visitId}/leave`, { method: "POST" }),
+
+  // gym subscriptions
+  membershipPlans: (facilityId) => request(`/api/facilities/${facilityId}/plans`),
+  addMembershipPlan: (facilityId, body) =>
+    request(`/api/facilities/${facilityId}/plans`, { method: "POST", body }),
+  updateMembershipPlan: (facilityId, planId, body) =>
+    request(`/api/facilities/${facilityId}/plans/${planId}`, { method: "PATCH", body }),
+  memberships: (facilityId) => request(`/api/facilities/${facilityId}/memberships`),
+  addMembership: (facilityId, body) =>
+    request(`/api/facilities/${facilityId}/memberships`, { method: "POST", body }),
 
   // analytics + audit
   summary: (location, days) => request("/api/analytics/summary", { params: { location, days } }),

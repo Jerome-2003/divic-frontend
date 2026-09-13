@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Waves, Martini, Dumbbell, UtensilsCrossed } from "lucide-react";
 import api from "../lib/api";
 import { FACILITY_STATUS_META } from "../lib/constants";
+import { naira } from "../lib/format";
 import { Card, Chip, Loading, Empty, ErrorNote } from "./ui";
 
 const TYPE_ICON = {
@@ -17,10 +18,11 @@ const TYPE_ICON = {
  * off — "why is the pool shut" is the question staff actually get asked, and a
  * note on an open facility has nothing to say.
  */
-function FacilityRow({ facility, editable, onChanged }) {
+function FacilityRow({ facility, editable, canPrice, onChanged }) {
   const Icon = TYPE_ICON[facility.type] || Martini;
   const meta = FACILITY_STATUS_META[facility.status] || FACILITY_STATUS_META.open;
   const [note, setNote] = useState(facility.statusNote || "");
+  const [fee, setFee] = useState(String(facility.entryFee ?? 0));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
@@ -37,7 +39,25 @@ function FacilityRow({ facility, editable, onChanged }) {
     }
   };
 
+  const saveFee = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await api.setFacilityEntryFee(facility.id, facility.status, Number(fee));
+      await onChanged?.();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const noteChanged = note.trim() !== (facility.statusNote || "").trim();
+  // Nobody gets into the pool or the gym until this is set — the server refuses
+  // a visit with no fee — so it is shown here rather than buried behind an edit
+  // mode, and only to the people allowed to set a price.
+  const showFee = canPrice && ["pool", "gym"].includes(facility.type);
+  const feeChanged = Number(fee) !== Number(facility.entryFee ?? 0);
 
   return (
     <div className="fac-row">
@@ -47,7 +67,32 @@ function FacilityRow({ facility, editable, onChanged }) {
         <div className="fac-meta">
           {facility.openingHours || "Hours not set"}
           {facility.sellsItems && " · takes sales"}
+          {["pool", "gym"].includes(facility.type) && (
+            facility.entryFee > 0
+              ? " · entry " + naira(facility.entryFee)
+              : " · no entry fee set"
+          )}
         </div>
+
+        {showFee && (
+          <div style={{ display: "flex", gap: 8, marginTop: 9, alignItems: "center" }}>
+            <label htmlFor={"fee-" + facility.id} style={{ fontSize: "0.7188rem", color: "var(--slate-faint)" }}>
+              Entry fee
+            </label>
+            <input
+              id={"fee-" + facility.id}
+              value={fee}
+              disabled={busy}
+              inputMode="numeric"
+              onChange={(e) => setFee(e.target.value.replace(/[^0-9]/g, ""))}
+              onKeyDown={(e) => e.key === "Enter" && feeChanged && saveFee()}
+              style={{ fontSize: "0.7812rem", padding: "6px 9px", width: 110 }}
+            />
+            <button className="btn btn-sm" disabled={busy || !feeChanged} onClick={saveFee}>
+              Save
+            </button>
+          </div>
+        )}
         {!editable && facility.statusNote && <div className="fac-note">{facility.statusNote}</div>}
         {error && <div style={{ marginTop: 8 }}><ErrorNote>{error}</ErrorNote></div>}
 
@@ -100,7 +145,7 @@ function FacilityRow({ facility, editable, onChanged }) {
  * staff — who have no dashboard — can still close their own bar.
  */
 export default function FacilitiesCard({
-  facilities, loading, error, editable, onChanged, title = "Facilities", sub,
+  facilities, loading, error, editable, canPrice, onChanged, title = "Facilities", sub,
 }) {
   return (
     <Card title={title} sub={sub}>
@@ -112,7 +157,7 @@ export default function FacilitiesCard({
         <Empty heading="No facilities listed" text="Nothing has been set up for this property yet." />
       ) : (
         facilities.map((f) => (
-          <FacilityRow key={f.id} facility={f} editable={editable} onChanged={onChanged} />
+          <FacilityRow key={f.id} facility={f} editable={editable} canPrice={canPrice} onChanged={onChanged} />
         ))
       )}
     </Card>

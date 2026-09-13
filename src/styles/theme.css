@@ -584,3 +584,65 @@ html[data-theme="dark"] .divic .room.available,html[data-theme="dark"] .divic .l
 @media (max-width:640px){
   .tour-card{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:60vh;}
 }
+/* ---- Facility screens: bar tables, pool/gym logs ---- */
+.settle-choice{display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:14px;}
+.settle-choice .pos-tile{min-height:56px;}
+.settle-choice .pos-tile span{display:flex;flex-direction:column;gap:2px;text-align:left;}
+.settle-choice .pos-tile em{font-style:normal;font-size:0.75rem;color:var(--slate-faint);}
+@media (max-width:640px){ .settle-choice{grid-template-columns:1fr;} }
+
+.tab-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));}
+.tab-card{text-align:left;background:var(--porcelain);border:1px solid var(--line);
+  border-left:3px solid var(--gold);border-radius:2px;padding:14px 16px;display:flex;
+  flex-direction:column;gap:6px;min-height:96px;transition:background .12s;}
+.tab-card:hover{background:var(--gold-wash);}
+.tab-card .tc-name{font-size:1.0625rem;font-weight:500;}
+.tab-card .tc-meta{font-size:0.75rem;color:var(--slate-faint);}
+.tab-card .tc-total{margin-top:auto;font-size:1.125rem;}
+.tab-card.empty{border-left-color:var(--line);}
+
+.menu-pick{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+.menu-pick button{border:1px solid var(--line);border-radius:2px;background:var(--surface-raised);
+  padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:3px;min-height:56px;}
+.menu-pick button:hover{border-color:var(--gold);background:var(--gold-wash);}
+.menu-pick .mp-name{font-size:0.875rem;}
+.menu-pick .mp-price{font-size:0.75rem;color:var(--gold-deep);}
+
+.order-line{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line-soft);}
+.order-line .ol-name{flex:1;font-size:0.875rem;}
+.order-line .ol-qty{font-size:0.8125rem;color:var(--slate-soft);}
+
+/* ---- Printed receipt ---- */
+.receipt-shell{max-width:420px;}
+.receipt-paper{background:#FFFFFF;color:#1A1A1A;padding:22px 24px;margin:0 auto;width:100%;
+  max-width:340px;font-family:'Inter',system-ui,sans-serif;}
+.receipt-brand{text-align:center;}
+.receipt-brand img{display:block;margin:0 auto 8px;}
+.receipt-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.25rem;letter-spacing:.02em;}
+.receipt-sub{font-size:0.6875rem;color:#5A5A5A;line-height:1.5;}
+.receipt-rule{height:1px;background:#D9CFB6;margin:12px 0;}
+.receipt-meta{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-size:0.6875rem;}
+.receipt-meta span:nth-child(odd){color:#6B6664;}
+.receipt-meta span:nth-child(even){text-align:right;}
+.receipt-lines{width:100%;border-collapse:collapse;font-size:0.75rem;}
+.receipt-lines td{padding:4px 0;vertical-align:top;}
+.receipt-lines .ri-qty{width:32px;color:#6B6664;}
+.receipt-lines .ri-amt{text-align:right;white-space:nowrap;}
+.receipt-total{display:flex;justify-content:space-between;align-items:baseline;font-size:1rem;}
+.receipt-total strong{font-size:1.25rem;}
+.receipt-settle{margin-top:6px;font-size:0.6875rem;color:#5A5A5A;text-align:right;}
+.receipt-foot{text-align:center;font-size:0.75rem;}
+
+/* Printing sends the receipt alone to paper. Everything else in the app —
+   the sidebar, the modal chrome, the buttons that triggered this — is hidden
+   rather than restyled, because a print stylesheet that tries to lay out the
+   whole app is a stylesheet nobody can keep correct. */
+@media print{
+  body *{visibility:hidden !important;}
+  #receipt-paper, #receipt-paper *{visibility:visible !important;}
+  #receipt-paper{position:absolute;left:0;top:0;width:80mm;max-width:80mm;padding:4mm;}
+  .no-print{display:none !important;}
+  .scrim{position:static;background:none;padding:0;overflow:visible;}
+  .modal{box-shadow:none;border:0;max-width:none;}
+  @page{margin:6mm;}
+}
