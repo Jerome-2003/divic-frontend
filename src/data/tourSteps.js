@@ -107,11 +107,10 @@ export const TOUR_STEPS = [
       "Tap items onto the order; the plus and minus set how many.",
       "Filter by Open, On a room or Paid, or search a table, room or surname.",
       "Settle to one payment, or split the bill across people and methods.",
-      "Mark something unavailable the moment it runs out, without finding a manager.",
       "Print the bill on headed paper before they pay, and the receipt after — both carry the logo.",
       "A receipt can be printed again later, or sent as text for the guest's phone.",
     ],
-    note: "Prices come from this facility's menu and are read by the server — nothing here can set its own price. Only a manager can undo a bill after the money is taken.",
+    note: "The menu is a manager's to write — items and prices alike. Everyone else sells from it. Only a manager can undo a bill after the money is taken.",
   },
   {
     module: "pos",

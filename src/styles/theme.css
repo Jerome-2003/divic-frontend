@@ -775,17 +775,17 @@ html[data-theme="dark"] .divic .room.available,html[data-theme="dark"] .divic .l
   color:var(--slate-faint);font-weight:500;margin:0 0 8px;}
 .wsm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px;}
 /* A tile, not a row: this is tapped with a thumb. */
-.mtile{position:relative;border:1px solid var(--line);border-radius:3px;background:var(--porcelain);
-  overflow:hidden;transition:border-color .12s;}
-.mtile:hover{border-color:var(--gold-border);}
-.mtile.off{opacity:.55;}
-.mtile-main{display:flex;flex-direction:column;gap:3px;width:100%;text-align:left;padding:11px 30px 11px 11px;
-  min-height:64px;justify-content:center;}
+.mtile{display:flex;flex-direction:column;gap:3px;width:100%;text-align:left;justify-content:center;
+  border:1px solid var(--line);border-radius:3px;background:var(--porcelain);
+  padding:11px;min-height:64px;transition:border-color .12s;}
+.mtile:hover:not(:disabled){border-color:var(--gold-border);}
+/* An item a manager has taken off stays visible and unsellable. A tile that
+   vanished would look like a fault, and staff need to be able to tell a guest
+   it is off rather than hunt for something no longer there. */
+.mtile.off{opacity:.5;cursor:not-allowed;}
 .mt-name{font-size:0.8125rem;line-height:1.35;}
 .mt-price{font-size:0.75rem;color:var(--gold-deep);}
 .mt-off{font-size:0.625rem;color:var(--wine);text-transform:uppercase;letter-spacing:.05em;}
-.mtile-toggle{position:absolute;top:4px;right:4px;padding:5px;color:var(--slate-faint);border-radius:2px;}
-.mtile-toggle:hover{color:var(--slate);background:var(--line-soft);}
 
 .ws-cart{background:var(--porcelain);border:1px solid var(--line);border-radius:3px;padding:13px;}
 .ws-cart h4,.till-h4{font-size:0.6875rem;letter-spacing:.1em;text-transform:uppercase;
