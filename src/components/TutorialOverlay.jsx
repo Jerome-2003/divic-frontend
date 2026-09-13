@@ -21,12 +21,12 @@ export default function TutorialOverlay() {
     if (!active || !step) return undefined;
 
     const measure = () => {
-      const el = document.querySelector(`[data-tour="nav-${step.path}"]`);
+      const el = document.querySelector(`[data-tour="nav-${step.anchor || step.path}"]`);
       setRect(el ? el.getBoundingClientRect() : null);
     };
     // On the mobile layout the nav is a horizontally-scrolling strip, so the
     // target for this step may be scrolled out of view entirely.
-    const el = document.querySelector(`[data-tour="nav-${step.path}"]`);
+    const el = document.querySelector(`[data-tour="nav-${step.anchor || step.path}"]`);
     el?.scrollIntoView({ block: "nearest", inline: "nearest" });
     measure();
     // The sidebar becomes a horizontal top bar below the layout's mobile

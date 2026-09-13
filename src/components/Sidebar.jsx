@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
-  LayoutDashboard, CalendarDays, ConciergeBell, Globe, Sparkles, Users,
-  Receipt, Martini, TrendingUp, Tags, UserCog, ScrollText, Globe2, LogOut,
+  LayoutDashboard, CalendarDays, ConciergeBell, Sparkles, Users,
+  Martini, TrendingUp, Tags, UserCog, ScrollText, Globe2, LogOut, FileText,
   Moon, Sun, ListTodo, HelpCircle, Waves, Dumbbell,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -15,15 +15,16 @@ import { ConfirmModal } from "./ui";
 const ITEMS = [
   { module: "dashboard", label: "Dashboard",        path: "/",             icon: LayoutDashboard },
   { module: "bookings",  label: "Bookings",         path: "/bookings",     icon: CalendarDays },
+  // Website requests and bills are tabs of the front desk, not pages of their
+  // own — the desk does all three jobs at the same counter.
   { module: "frontdesk", label: "Front desk",       path: "/front-desk",   icon: ConciergeBell },
-  { module: "bookings",  label: "Website requests", path: "/requests",     icon: Globe },
   { module: "rooms",     label: "Housekeeping",     path: "/housekeeping", icon: Sparkles },
   { module: "guests",    label: "Guests",           path: "/guests",       icon: Users },
-  { module: "billing",   label: "Billing",          path: "/billing",      icon: Receipt },
   { module: "pos",       label: "Bar",              path: "/bar",          icon: Martini },
   { module: "pos",       label: "Pool",             path: "/pool",         icon: Waves },
   { module: "pos",       label: "Gym",              path: "/gym",          icon: Dumbbell },
   { module: "analytics", label: "Analytics",        path: "/analytics",    icon: TrendingUp },
+  { module: "analytics", label: "Records",          path: "/records",      icon: FileText },
   { module: "rates",     label: "Rates",            path: "/rates",        icon: Tags },
   { module: "staff",     label: "Staff",            path: "/staff",        icon: UserCog },
   { module: "content",   label: "Website",          path: "/website",      icon: Globe2 },
@@ -67,7 +68,7 @@ export default function Sidebar() {
               className={({ isActive }) => "nav-item" + (isActive ? " on" : "")}
             >
               <Icon size={16} strokeWidth={1.6} /> {i.label}
-              {i.path === "/requests" && newWebsiteRequests > 0 && (
+              {i.path === "/front-desk" && newWebsiteRequests > 0 && (
                 <i className="notif-dot" aria-label={newWebsiteRequests + " new"} />
               )}
             </NavLink>

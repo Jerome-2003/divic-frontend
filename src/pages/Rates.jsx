@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { LOCATIONS } from "../lib/constants";
 import { naira, cap } from "../lib/format";
 import { PageHead, Card, Loading, ErrorNote, Note } from "../components/ui";
+import DiscountsCard from "../components/DiscountsCard";
 
 export default function Rates() {
   const { location, user } = useAuth();
@@ -38,7 +39,7 @@ export default function Rates() {
   return (
     <>
       <PageHead title="Rates"
-        blurb={"Nightly rates at " + LOCATIONS[location].name + ". Each property keeps its own pricing."}>
+        blurb={"Nightly rates and offers at " + LOCATIONS[location].name + ". Each property keeps its own pricing."}>
         {editable && (draft ? (
           <div style={{ display: "flex", gap: 8 }}>
             <button className="btn" onClick={() => setDraft(null)} disabled={saving}>Discard</button>
@@ -84,6 +85,13 @@ export default function Rates() {
             ? "Changing a rate affects new bookings only. Bookings already taken keep the rate they were quoted."
             : "Rates are set by a manager or the owner. You can see them here but not change them."}
         </Note>
+      </div>
+
+      {/* Offers are their own section, not a column in the table above. On the
+          website they are read as their own thing, and here a manager turns
+          them on and off without touching a published rate. */}
+      <div style={{ marginTop: 24 }}>
+        <DiscountsCard location={location} typeOrder={data.typeOrder} editable={editable} />
       </div>
     </>
   );

@@ -59,6 +59,9 @@ export const api = {
     request("/api/auth/change-password", { method: "POST", body: { currentPassword, newPassword } }),
   markTourSeen: () => request("/api/auth/me/tour-seen", { method: "PUT" }),
 
+  // The filed record of a month or a year, across the business.
+  performanceReport: (params) => request("/api/analytics/report", { params }),
+
   // rooms + rates
   rooms: (location) => request("/api/rooms", { params: { location } }),
   setRoomStatus: (id, status, note) => request(`/api/rooms/${id}/status`, { method: "PATCH", body: { status, note } }),
@@ -66,6 +69,13 @@ export const api = {
     request("/api/rooms/availability", { params: { location, checkIn, checkOut, roomType } }),
   rates: (location) => request("/api/rooms/rates", { params: { location } }),
   saveRates: (location, prices) => request("/api/rooms/rates", { method: "PUT", body: { location, prices } }),
+
+  // Offers against those rates. Shown to guests in their own right on the
+  // website; taken off the price by the server at the moment of booking.
+  discounts: (location) => request("/api/rooms/discounts", { params: { location } }),
+  createDiscount: (location, body) => request("/api/rooms/discounts", { method: "POST", params: { location }, body }),
+  updateDiscount: (location, id, body) => request(`/api/rooms/discounts/${id}`, { method: "PATCH", params: { location }, body }),
+  deleteDiscount: (location, id) => request(`/api/rooms/discounts/${id}`, { method: "DELETE", params: { location } }),
 
   // bookings
   bookings: (location, params) => request("/api/bookings", { params: { location, ...params } }),
@@ -176,7 +186,9 @@ export const api = {
   createContent: (body) => request("/api/content", { method: "POST", body }),
   updateContent: (id, body) => request(`/api/content/${id}`, { method: "PATCH", body }),
   deleteContent: (id) => request(`/api/content/${id}`, { method: "DELETE" }),
-  uploadContentMedia: (dataUrl, mediaType) => request("/api/content/media-upload", { method: "POST", body: { dataUrl, mediaType } }),
+  // A one-time permission to upload one file straight to Cloudinary. The file
+  // itself never comes through here — see lib/uploadMedia.js.
+  mediaUploadSignature: (mediaType) => request("/api/content/media-signature", { method: "POST", body: { mediaType } }),
 
   // what the website's FAQ assistant is allowed to know
   faqEntries: () => request("/api/content/faq/all"),

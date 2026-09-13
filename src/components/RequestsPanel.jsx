@@ -5,14 +5,21 @@ import { useApi } from "../lib/useApi";
 import { useAuth } from "../context/AuthContext";
 import { useNotifications, WEBSITE_REQUEST_TYPES } from "../context/NotificationsContext";
 import { naira, cap, telUrl, prettyDateTime } from "../lib/format";
-import { PageHead, Card, Empty, Loading, ErrorNote, Chip, Note, ConfirmModal } from "../components/ui";
+import { Card, Empty, Loading, ErrorNote, Chip, Note, ConfirmModal } from "./ui";
 
 /**
- * Requests lodged by the public website. They hold no room until a receptionist
- * accepts one — that is what stops a stranger on the internet from taking a
- * room out from under a walk-in standing at the desk.
+ * Requests lodged by the public website, shown on the front desk alongside
+ * arrivals and bills — the desk handles all three in the same breath, and
+ * having them on three separate screens meant a request could sit unseen while
+ * someone worked the arrivals list.
+ *
+ * They are drawn deliberately unlike a booking. A request holds no room: it is
+ * a stranger on the internet asking, not a guest with a key waiting. Every row
+ * carries the website mark and the amber edge so nobody at the desk can mistake
+ * one for a confirmed arrival — which is the whole reason they were worth
+ * separating visually rather than simply listing together.
  */
-export default function WebsiteRequests() {
+export default function RequestsPanel() {
   const { location } = useAuth();
   const { markTypesRead } = useNotifications();
 
@@ -43,10 +50,7 @@ export default function WebsiteRequests() {
 
   return (
     <>
-      <PageHead title="Website requests"
-        blurb="Requests from the hotel website. Accepting one assigns a real room and creates the booking." />
-
-      <div className="tabs">
+      <div className="tabs tabs-sub">
         {["pending", "accepted", "declined"].map((s) => (
           <button key={s} className={tab === s ? "on" : ""} onClick={() => setTab(s)}>{cap(s)}</button>
         ))}
@@ -54,7 +58,8 @@ export default function WebsiteRequests() {
 
       <ErrorNote>{error || actionError}</ErrorNote>
 
-      <Card>
+      <Card title="From the website"
+        sub="A request holds no room until someone here accepts it.">
         {loading ? <Loading /> : !data?.length ? (
           <Empty heading={tab === "pending" ? "No requests waiting" : "Nothing here"}
             text={tab === "pending"
@@ -68,9 +73,9 @@ export default function WebsiteRequests() {
             </thead>
             <tbody>
               {data.map((r) => (
-                <tr key={r._id}>
+                <tr key={r._id} className="wr-row">
                   <td className="mono" style={{ color: "var(--gold-deep)" }}>
-                    {r.reference}
+                    <span className="wr-mark"><Globe size={12} /> {r.reference}</span>
                     <div style={{ fontSize: "0.6875rem", color: "var(--slate-faint)" }}>{prettyDateTime(r.createdAt)}</div>
                   </td>
                   <td>

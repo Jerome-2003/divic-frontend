@@ -4,10 +4,16 @@ import api from "../lib/api";
 import { useApi } from "../lib/useApi";
 import { useAuth } from "../context/AuthContext";
 import { naira } from "../lib/format";
-import { PageHead, Card, Metric, Empty, Loading, ErrorNote, Chip } from "../components/ui";
-import PaymentModal from "../components/PaymentModal";
+import { Card, Metric, Empty, Loading, ErrorNote, Chip } from "./ui";
+import PaymentModal from "./PaymentModal";
 
-export default function Billing() {
+/**
+ * Every stay's bill, on the front desk where it is settled. It used to be its
+ * own screen, which meant checking someone out and taking their money were two
+ * different places — the one moment in a shift where they are most obviously
+ * the same job.
+ */
+export default function BillingPanel() {
   const { location } = useAuth();
   const [paying, setPaying] = useState(null);
   const { data, loading, error, reload } = useApi(() => api.folios(location), [location]);
@@ -20,9 +26,6 @@ export default function Billing() {
 
   return (
     <>
-      <PageHead title="Billing"
-        blurb="Every stay, with what is still owed. Room charges and anything signed for at the bar or restaurant are listed apart, so a guest querying a bill can see where each figure came from. Card payments go through Paystack; cash, transfer and card machine are recorded by hand." />
-
       <div className="grid g4" style={{ marginBottom: 20 }}>
         <Metric accent label="Still owed" value={naira(outstanding)} note="Across unpaid bills" />
         <Metric label="Collected" value={naira(collected)} note="All recorded payments" />
@@ -32,7 +35,8 @@ export default function Billing() {
 
       <ErrorNote>{error}</ErrorNote>
 
-      <Card>
+      <Card title="Bills"
+        sub="Largest balance first. Room charges and anything signed for at the bar are listed apart, so a guest querying a bill can see where each figure came from.">
         {loading ? <Loading /> : !rows.length ? (
           <Empty heading="No bills yet" text="A bill appears here as soon as a booking is created." />
         ) : (
