@@ -673,6 +673,14 @@ html[data-theme="dark"] .divic .room.available,html[data-theme="dark"] .divic .l
 .receipt-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.25rem;letter-spacing:.02em;}
 .receipt-sub{font-size:0.6875rem;color:#5A5A5A;line-height:1.5;}
 .receipt-rule{height:1px;background:#D9CFB6;margin:12px 0;}
+/* Which document this is. A guest handed a piece of paper has to be able to
+   tell at a glance whether it is a demand or a record — so the heading is
+   stated rather than inferred from whether a payment line happens to appear. */
+.receipt-kind{text-align:center;font-size:0.6875rem;letter-spacing:.16em;text-transform:uppercase;
+  color:#6B6664;margin-bottom:10px;}
+.receipt-kind.bill{color:#8A6D3B;font-weight:600;border:1px solid #D9CFB6;border-radius:2px;
+  padding:5px 8px;}
+.receipt-settle.unpaid{color:#8A6D3B;}
 .rs-part{display:flex;justify-content:space-between;gap:12px;font-size:0.6875rem;margin-top:3px;
   color:#5A5A5A;}
 .receipt-meta{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-size:0.6875rem;}

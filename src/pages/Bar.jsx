@@ -80,12 +80,13 @@ export default function Bar() {
       key={facility.id}
       facility={facility}
       isManager={isManager}
+      user={user}
       onSwitch={mine.length > 1 ? () => setPickedId(null) : null}
     />
   );
 }
 
-function Till({ facility, isManager, onSwitch }) {
+function Till({ facility, isManager, user, onSwitch }) {
   // One fetch for the whole day, open and settled alike. Two lists meant two
   // things that could disagree about the same order.
   const { data: orders, reload } = useApi(() => api.tabs(facility.id, "all"), [facility.id]);
@@ -201,6 +202,7 @@ function Till({ facility, isManager, onSwitch }) {
                 tab={selected}
                 menu={menu || []}
                 isManager={isManager}
+                user={user}
                 onChanged={reload}
                 onMenuChanged={reloadMenu}
                 onSettled={async (r) => { setReceipt(r); await reload(); }}
