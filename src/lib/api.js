@@ -83,9 +83,14 @@ export const api = {
   // bookings
   bookings: (location, params) => request("/api/bookings", { params: { location, ...params } }),
   createBooking: (payload) => request("/api/bookings", { method: "POST", body: payload }),
-  checkIn: (id) => request(`/api/bookings/${id}/check-in`, { method: "POST" }),
-  checkOut: (id, allowUnpaid) => request(`/api/bookings/${id}/check-out`, { method: "POST", body: { allowUnpaid } }),
-  updateBookingDates: (id, checkIn, checkOut, reason) => request(`/api/bookings/${id}/dates`, { method: "PATCH", body: { checkIn, checkOut, reason } }),
+  // `extra` carries a manager's or owner's override — see lib/useOverride.jsx.
+  // These are a receptionist's routine work, so the server asks anyone else for
+  // a reason, and it has to have somewhere to travel.
+  checkIn: (id, extra) => request(`/api/bookings/${id}/check-in`, { method: "POST", body: { ...extra } }),
+  checkOut: (id, allowUnpaid, extra) =>
+    request(`/api/bookings/${id}/check-out`, { method: "POST", body: { allowUnpaid, ...extra } }),
+  updateBookingDates: (id, checkIn, checkOut, reason, extra) =>
+    request(`/api/bookings/${id}/dates`, { method: "PATCH", body: { checkIn, checkOut, reason, ...extra } }),
   cancelBooking: (id, reason) => request(`/api/bookings/${id}/cancel`, { method: "POST", body: { reason } }),
 
   // website requests
@@ -149,10 +154,12 @@ export const api = {
   openTab: (facilityId, body) => request(`/api/facilities/${facilityId}/tabs`, { method: "POST", body }),
   addTabLine: (facilityId, tabId, body) =>
     request(`/api/facilities/${facilityId}/tabs/${tabId}/lines`, { method: "POST", body }),
-  removeTabLine: (facilityId, tabId, lineId) =>
-    request(`/api/facilities/${facilityId}/tabs/${tabId}/lines/${lineId}`, { method: "DELETE" }),
-  setTabLineQty: (facilityId, tabId, lineId, qty) =>
-    request(`/api/facilities/${facilityId}/tabs/${tabId}/lines/${lineId}`, { method: "PATCH", body: { qty } }),
+  // A quantity of zero removes the line, so this is also how the bin button
+  // works — one route, and the manager's override rides in the body either way.
+  setTabLineQty: (facilityId, tabId, lineId, qty, extra) =>
+    request(`/api/facilities/${facilityId}/tabs/${tabId}/lines/${lineId}`, {
+      method: "PATCH", body: { qty, ...extra },
+    }),
   // Resolves with the tab plus everything the printed receipt needs.
   settleTab: (facilityId, tabId, body) =>
     request(`/api/facilities/${facilityId}/tabs/${tabId}/settle`, { method: "POST", body }),

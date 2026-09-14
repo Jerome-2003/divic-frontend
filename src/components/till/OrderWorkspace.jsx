@@ -60,10 +60,15 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, user, o
       api.addTabLine(facility.id, tab.id, { menuItemId: item.id, qty: 1, ...extra })));
 
   const setQty = (line, qty) =>
-    guard(() => runWithOverride(() => api.setTabLineQty(facility.id, tab.id, line.id, qty)));
+    guard(() => runWithOverride((extra) => api.setTabLineQty(facility.id, tab.id, line.id, qty, extra)));
 
+  // Removing a line is setting its quantity to zero — which is already what
+  // the minus button does at one, and goes through a route that carries the
+  // manager's override in its body. The plain DELETE could not: it sends no
+  // body, so there was nowhere for the override to ride and an owner pressing
+  // the bin got the same refusal twice.
   const removeLine = (line) =>
-    guard(() => runWithOverride(() => api.removeTabLine(facility.id, tab.id, line.id)));
+    guard(() => runWithOverride((extra) => api.setTabLineQty(facility.id, tab.id, line.id, 0, extra)));
 
   const settle = async (parts) => {
     setErr(null);
@@ -344,14 +349,21 @@ function SettledOrder({ tab, isManager, onVoid, onReprint, busy }) {
 
 /** Putting an open table against a guest's room, or correcting it. */
 function AttachRoom({ facility, tab, onClose, onDone }) {
+  const { runWithOverride, overrideDialog } = useOverride();
   const [room, setRoom] = useState(tab.roomNumber || "");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(null);
 
   const save = async (value) => {
     setBusy(true); setErr(null);
-    try { await api.updateTab(facility.id, tab.id, { roomNumber: value }); await onDone(); }
-    catch (e) { setErr(e.message); }
+    try {
+      // Attaching a room is a bartender's routine job, so a manager or the
+      // owner doing it needs to say why. This had no override path at all and
+      // simply refused them.
+      await runWithOverride((extra) =>
+        api.updateTab(facility.id, tab.id, { roomNumber: value, ...extra }));
+      await onDone();
+    } catch (e) { if (!e.cancelled) setErr(e.message); }
     finally { setBusy(false); }
   };
 
@@ -382,6 +394,7 @@ function AttachRoom({ facility, tab, onClose, onDone }) {
         Only a guest who is checked in can be attached. Attaching a room does not charge
         anything to it — that still happens when the bill is settled.
       </Note>
+      {overrideDialog}
     </Modal>
   );
 }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CreditCard, Loader2 } from "lucide-react";
 import api from "../lib/api";
+import { useOverride } from "../lib/useOverride";
 import { useApi } from "../lib/useApi";
 import { Modal, Field, Row, ErrorNote, Note } from "./ui";
 import { naira, cap } from "../lib/format";
@@ -10,6 +11,7 @@ export default function PaymentModal({ folio, onClose, onPaid }) {
   const [method, setMethod] = useState("paystack");
   const [reference, setReference] = useState("");
   const [busy, setBusy] = useState(false);
+  const { runWithOverride, overrideDialog } = useOverride();
   const [error, setError] = useState(null);
 
   /* The itemised bill, so "what is this 12,000 for?" can be answered without
@@ -45,14 +47,15 @@ export default function PaymentModal({ folio, onClose, onPaid }) {
     }
     setBusy(true); setError(null);
     try {
-      await api.recordPayment({
+      await runWithOverride((extra) => api.recordPayment({
         bookingId: folio.bookingId, amount: amt, method,
         paystackReference: method === "paystack" ? reference : undefined,
-      });
+        ...extra,
+      }));
       onPaid?.();
       onClose();
     } catch (e) {
-      setError(e.message);
+      if (!e.cancelled) setError(e.message);
     } finally {
       setBusy(false);
     }
@@ -163,6 +166,7 @@ export default function PaymentModal({ folio, onClose, onPaid }) {
           connection cannot create a payment that never happened.
         </Note>
       )}
+      {overrideDialog}
     </Modal>
   );
 }
