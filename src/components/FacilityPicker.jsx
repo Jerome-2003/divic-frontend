@@ -23,7 +23,7 @@ const ICONS = {
 
 export default function FacilityPicker({ title, facilities, onPick }) {
   return (
-    <div className="picker">
+    <div className="picker" data-tour="facility-picker">
       <h2 className="picker-h">{title}</h2>
       <p className="picker-sub">
         You are assigned to {facilities.length}. Choose the one you are working now —
