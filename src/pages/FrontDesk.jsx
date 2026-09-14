@@ -5,6 +5,7 @@ import api from "../lib/api";
 import { useApi } from "../lib/useApi";
 import { useAuth } from "../context/AuthContext";
 import { useNotifications, WEBSITE_REQUEST_TYPES } from "../context/NotificationsContext";
+import { useOverride } from "../lib/useOverride";
 import { naira, cap, telUrl, today } from "../lib/format";
 import { PageHead, Card, Empty, Loading, ErrorNote, ConfirmModal } from "../components/ui";
 import NewBookingModal from "../components/NewBookingModal";
@@ -26,6 +27,9 @@ import BillingPanel from "../components/BillingPanel";
 export default function FrontDesk() {
   const { location, can } = useAuth();
   const { unreadByType } = useNotifications();
+  // Checking a guest in is a receptionist's job. A manager or the owner doing
+  // it themselves is allowed, but the server asks why first.
+  const { runWithOverride, overrideDialog } = useOverride();
   const [params, setParams] = useSearchParams();
 
   // Requests and bills are only tabs for someone allowed to see them. Today
@@ -59,17 +63,18 @@ export default function FrontDesk() {
 
   const doCheckIn = async (b) => {
     setBusyId(b._id); setActionError(null);
-    try { await api.checkIn(b._id); await reload(); }
-    catch (e) { setActionError(e.message); }
+    try { await runWithOverride((extra) => api.checkIn(b._id, extra)); await reload(); }
+    catch (e) { if (!e.cancelled) setActionError(e.message); }
     finally { setBusyId(null); }
   };
 
   const doCheckOut = async (b) => {
     setBusyId(b._id); setActionError(null);
     try {
-      await api.checkOut(b._id);
+      await runWithOverride((extra) => api.checkOut(b._id, undefined, extra));
       await reload();
     } catch (e) {
+      if (e.cancelled) return;
       // The server refuses a checkout with money owing unless it is overridden.
       // It breaks the balance out and names the facilities, so the dialog can
       // show where each figure came from — an unpaid gym term is a different
@@ -82,8 +87,11 @@ export default function FrontDesk() {
   const forceCheckOut = async () => {
     const b = owing.booking;
     setBusyId(b._id); setActionError(null);
-    try { await api.checkOut(b._id, true); setOwing(null); await reload(); }
-    catch (e) { setActionError(e.message); setOwing(null); }
+    try {
+      await runWithOverride((extra) => api.checkOut(b._id, true, extra));
+      setOwing(null); await reload();
+    }
+    catch (e) { if (!e.cancelled) setActionError(e.message); setOwing(null); }
     finally { setBusyId(null); }
   };
 
@@ -185,6 +193,8 @@ export default function FrontDesk() {
       </>}
 
       {adding && <NewBookingModal onClose={() => setAdding(false)} onCreated={reload} />}
+
+      {overrideDialog}
 
       {owing && (
         <ConfirmModal

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../lib/api";
+import { useOverride } from "../lib/useOverride";
 import { Modal, Field, Row, ErrorNote } from "./ui";
 import { useAuth } from "../context/AuthContext";
 import { LOCATIONS, FLOOR_NAME } from "../lib/constants";
@@ -22,6 +23,7 @@ export default function NewBookingModal({ onClose, onCreated }) {
   const [requests, setRequests] = useState("");
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
+  const { runWithOverride, overrideDialog } = useOverride();
 
   useEffect(() => {
     api.rates(location).then((r) => setRates(r.prices)).catch(() => {});
@@ -52,15 +54,18 @@ export default function NewBookingModal({ onClose, onCreated }) {
     setSaving(true);
     setError(null);
     try {
-      const created = await api.createBooking({
+      // Taking a booking is a receptionist's routine work, so a manager or the
+      // owner is asked why they are doing it themselves.
+      const created = await runWithOverride((extra) => api.createBooking({
         location, roomNumber, roomType, checkIn, checkOut, source,
         specialRequests: requests || undefined,
         ...(guestId ? { guestId } : { guest }),
-      });
+        ...extra,
+      }));
       onCreated?.(created);
       onClose();
     } catch (e) {
-      setError(e.message);
+      if (!e.cancelled) setError(e.message);
     } finally {
       setSaving(false);
     }
@@ -164,6 +169,7 @@ export default function NewBookingModal({ onClose, onCreated }) {
           <input id="sr" value={requests} onChange={(e) => setRequests(e.target.value)} placeholder="Optional" />
         </Field>
       </Row>
+      {overrideDialog}
     </Modal>
   );
 }

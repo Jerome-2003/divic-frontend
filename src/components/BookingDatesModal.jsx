@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CalendarDays } from "lucide-react";
 import api from "../lib/api";
+import { useOverride } from "../lib/useOverride";
 import { Modal, Field, Row, ErrorNote, Note } from "./ui";
 
 export default function BookingDatesModal({ booking, onClose, onSaved }) {
@@ -9,17 +10,19 @@ export default function BookingDatesModal({ booking, onClose, onSaved }) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
+  const { runWithOverride, overrideDialog } = useOverride();
 
   const submit = async () => {
     setError(null);
     if (!checkIn || !checkOut || checkOut <= checkIn) return setError("Check-out must be after check-in.");
     setSaving(true);
     try {
-      const updated = await api.updateBookingDates(booking._id, checkIn, checkOut, reason);
+      const updated = await runWithOverride((extra) =>
+        api.updateBookingDates(booking._id, checkIn, checkOut, reason, extra));
       onSaved?.(updated);
       onClose();
     } catch (e) {
-      setError(e.message);
+      if (!e.cancelled) setError(e.message);
     } finally { setSaving(false); }
   };
 
@@ -57,6 +60,7 @@ export default function BookingDatesModal({ booking, onClose, onSaved }) {
           ? "This guest is already checked in, so only the departure date can be changed. The system checks that the room remains available."
           : "Changing dates recalculates the number of nights and room charge and checks the guest's room is available for the full stay."}
       </Note>
+      {overrideDialog}
     </Modal>
   );
 }
