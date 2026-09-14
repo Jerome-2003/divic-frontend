@@ -25,9 +25,14 @@ export default function Staff() {
   // Reactivating gives access back and goes straight through.
   const [deactivating, setDeactivating] = useState(null);
   const [endingShift, setEndingShift] = useState(null);
+  // Somebody who has left. Not the same as deactivating, which is for a
+  // suspension you expect to undo.
+  const [removing, setRemoving] = useState(null);
+  const [removedNote, setRemovedNote] = useState(null);
+  const [showPast, setShowPast] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const { data, loading, error, reload } = useApi(() => api.staff(), []);
+  const { data, loading, error, reload } = useApi(() => api.staff(showPast), [showPast]);
   const { data: shiftTimes, reload: reloadTimes } = useApi(() => api.shiftTimes(), []);
   const [editingTimes, setEditingTimes] = useState(false);
 
@@ -35,6 +40,17 @@ export default function Staff() {
     setActionError(null); setBusy(true);
     try { await api.updateStaff(s.id, { active: !s.active }); setDeactivating(null); await reload(); }
     catch (e) { setActionError(e.message); setDeactivating(null); }
+    finally { setBusy(false); }
+  };
+
+  const remove = async () => {
+    setActionError(null); setRemovedNote(null); setBusy(true);
+    try {
+      const r = await api.removeStaff(removing.id);
+      setRemovedNote(r.message);
+      setRemoving(null);
+      await reload();
+    } catch (e) { setActionError(e.message); setRemoving(null); }
     finally { setBusy(false); }
   };
 
@@ -60,11 +76,22 @@ export default function Staff() {
           <button data-tour="staff-shift-times" className="btn" onClick={() => setEditingTimes(true)}>
             <Clock size={15} /> Shift times
           </button>
+          {/* Somebody who has left keeps their record, so there has to be a
+              way to look at it — otherwise "removed" reads as "destroyed". */}
+          <button className={"btn" + (showPast ? " btn-gold" : "")} onClick={() => setShowPast((v) => !v)}>
+            {showPast ? "Hide past staff" : "Past staff"}
+          </button>
           <button className="btn btn-gold" onClick={() => setAdding(true)}><Plus size={15} /> Add staff</button>
         </div>
       </PageHead>
 
       <ErrorNote>{error || actionError}</ErrorNote>
+
+      {removedNote && (
+        <div style={{ marginBottom: 14 }}>
+          <Note>{removedNote}</Note>
+        </div>
+      )}
 
       {/* The gap between the two columns, said once at the top so nobody has
           to read the whole table to find it. */}
@@ -133,8 +160,8 @@ export default function Staff() {
                     {s.lastLoginAt ? prettyDateTime(s.lastLoginAt) : "Never"}
                   </td>
                   <td>
-                    <Chip tone={s.active ? "st-available" : "st-maintenance"}>
-                      {s.active ? "Active" : "Deactivated"}
+                    <Chip tone={s.removedAt ? "st-maintenance" : s.active ? "st-available" : "st-maintenance"}>
+                      {s.removedAt ? "Left" : s.active ? "Active" : "Deactivated"}
                     </Chip>
                   </td>
                   <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
@@ -149,10 +176,16 @@ export default function Staff() {
                         End shift
                       </button>
                     )}
-                    {s.id !== user.id && (
+                    {s.id !== user.id && !s.removedAt && (
                       <button className="btn btn-sm btn-quiet"
                         onClick={() => (s.active ? setDeactivating(s) : toggle(s))}>
                         {s.active ? "Deactivate" : "Reactivate"}
+                      </button>
+                    )}
+                    {s.id !== user.id && !s.removedAt && (
+                      <button className="btn btn-sm btn-quiet" style={{ color: "var(--wine)" }}
+                        onClick={() => setRemoving(s)}>
+                        Remove
                       </button>
                     )}
                   </td>
@@ -185,6 +218,30 @@ export default function Staff() {
             Use this when somebody has gone home without ending it themselves. It does not
             sign them out or change what they can reach — it closes the record, and the
             activity log will show that you closed it rather than they did.
+          </p>
+        </ConfirmModal>
+      )}
+
+      {removing && (
+        <ConfirmModal
+          title={"Remove " + removing.name + "?"}
+          blurb={ROLE_LABEL[removing.role] + " · " + removing.username}
+          destructive
+          confirmLabel="Remove them"
+          cancelLabel="Keep the account"
+          busy={busy}
+          onConfirm={remove}
+          onClose={() => setRemoving(null)}
+        >
+          <p style={{ fontSize: "0.8438rem", color: "var(--slate-soft)", margin: 0, lineHeight: 1.6 }}>
+            For somebody who has left. They come off this list, cannot sign in again,
+            and any shift still open is closed.
+          </p>
+          <p style={{ fontSize: "0.8438rem", color: "var(--slate-soft)", margin: "10px 0 0", lineHeight: 1.6 }}>
+            If the account never did anything it is deleted outright. If it took a
+            payment, worked a shift or changed a booking, the record is kept and only
+            hidden — otherwise every one of those entries would lose the name on it.
+            Past staff shows them again.
           </p>
         </ConfirmModal>
       )}

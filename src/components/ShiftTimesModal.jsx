@@ -24,6 +24,36 @@ const minutesOf = (t) => {
   return h * 60 + m;
 };
 
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
+const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
+
+/**
+ * Hour and minute, as two lists.
+ *
+ * This was a native time input, which on most browsers is a pair of tiny
+ * spinners you have to know to type into: a manager who wanted the night shift
+ * to start at 18:59 could not see how to say so, and every minute that was not
+ * on the hour felt like it was not on offer. Two plain dropdowns put all
+ * fourteen hundred and forty of them a click away, and read the same on a phone
+ * at the desk as on the office machine.
+ */
+function TimePicker({ id, value, onChange }) {
+  const [h = "07", m = "00"] = String(value || "07:00").split(":");
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <select id={id} value={h} onChange={(e) => onChange(e.target.value + ":" + m)}
+        aria-label="Hour" style={{ flex: 1 }}>
+        {HOURS.map((x) => <option key={x} value={x}>{x}</option>)}
+      </select>
+      <span style={{ color: "var(--slate-faint)" }}>:</span>
+      <select value={m} onChange={(e) => onChange(h + ":" + e.target.value)}
+        aria-label="Minute" style={{ flex: 1 }}>
+        {MINUTES.map((x) => <option key={x} value={x}>{x}</option>)}
+      </select>
+    </div>
+  );
+}
+
 const span = (from, to) => {
   const a = minutesOf(from);
   const b = minutesOf(to);
@@ -75,15 +105,15 @@ export default function ShiftTimesModal({ times, onClose, onSaved }) {
           <h4>{LOCATIONS[r.location]?.name || r.location}</h4>
           <Row>
             <Field label="Mornings start at" htmlFor={"m-" + r.location}>
-              <input
-                id={"m-" + r.location} type="time" value={r.morningStartsAt}
-                onChange={(e) => set(r.location, { morningStartsAt: e.target.value })}
+              <TimePicker
+                id={"m-" + r.location} value={r.morningStartsAt}
+                onChange={(v) => set(r.location, { morningStartsAt: v })}
               />
             </Field>
             <Field label="Nights start at" htmlFor={"n-" + r.location}>
-              <input
-                id={"n-" + r.location} type="time" value={r.nightStartsAt}
-                onChange={(e) => set(r.location, { nightStartsAt: e.target.value })}
+              <TimePicker
+                id={"n-" + r.location} value={r.nightStartsAt}
+                onChange={(v) => set(r.location, { nightStartsAt: v })}
               />
             </Field>
           </Row>

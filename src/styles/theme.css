@@ -87,8 +87,6 @@ html[data-theme="dark"] { background:#161514; }
 .side-foot{padding:14px 16px;border-top:1px solid var(--line-soft);}
 .who{font-size:0.8125rem;font-weight:500;}
 .who-role{font-size:0.7188rem;color:var(--slate-faint);margin-top:1px;}
-.signout{display:flex;align-items:center;gap:7px;font-size:0.7812rem;color:var(--slate-soft);}
-.signout:hover{color:var(--wine);}
 .foot-actions{display:flex;align-items:center;gap:8px;margin-top:11px;}
 
 .main{flex:1;min-width:0;display:flex;flex-direction:column;}
@@ -316,7 +314,7 @@ html[data-theme="dark"] { background:#161514; }
 /* Below 900px the sidebar collapses to a scroller and the app is being held,
    not pointed at — housekeeping on the floor, the desk on a phone. That is the
    context the 44px minimum target exists for, and until now only the till
-   honoured it: .btn-sm rendered at 29px, .signout at 15px. Sizes are set here
+   honoured it: .btn-sm rendered at 29px. Sizes are set here
    rather than globally so the desk's dense tables keep their proportions on a
    monitor, where a pointer makes 29px perfectly reachable. */
 @media (max-width:900px){
@@ -324,7 +322,7 @@ html[data-theme="dark"] { background:#161514; }
   .notif-btn{width:44px;height:44px;}
   .notif-item{min-height:44px;}
   .btn,.btn-sm{padding-top:0;padding-bottom:0;}
-  .signout,.demo-row button{min-height:44px;display:inline-flex;align-items:center;}
+  .demo-row button{min-height:44px;display:inline-flex;align-items:center;}
   .divic input,.divic select,.divic textarea{min-height:44px;}
   .pw input{min-height:44px;}
   .pw-toggle{width:44px;}
@@ -744,6 +742,20 @@ html[data-theme="dark"] .divic .room.available,html[data-theme="dark"] .divic .l
    An A4 document rather than a screen. Printed on white with black text
    whatever theme the app is in — a report is filed and read on paper, where
    the dark theme would be a page of ink and an unreadable photocopy. */
+/* ---- Finding a returning guest ----
+   A list of hits under the box rather than a dropdown of everyone on file: the
+   dropdown quietly stopped holding every guest once there were more than a
+   page of them. */
+.guest-hits{margin-top:6px;border:1px solid var(--line-soft);border-radius:2px;
+  max-height:210px;overflow-y:auto;}
+.guest-hit{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;
+  padding:8px 11px;text-align:left;font-size:0.8125rem;border-bottom:1px solid var(--line-soft);}
+.guest-hit:last-child{border-bottom:0;}
+.guest-hit:hover{background:var(--gold-wash);}
+.guest-hit-note{padding:9px 11px;font-size:0.7812rem;color:var(--slate-faint);}
+.guest-picked{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 11px;border:1px solid var(--gold-border);background:var(--gold-wash);border-radius:2px;}
+
 /* ---- The week somebody is meant to work ---- */
 .roster{display:flex;flex-direction:column;gap:2px;}
 .roster-row{display:flex;align-items:center;gap:12px;padding:7px 9px;border-radius:2px;
