@@ -41,7 +41,40 @@ async function request(path, { method = "GET", body, params } = {}) {
   }
 
   const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
+
+  /**
+   * Not every response is JSON, and assuming so hid every failure that was not
+   * the server's own.
+   *
+   * A crash, a proxy timeout, a cold start, a 502 from the host — all answer
+   * with HTML, and JSON.parse threw "Unexpected token '<'" over the top of it.
+   * That error carried no status and no payload, so two things silently
+   * stopped working whenever it happened: the checkout guard that reads a 409,
+   * and the override dialog, which only appears when it can see
+   * `requiresOverride` on the payload. A manager would have pressed a button
+   * and been told nothing useful at all.
+   */
+  let data = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      if (!res.ok) {
+        const err = new Error(
+          res.status >= 500
+            ? "The server had a problem (" + res.status + "). Try again in a moment."
+            : "The server gave an unexpected answer (" + res.status + ")."
+        );
+        err.status = res.status;
+        throw err;
+      }
+      // A 2xx that is not JSON is not something any caller here expects.
+      const err = new Error("The server's answer could not be read.");
+      err.status = res.status;
+      throw err;
+    }
+  }
+
   if (!res.ok) {
     const err = new Error(data?.error || "Something went wrong.");
     err.status = res.status;
