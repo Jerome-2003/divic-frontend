@@ -116,8 +116,12 @@ export default function Sidebar() {
           </div>
         </div>
         <div className="foot-actions">
-          <button className="signout" onClick={() => setConfirmingSignOut(true)}>
-            <LogOut size={14} /> Sign out
+          {/* The icon is the button. It sits in a row of icon buttons and the
+              word was the only thing making that row uneven. */}
+          <button className="notif-btn" onClick={() => setConfirmingSignOut(true)}
+            title="Sign out"
+            aria-label="Sign out">
+            <LogOut size={15} />
           </button>
           <button className="notif-btn" onClick={() => setChangingPassword(true)}
             title="Change your password"

@@ -143,7 +143,11 @@ export const api = {
   declineRequest: (id, reason) => request(`/api/requests/${id}/decline`, { method: "POST", body: { reason } }),
 
   // guests
-  guests: (q) => request("/api/guests", { params: { q } }),
+  // Answers { guests, total, hasMore }. The list is ordered by who was here
+  // last unless sort is "name", and it is a page of a longer list — `total`
+  // says how much longer.
+  guests: ({ q, sort, skip, limit } = {}) =>
+    request("/api/guests", { params: { q, sort, skip, limit } }),
   guest: (id) => request(`/api/guests/${id}`),
   updateGuest: (id, body) => request(`/api/guests/${id}`, { method: "PATCH", body }),
 
@@ -162,9 +166,13 @@ export const api = {
   voidPayment: (id, reason) => request(`/api/payments/${id}/void`, { method: "POST", body: { reason } }),
 
   // staff
-  staff: () => request("/api/staff"),
+  staff: (includeRemoved) =>
+    request("/api/staff", { params: { includeRemoved: includeRemoved ? "1" : undefined } }),
   createStaff: (body) => request("/api/staff", { method: "POST", body }),
   updateStaff: (id, body) => request(`/api/staff/${id}`, { method: "PATCH", body }),
+  // Deletes the account outright if it never did anything, and otherwise keeps
+  // the record and takes it off the list — the answer says which happened.
+  removeStaff: (id) => request(`/api/staff/${id}`, { method: "DELETE" }),
 
   // facilities + point of sale
   facilities: (location) => request("/api/facilities", { params: { location } }),

@@ -16,8 +16,11 @@ export default function NewBookingModal({ onClose, onCreated }) {
   const [roomNumber, setRoomNumber] = useState("");
   const [free, setFree] = useState([]);
   const [rates, setRates] = useState({});
-  const [guests, setGuests] = useState([]);
   const [guestId, setGuestId] = useState("");
+  const [picked, setPicked] = useState(null);
+  const [gq, setGq] = useState("");
+  const [hits, setHits] = useState([]);
+  const [searching, setSearching] = useState(false);
   const [guest, setGuest] = useState({ name: "", phone: "", email: "", idType: "NIN", idNumber: "" });
   const [source, setSource] = useState("walk-in");
   const [requests, setRequests] = useState("");
@@ -27,8 +30,26 @@ export default function NewBookingModal({ onClose, onCreated }) {
 
   useEffect(() => {
     api.rates(location).then((r) => setRates(r.prices)).catch(() => {});
-    api.guests().then(setGuests).catch(() => {});
   }, [location]);
+
+  /* A returning guest is looked up, not scrolled to.
+     This was a dropdown of every guest on file, which quietly stopped working
+     once there were more than a hundred of them: the list is a page, so a
+     returning guest past the end of it simply was not in it, and the only way
+     forward was to type them in again — a second record for the same person,
+     splitting their history in two. */
+  useEffect(() => {
+    const term = gq.trim();
+    if (term.length < 2) { setHits([]); setSearching(false); return; }
+    setSearching(true);
+    let stale = false;
+    const t = setTimeout(() => {
+      api.guests({ q: term, limit: 8 })
+        .then((r) => { if (!stale) { setHits(r.guests); setSearching(false); } })
+        .catch(() => { if (!stale) { setHits([]); setSearching(false); } });
+    }, 250);
+    return () => { stale = true; clearTimeout(t); };
+  }, [gq]);
 
   // Availability is asked of the server, never guessed on the client — the
   // server is the only place that knows about a booking made a second ago at
@@ -124,10 +145,45 @@ export default function NewBookingModal({ onClose, onCreated }) {
       </div>
 
       <Field label="Guest" htmlFor="gs">
-        <select id="gs" value={guestId} onChange={(e) => setGuestId(e.target.value)}>
-          <option value="">New guest</option>
-          {guests.map((g) => <option key={g._id} value={g._id}>{g.name} · {g.phone}</option>)}
-        </select>
+        {picked ? (
+          <div className="guest-picked">
+            <div>
+              <strong>{picked.name}</strong>
+              <div className="tc-meta">
+                {picked.phone}
+                {picked.stays ? " · " + picked.stays + " previous stay" + (picked.stays === 1 ? "" : "s") : " · first stay"}
+              </div>
+            </div>
+            <button className="btn btn-sm btn-quiet"
+              onClick={() => { setGuestId(""); setPicked(null); setGq(""); }}>
+              Change
+            </button>
+          </div>
+        ) : (
+          <>
+            <input id="gs" value={gq} onChange={(e) => setGq(e.target.value)}
+              placeholder="Search a returning guest by name, phone or email" />
+            {gq.trim().length >= 2 && (
+              <div className="guest-hits">
+                {searching ? (
+                  <div className="guest-hit-note">Looking…</div>
+                ) : !hits.length ? (
+                  <div className="guest-hit-note">
+                    Nobody on file matches. Fill in the details below and a new record is made.
+                  </div>
+                ) : hits.map((g) => (
+                  <button key={g._id} type="button" className="guest-hit"
+                    onClick={() => { setGuestId(g._id); setPicked(g); }}>
+                    <span>{g.name}</span>
+                    <span className="tc-meta">
+                      {g.phone}{g.lastStay ? " · last stay " + g.lastStay : ""}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </Field>
 
       {!guestId && (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, Phone } from "lucide-react";
 import api from "../lib/api";
 import { useApi } from "../lib/useApi";
@@ -6,29 +6,73 @@ import { LOCATIONS } from "../lib/constants";
 import { naira, telUrl } from "../lib/format";
 import { PageHead, Card, Modal, Empty, Loading, ErrorNote, Note, Chip } from "../components/ui";
 
+/* A page at a time. Fifty rows is about a screen and a half — enough that the
+   person you want is usually already there, small enough that the request is
+   quick on a phone at the desk. */
+const PAGE = 50;
+
 export default function Guests() {
   const [q, setQ] = useState("");
+  const [sort, setSort] = useState("recent");
+  const [skip, setSkip] = useState(0);
+  const [rows, setRows] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
 
-  const { data, loading, error } = useApi(() => api.guests(q || undefined), [q]);
+  // A different search, or a different order, is a different list.
+  useEffect(() => { setSkip(0); setRows([]); }, [q, sort]);
+
+  const { data, loading, error } = useApi(
+    () => api.guests({ q: q || undefined, sort, skip, limit: PAGE }),
+    [q, sort, skip]
+  );
+
+  /* Pages accumulate rather than replace, so Show more adds to what is on
+     screen instead of moving it. Deduplicated by id: a guest added at the desk
+     between two pages would otherwise shift the window and appear twice. */
+  useEffect(() => {
+    if (!data) return;
+    setRows((prev) => {
+      const next = skip === 0 ? data.guests : [...prev, ...data.guests];
+      const seen = new Set();
+      return next.filter((g) => !seen.has(g._id) && seen.add(g._id));
+    });
+  }, [data]);   // eslint-disable-line react-hooks/exhaustive-deps
+
   const { data: detail } = useApi(() => api.guest(selectedId), [selectedId], { skip: !selectedId });
+
+  const total = data?.total ?? 0;
+  const first = loading && !rows.length;
 
   return (
     <>
       <PageHead title="Guests"
-        blurb="Guest records are shared across both properties, so a returning guest is recognised at either address." />
+        blurb={"Guest records are shared across both properties, so a returning guest is recognised at either address. " +
+          "They are kept for good — nothing here is cleared at the end of a day."} />
 
-      <div style={{ position: "relative", marginBottom: 16, maxWidth: 380 }}>
-        <Search size={15} style={{ position: "absolute", left: 11, top: 11, color: "var(--slate-faint)" }} />
-        <input placeholder="Search by name, phone or email" value={q}
-          onChange={(e) => setQ(e.target.value)} style={{ paddingLeft: 34 }} />
+      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 16 }}>
+        <div style={{ position: "relative", flex: 1, minWidth: 240, maxWidth: 380 }}>
+          <Search size={15} style={{ position: "absolute", left: 11, top: 11, color: "var(--slate-faint)" }} />
+          <input placeholder="Search by name, phone or email" value={q}
+            onChange={(e) => setQ(e.target.value)} style={{ paddingLeft: 34 }} />
+        </div>
+        {/* Most recent first by default. The desk is nearly always looking for
+            somebody it dealt with in the last day or two, and A–Z buries them
+            in the middle of the alphabet. */}
+        <div style={{ display: "flex", gap: 5 }}>
+          <button className={"chip-btn" + (sort === "recent" ? " on" : "")}
+            onClick={() => setSort("recent")}>Recent</button>
+          <button className={"chip-btn" + (sort === "name" ? " on" : "")}
+            onClick={() => setSort("name")}>A–Z</button>
+        </div>
       </div>
 
       <ErrorNote>{error}</ErrorNote>
 
       <Card>
-        {loading ? <Loading /> : !data?.length ? (
-          <Empty heading="No guests match" text="Try a different name or number." />
+        {first ? <Loading /> : !rows.length ? (
+          q
+            ? <Empty heading="No guests match" text="Try a different name or number." />
+            : <Empty heading="No guest records yet" text="A record is created the first time somebody books or checks in." />
         ) : (
           <table className="tbl">
             <thead>
@@ -36,7 +80,7 @@ export default function Guests() {
                   <th style={{ textAlign: "right" }}>Lifetime value</th></tr>
             </thead>
             <tbody>
-              {data.map((g) => (
+              {rows.map((g) => (
                 <tr key={g._id} style={{ cursor: "pointer" }} onClick={() => setSelectedId(g._id)}>
                   <td>
                     <div style={{ fontWeight: 500 }}>{g.name}</div>
@@ -59,6 +103,24 @@ export default function Guests() {
           </table>
         )}
       </Card>
+
+      {/* The list is a window on a longer one, and it says so. Without this a
+          guest past the end of the page reads as a record that is gone. */}
+      {rows.length > 0 && (
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          gap: 12, flexWrap: "wrap", marginTop: 12,
+        }}>
+          <span style={{ fontSize: "0.7812rem", color: "var(--slate-faint)" }}>
+            Showing {rows.length} of {total}{q ? " matching" : ""} guest{total === 1 ? "" : "s"}
+          </span>
+          {data?.hasMore && (
+            <button className="btn btn-sm" disabled={loading} onClick={() => setSkip(rows.length)}>
+              {loading ? "Loading" : "Show more"}
+            </button>
+          )}
+        </div>
+      )}
 
       {selectedId && detail && (
         <Modal title={detail.name}
