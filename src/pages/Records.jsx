@@ -26,12 +26,18 @@ import ReportDuePrompt from "../components/ReportDuePrompt";
 const MONTHS = ["January","February","March","April","May","June",
   "July","August","September","October","November","December"];
 
-/** The month that just ended — what somebody opening this usually wants. */
+/**
+ * The month that just ended — what somebody opening this usually wants.
+ *
+ * Derived from the hotel's own date. Taken from UTC, this returns the wrong
+ * month for the first hour of the first day of a month: it is still the old
+ * month in UTC, so "last month" comes back as the one before that.
+ */
 function lastMonth() {
-  const d = new Date();
-  d.setUTCDate(1);
-  d.setUTCMonth(d.getUTCMonth() - 1);
-  return d.toISOString().slice(0, 10).slice(0, 7);
+  const [y, m] = today().split("-").map(Number);
+  const year = m === 1 ? y - 1 : y;
+  const month = m === 1 ? 12 : m - 1;
+  return year + "-" + String(month).padStart(2, "0");
 }
 
 export default function Records() {

@@ -91,8 +91,17 @@ export default function Dashboard() {
           <Metric label="Room revenue tonight"
             value={naira(inHouse.reduce((s, b) => s + b.rate, 0))}
             note="Nightly value of the rooms in use" />
-          <Metric label="Outstanding balances" value={naira(owing)}
-            note="Across guests staying tonight" />
+          {/* A day's takings reset at midnight; a debt does not. Money owed by
+              a guest who has already left is the more urgent of the two and
+              used to disappear from this page the moment they checked out. */}
+          <Metric
+            label="Outstanding balances"
+            value={naira(sales?.outstanding ? sales.outstanding.total : owing)}
+            note={sales?.outstanding?.departed
+              ? naira(sales.outstanding.inHouse) + " staying · " +
+                naira(sales.outstanding.departed) + " already left"
+              : "Across guests staying tonight"}
+          />
         </div>
       )}
 
