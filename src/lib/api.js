@@ -163,6 +163,12 @@ export const api = {
   // Resolves with the tab plus everything the printed receipt needs.
   settleTab: (facilityId, tabId, body) =>
     request(`/api/facilities/${facilityId}/tabs/${tabId}/settle`, { method: "POST", body }),
+  // Closing a table that should not have been opened. Open tables only; a
+  // settled one has money against it and is voided instead.
+  discardTab: (facilityId, tabId, reason, extra) =>
+    request(`/api/facilities/${facilityId}/tabs/${tabId}/discard`, {
+      method: "POST", body: { reason, ...extra },
+    }),
   // Undoing a bill after the money was taken — a manager's decision only.
   voidTab: (facilityId, tabId, reason) =>
     request(`/api/facilities/${facilityId}/tabs/${tabId}/void`, { method: "POST", body: { reason } }),

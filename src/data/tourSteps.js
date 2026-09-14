@@ -107,6 +107,7 @@ export const TOUR_STEPS = [
       "Tap items onto the order; the plus and minus set how many.",
       "Filter by Open, On a room or Paid, or search a table, room or surname.",
       "Settle to one payment, or split the bill across people and methods.",
+      "Close a table without settling when it was opened by mistake or the party left.",
       "Print the bill on headed paper before they pay, and the receipt after — both carry the logo.",
       "A receipt can be printed again later, or sent as text for the guest's phone.",
     ],
