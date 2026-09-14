@@ -32,7 +32,8 @@ export default function Guests() {
   useEffect(() => {
     if (!data) return;
     setRows((prev) => {
-      const next = skip === 0 ? data.guests : [...prev, ...data.guests];
+      const page = data.guests || [];
+      const next = skip === 0 ? page : [...prev, ...page];
       const seen = new Set();
       return next.filter((g) => !seen.has(g._id) && seen.add(g._id));
     });

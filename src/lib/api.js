@@ -143,11 +143,22 @@ export const api = {
   declineRequest: (id, reason) => request(`/api/requests/${id}/decline`, { method: "POST", body: { reason } }),
 
   // guests
-  // Answers { guests, total, hasMore }. The list is ordered by who was here
-  // last unless sort is "name", and it is a page of a longer list — `total`
-  // says how much longer.
-  guests: ({ q, sort, skip, limit } = {}) =>
-    request("/api/guests", { params: { q, sort, skip, limit } }),
+  /**
+   * Answers { guests, total, hasMore }. The list is ordered by who was here
+   * last unless sort is "name", and it is a page of a longer list — `total`
+   * says how much longer.
+   *
+   * An older server answers with a bare array instead, and the two halves of
+   * this system deploy separately: the app went out ahead of the API once and
+   * every guest page crashed on `undefined.filter` until the API caught up.
+   * Reading either shape costs one line and makes the order of the two
+   * deployments stop mattering.
+   */
+  guests: async ({ q, sort, skip, limit } = {}) => {
+    const r = await request("/api/guests", { params: { q, sort, skip, limit } });
+    if (Array.isArray(r)) return { guests: r, total: r.length, hasMore: false };
+    return { guests: r?.guests || [], total: r?.total ?? 0, hasMore: Boolean(r?.hasMore) };
+  },
   guest: (id) => request(`/api/guests/${id}`),
   updateGuest: (id, body) => request(`/api/guests/${id}`, { method: "PATCH", body }),
 
