@@ -4,6 +4,7 @@ import { useApi } from "../lib/useApi";
 import { Modal, Field, Row, ErrorNote, Note, PasswordInput } from "./ui";
 import { useAuth } from "../context/AuthContext";
 import { ROLE_LABEL, LOCATIONS } from "../lib/constants";
+import RosterEditor from "./RosterEditor";
 
 const ROLE_HELP = {
   cleaner: "Housekeeping staff see only the room board for their property.",
@@ -19,6 +20,7 @@ export default function StaffFormModal({ editing, onClose, onSaved }) {
     name: "", username: "", password: "", role: "receptionist", location: "exclusive", phone: "",
   });
   const [assigned, setAssigned] = useState(() => (editing?.assignedFacilities || []).map(String));
+  const [shifts, setShifts] = useState(() => editing?.shifts || []);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -68,14 +70,14 @@ export default function StaffFormModal({ editing, onClose, onSaved }) {
     setSaving(true); setError(null);
     try {
       if (editing) {
-        const body = { name: f.name, role: f.role, location: f.location, phone: f.phone };
+        const body = { name: f.name, role: f.role, location: f.location, phone: f.phone, shifts };
         // The server rejects an assignment on any other role, so it is only
         // ever sent for facility staff.
         if (isFacility) body.assignedFacilities = assigned;
         if (f.password) body.password = f.password;
         await api.updateStaff(editing._id || editing.id, body);
       } else {
-        await api.createStaff({ ...f, assignedFacilities: isFacility ? assigned : undefined });
+        await api.createStaff({ ...f, shifts, assignedFacilities: isFacility ? assigned : undefined });
       }
       onSaved?.();
       onClose();
@@ -169,6 +171,12 @@ export default function StaffFormModal({ editing, onClose, onSaved }) {
 
       <Field label="Phone" htmlFor="sph">
         <input id="sph" value={f.phone || ""} onChange={(e) => setF({ ...f, phone: e.target.value })} />
+      </Field>
+
+      {/* Set when the account is made, so the roster exists from the first
+          day rather than being something somebody remembers to add later. */}
+      <Field label="Shifts">
+        <RosterEditor shifts={shifts} onChange={setShifts} />
       </Field>
 
       <Note>{ROLE_HELP[f.role]}</Note>

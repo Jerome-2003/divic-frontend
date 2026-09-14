@@ -129,6 +129,10 @@ export function Modal({ title, blurb, onClose, children, footer, wide }) {
 export function ConfirmModal({
   title, blurb, children, confirmLabel = "Confirm", cancelLabel = "Cancel",
   destructive, busy, requireReason, reasonLabel = "Reason", reasonPlaceholder,
+  // A third way out, for a question with three honest answers rather than two.
+  // Signing out is one: end the shift and go, sign out and keep working, or
+  // stay put — and forcing that into yes/no puts wrong hours on a record.
+  extraAction,
   onConfirm, onClose,
 }) {
   const [reason, setReason] = useState("");
@@ -141,6 +145,11 @@ export function ConfirmModal({
       onClose={onClose}
       footer={<>
         <button className="btn" onClick={onClose} disabled={busy}>{cancelLabel}</button>
+        {extraAction && (
+          <button className="btn" onClick={extraAction.onClick} disabled={busy}>
+            {extraAction.label}
+          </button>
+        )}
         <button
           className={"btn " + (destructive ? "btn-danger" : "btn-gold")}
           onClick={() => onConfirm(reason.trim())}

@@ -1,4 +1,4 @@
-import { Building2, Phone, MapPin, Cloud, CloudOff, WifiOff } from "lucide-react";
+import { Building2, Phone, MapPin, CloudOff, WifiOff } from "lucide-react";
 import NotificationBell from "./NotificationBell";
 import { useAuth } from "../context/AuthContext";
 import { LOCATIONS } from "../lib/constants";
@@ -31,13 +31,17 @@ export default function Topbar({ online, pending }) {
         <MapPin size={13} style={{ color: "var(--gold-deep)" }} /> Directions
       </a>
 
-      <div className={"sync" + (!online || pending ? " warn" : "")}>
-        {!online
-          ? <><WifiOff size={14} /> Offline — changes will send when you reconnect</>
-          : pending
-            ? <><CloudOff size={14} /> {pending} change{pending === 1 ? "" : "s"} waiting</>
-            : <><Cloud size={14} /> Live</>}
-      </div>
+      {/* Only shown when there is something to say. A permanent "Live" badge
+          is a light that is always on: it tells nobody anything, and it makes
+          the one state worth noticing — that changes are not getting through —
+          look like more of the same. */}
+      {(!online || pending > 0) && (
+        <div className="sync warn">
+          {!online
+            ? <><WifiOff size={14} /> Offline — changes will send when you reconnect</>
+            : <><CloudOff size={14} /> {pending} change{pending === 1 ? "" : "s"} waiting</>}
+        </div>
+      )}
       <NotificationBell />
     </header>
   );

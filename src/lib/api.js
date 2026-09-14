@@ -59,6 +59,13 @@ export const api = {
     request("/api/auth/change-password", { method: "POST", body: { currentPassword, newPassword } }),
   markTourSeen: () => request("/api/auth/me/tour-seen", { method: "PUT" }),
 
+  // Shifts. A shift opens when somebody signs in; signing out is not the same
+  // as going home, so ending one is asked for rather than assumed.
+  myShift: () => request("/api/auth/my-shift"),
+  endMyShift: () => request("/api/auth/end-shift", { method: "POST" }),
+  endStaffShift: (id) => request(`/api/staff/${id}/end-shift`, { method: "POST" }),
+  shiftsWorked: (from, to) => request("/api/staff/shifts", { params: { from, to } }),
+
   // The filed record of a month or a year, across the business.
   performanceReport: (params) => request("/api/analytics/report", { params }),
   // Which closed months and years this person has not taken a copy of yet.
