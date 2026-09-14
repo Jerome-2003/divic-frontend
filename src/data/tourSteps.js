@@ -44,7 +44,8 @@ export const TOUR_STEPS = [
     ],
   },
   {
-    module: "frontdesk", path: "/front-desk", section: "Front desk", target: "fd-tabs",
+    module: "frontdesk", path: "/front-desk?tab=arrivals", anchor: "/front-desk",
+    section: "Front desk", target: "fd-tabs",
     label: "The three room tabs",
     blurb: "Arrivals is who is due in today, Staying is who is in the building, Departures is who is due out. Each carries a live count.",
     features: [
@@ -62,7 +63,8 @@ export const TOUR_STEPS = [
     ],
   },
   {
-    module: "frontdesk", path: "/front-desk", section: "Front desk", target: "fd-requests",
+    module: "frontdesk", path: "/front-desk?tab=requests", anchor: "/front-desk",
+    section: "Front desk", target: "fd-requests",
     optional: true,
     label: "Website requests",
     blurb: "Requests lodged on the hotel website. They hold no room until you accept one.",
@@ -74,7 +76,8 @@ export const TOUR_STEPS = [
     ],
   },
   {
-    module: "frontdesk", path: "/front-desk", section: "Front desk", target: "fd-bills",
+    module: "frontdesk", path: "/front-desk?tab=billing", anchor: "/front-desk",
+    section: "Front desk", target: "fd-bills",
     optional: true,
     label: "Bills",
     blurb: "Every stay's bill, largest balance first — next to the checkout that needs it settled.",
@@ -117,6 +120,16 @@ export const TOUR_STEPS = [
     features: [
       "It works the same for a bar and for the restaurant.",
       "If you are assigned to more than one, you are asked which before you get here.",
+    ],
+  },
+  {
+    module: "pos", path: "/bar", section: "Bar", target: "facility-picker",
+    optional: true,
+    label: "Which bar are you working?",
+    blurb: "Asked first if you are assigned to more than one bar, or to the restaurant as well. The rest of this page is the same for all of them.",
+    features: [
+      "Pick one and you can switch later from the top of the screen.",
+      "A facility that is closed or under maintenance says so on its tile.",
     ],
   },
   {

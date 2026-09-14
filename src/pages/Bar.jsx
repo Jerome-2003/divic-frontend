@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowLeft, Plus, Settings2, TrendingUp, X,
 } from "lucide-react";
@@ -6,6 +6,7 @@ import api from "../lib/api";
 import { useApi } from "../lib/useApi";
 import { useOverride } from "../lib/useOverride";
 import { useAuth } from "../context/AuthContext";
+import { useTutorial } from "../context/TutorialContext";
 import { naira } from "../lib/format";
 import { PageHead, Field, Empty, Loading, ErrorNote, Note, Modal } from "../components/ui";
 import Receipt from "../components/Receipt";
@@ -45,6 +46,19 @@ export default function Bar() {
   const [pickedId, setPickedId] = useState(null);
   const facility = mine.find((f) => f.id === pickedId) || (mine.length === 1 ? mine[0] : null);
 
+  // The tour is about the till, and somebody assigned to two bars never gets
+  // to it: the picker stands in front, none of the buttons the next dozen
+  // steps describe exist yet, and the slides go by against a screen with two
+  // tiles on it. So once the picker has had its own step, the tour walks
+  // through it — choosing a bar is a view, not a change to anything.
+  const { active: touring, step: tourStep } = useTutorial();
+  const firstId = mine[0]?.id;
+  useEffect(() => {
+    if (!touring || pickedId || mine.length < 2) return;
+    if (tourStep?.target === "facility-picker") return;   // its own step, still on screen
+    setPickedId(firstId);
+  }, [touring, tourStep?.target, pickedId, mine.length, firstId]);
+
   if (loading) return <Loading />;
   if (error) return <ErrorNote>{error}</ErrorNote>;
 
@@ -75,6 +89,21 @@ export default function Bar() {
   );
 }
 
+/**
+ * Which half of the till each tour step is about.
+ *
+ * The order pad does not exist until an order is open, so a tour walking
+ * through Settle and Split against an empty workspace is describing buttons
+ * that are not on screen. It opens one — an order that already exists, chosen
+ * rather than created, because a tutorial must not put a drink on somebody's
+ * bill.
+ */
+const TOUR_WORKSPACE = new Set([
+  "bar-room", "bar-menu-grid", "bar-cart", "bar-qty",
+  "bar-printbill", "bar-settle", "bar-split", "bar-discard",
+]);
+const TOUR_LIST = new Set(["bar-orders", "bar-search", "bar-filters", "bar-cards"]);
+
 function Till({ facility, isManager, user, onSwitch }) {
   // One fetch for the whole day, open and settled alike. Two lists meant two
   // things that could disagree about the same order.
@@ -93,6 +122,26 @@ function Till({ facility, isManager, user, onSwitch }) {
 
   const list = orders || [];
   const selected = list.find((o) => o.id === selectedId) || null;
+
+  // Follow the tour between the two halves of the screen. On a handheld they
+  // are the same space — the list is replaced by the order — so without this
+  // half the steps would be describing something not on screen.
+  const { active: touring, step: tourStep } = useTutorial();
+  useEffect(() => {
+    if (!touring) return;
+    const t = tourStep?.target;
+    if (TOUR_WORKSPACE.has(t) && !selectedId) {
+      // An order still open and with something on it shows the most: the menu,
+      // the running bill, and every button under it.
+      const best = list.find((o) => o.state === "unpaid" && o.lines.length)
+        || list.find((o) => o.state === "unpaid")
+        || list[0];
+      if (best) setSelectedId(best.id);
+    } else if (TOUR_LIST.has(t) && selectedId) {
+      setSelectedId(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [touring, tourStep?.target, list.length, selectedId]);
   const takings = list
     .filter((o) => o.status === "settled" && !o.voided)
     .reduce((s, o) => s + o.total, 0);
