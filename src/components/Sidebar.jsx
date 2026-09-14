@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, CalendarDays, ConciergeBell, Sparkles, Users,
@@ -11,6 +11,7 @@ import { useTutorial } from "../context/TutorialContext";
 import { useNotifications, WEBSITE_REQUEST_TYPES } from "../context/NotificationsContext";
 import { ROLE_LABEL, LOCATIONS } from "../lib/constants";
 import { ConfirmModal } from "./ui";
+import api from "../lib/api";
 
 const ITEMS = [
   { module: "dashboard", label: "Dashboard",        path: "/",             icon: LayoutDashboard },
@@ -32,6 +33,13 @@ const ITEMS = [
   { module: "todos",     label: "To-do list",        path: "/todos",        icon: ListTodo },
 ];
 
+/** 95 -> "1h 35m", 40 -> "40m". */
+function hoursSince(mins) {
+  const h = Math.floor((mins || 0) / 60);
+  const m = (mins || 0) % 60;
+  return h ? h + "h " + m + "m" : m + "m";
+}
+
 export default function Sidebar() {
   const { user, can, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -44,6 +52,27 @@ export default function Sidebar() {
   // A stray click here would end the shift mid-task, so it asks first rather
   // than acting immediately.
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
+  // Whether they have a shift open, so the dialog can ask the right question.
+  const [shift, setShift] = useState(null);
+  const [ending, setEnding] = useState(false);
+
+  useEffect(() => {
+    if (!confirmingSignOut) return;
+    api.myShift().then(setShift).catch(() => setShift(null));
+  }, [confirmingSignOut]);
+
+  /**
+   * Signing out and going home are not the same thing, so the dialog offers
+   * both. A receptionist moving from the desk computer to their phone signs
+   * out and is still working; a bartender at the end of the night is not.
+   * Guessing either way would put the wrong hours on somebody's record.
+   */
+  const endShiftAndOut = async () => {
+    setEnding(true);
+    try { await api.endMyShift(); } catch { /* signing out matters more */ }
+    setEnding(false);
+    signOut();
+  };
 
   return (
     <aside className="side">
@@ -103,14 +132,26 @@ export default function Sidebar() {
 
       {confirmingSignOut && (
         <ConfirmModal
-          title="Sign out?"
-          blurb="You will need to sign in again to get back in."
-          destructive
-          confirmLabel="Sign out"
-          busy={false}
-          onConfirm={signOut}
-          onClose={() => setConfirmingSignOut(false)}
-        />
+          title={shift?.open ? "Are you finished for the day?" : "Sign out?"}
+          blurb={shift?.open
+            ? "You have been on shift " + hoursSince(shift.minutes) + "."
+            : "You will need to sign in again to get back in."}
+          confirmLabel={shift?.open ? "End my shift and sign out" : "Sign out"}
+          cancelLabel="Stay signed in"
+          busy={ending}
+          onConfirm={shift?.open ? endShiftAndOut : signOut}
+          onClose={() => { setConfirmingSignOut(false); setShift(null); }}
+          extraAction={shift?.open
+            ? { label: "Just sign out, still working", onClick: signOut }
+            : undefined}
+        >
+          {shift?.open && (
+            <p style={{ fontSize: "0.8438rem", color: "var(--slate-soft)", margin: 0, lineHeight: 1.6 }}>
+              Ending your shift records that you have finished. If you are only moving to
+              another computer or phone, sign out without ending it — your shift keeps running.
+            </p>
+          )}
+        </ConfirmModal>
       )}
     </aside>
   );

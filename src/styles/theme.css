@@ -740,6 +740,35 @@ html[data-theme="dark"] .divic .room.available,html[data-theme="dark"] .divic .l
    An A4 document rather than a screen. Printed on white with black text
    whatever theme the app is in — a report is filed and read on paper, where
    the dark theme would be a page of ink and an unreadable photocopy. */
+/* ---- The week somebody is meant to work ---- */
+.roster{display:flex;flex-direction:column;gap:2px;}
+.roster-row{display:flex;align-items:center;gap:12px;padding:7px 9px;border-radius:2px;
+  border:1px solid transparent;}
+.roster-row.on{background:var(--gold-wash);border-color:var(--gold-border);}
+.roster-day{display:flex;align-items:center;gap:8px;width:116px;flex-shrink:0;font-size:0.8125rem;
+  cursor:pointer;}
+.roster-day input{width:15px;flex-shrink:0;}
+.roster-times{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.roster-times input{width:110px;padding:5px 8px;font-size:0.8125rem;}
+.roster-dash{font-size:0.75rem;color:var(--slate-faint);}
+.roster-len{font-size:0.75rem;color:var(--slate-soft);display:inline-flex;align-items:center;gap:7px;}
+.roster-night{display:inline-flex;align-items:center;gap:3px;color:var(--gold-deep);font-size:0.6875rem;
+  text-transform:uppercase;letter-spacing:.04em;}
+.roster-off{font-size:0.75rem;color:var(--slate-faint);font-style:italic;}
+
+/* On shift, off shift, and whether they were meant to be. */
+.shift-dot{display:inline-flex;align-items:center;gap:5px;font-size:0.7188rem;white-space:nowrap;}
+.shift-dot i{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.sd-on{color:var(--sage);}
+.sd-off{color:var(--slate-faint);}
+.sd-late{color:var(--clay);}
+.sd-extra{color:var(--gold-deep);}
+
+@media (max-width:560px){
+  .roster-row{flex-wrap:wrap;gap:6px;}
+  .roster-day{width:auto;}
+}
+
 /* ------------------------------------------------------------------ *
  *  THE TILL
  *
