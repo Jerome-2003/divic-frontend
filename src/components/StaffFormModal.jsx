@@ -29,6 +29,12 @@ export default function StaffFormModal({ editing, onClose, onSaved }) {
   // Only fetched once the role actually needs it, and re-fetched when the
   // property changes — a Divic Urban bartender must not be offered a bar at
   // Divic Exclusive, which the server enforces as well.
+  // The property's changeover times, so "Morning" on a button says which hours
+  // it actually means.
+  const { data: shiftTimes } = useApi(() => api.shiftTimes(), []);
+  const windows = (shiftTimes || []).find((t) => t.location === f.location)?.windows
+    || (shiftTimes || [])[0]?.windows;
+
   const { data: facilities, loading: loadingFacilities } = useApi(
     () => api.facilities(f.location),
     [f.location, isFacility],
@@ -176,7 +182,7 @@ export default function StaffFormModal({ editing, onClose, onSaved }) {
       {/* Set when the account is made, so the roster exists from the first
           day rather than being something somebody remembers to add later. */}
       <Field label="Shifts">
-        <RosterEditor shifts={shifts} onChange={setShifts} />
+        <RosterEditor shifts={shifts} windows={windows} onChange={setShifts} />
       </Field>
 
       <Note>{ROLE_HELP[f.role]}</Note>

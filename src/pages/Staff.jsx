@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Clock } from "lucide-react";
 import api from "../lib/api";
 import { useApi } from "../lib/useApi";
 import { useAuth } from "../context/AuthContext";
@@ -7,6 +7,7 @@ import { LOCATIONS, ROLE_LABEL } from "../lib/constants";
 import { prettyDateTime } from "../lib/format";
 import { PageHead, Card, Loading, ErrorNote, Note, Chip, ConfirmModal } from "../components/ui";
 import StaffFormModal from "../components/StaffFormModal";
+import ShiftTimesModal from "../components/ShiftTimesModal";
 
 /** 95 -> "1h 35m". */
 function hoursSince(mins) {
@@ -27,6 +28,8 @@ export default function Staff() {
   const [busy, setBusy] = useState(false);
 
   const { data, loading, error, reload } = useApi(() => api.staff(), []);
+  const { data: shiftTimes, reload: reloadTimes } = useApi(() => api.shiftTimes(), []);
+  const [editingTimes, setEditingTimes] = useState(false);
 
   const toggle = async (s) => {
     setActionError(null); setBusy(true);
@@ -53,7 +56,12 @@ export default function Staff() {
         blurb={"Create sign-in details, set what each person can reach, and the week they work. " +
           onNow + " on shift now, " + dueNow + " due."}
       >
-        <button className="btn btn-gold" onClick={() => setAdding(true)}><Plus size={15} /> Add staff</button>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button className="btn" onClick={() => setEditingTimes(true)}>
+            <Clock size={15} /> Shift times
+          </button>
+          <button className="btn btn-gold" onClick={() => setAdding(true)}><Plus size={15} /> Add staff</button>
+        </div>
       </PageHead>
 
       <ErrorNote>{error || actionError}</ErrorNote>
@@ -104,7 +112,7 @@ export default function Staff() {
                   <td>
                     {s.dueOn ? (
                       <span className={"shift-dot " + (s.onShift ? "sd-on" : "sd-late")}>
-                        <i /> {s.dueWindow}
+                        <i /> {s.dueShift === "night" ? "Night" : "Morning"} {s.dueWindow}
                       </span>
                     ) : (
                       <span className="tc-meta">
@@ -145,6 +153,14 @@ export default function Staff() {
           </table>
         )}
       </Card>
+
+      {editingTimes && (
+        <ShiftTimesModal
+          times={shiftTimes || []}
+          onClose={() => setEditingTimes(false)}
+          onSaved={async () => { await reloadTimes(); await reload(); }}
+        />
+      )}
 
       {endingShift && (
         <ConfirmModal
