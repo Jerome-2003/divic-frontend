@@ -188,9 +188,20 @@ export function Empty({ heading, text, action }) {
 
 /* Errors say what went wrong and what to do about it. */
 export function ErrorNote({ children }) {
+  const ref = useRef(null);
+
+  /* A form taller than the screen — the staff form with a week's roster on it,
+     for one — puts this above the fold while the button that triggered it sits
+     at the bottom. The person presses Create account, the server says the
+     username is taken, and from their seat nothing happened at all. So the
+     message comes to them. */
+  useEffect(() => {
+    if (children) ref.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [children]);
+
   if (!children) return null;
   return (
-    <div className="err">
+    <div className="err" ref={ref} role="alert">
       <AlertCircle size={15} style={{ flexShrink: 0, marginTop: 1 }} />
       <span>{children}</span>
     </div>

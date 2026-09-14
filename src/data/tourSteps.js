@@ -379,6 +379,23 @@ export const TOUR_STEPS = [
     ],
   },
   {
+    module: "staff",
+    path: "/staff",
+    section: "Staff",
+    label: "Shifts",
+    target: "staff-shift-times",
+    blurb: "Who is meant to be here, and who actually is.",
+    features: [
+      "Shift times sets when the morning and night shifts change over at each property. " +
+        "Two times, not four — every hour belongs to one shift or the other, so a gap covered by nobody cannot be written down.",
+      "Inside Add staff or Edit, the week sets which shifts a person is on. " +
+        "Ticking both Morning and Night on one day is a double — round the clock, which a short-staffed week sometimes needs.",
+      "The two shift columns answer different questions. On shift is who is signed in right now; Due is who the roster says should be.",
+      "End shift closes a shift somebody forgot to close before going home.",
+    ],
+    note: "A shift opens when somebody signs in and closes when they say they are leaving — signing out on one device does not end it.",
+  },
+  {
     module: "content",
     path: "/website",
     section: "Website",

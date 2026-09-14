@@ -57,7 +57,7 @@ export default function Staff() {
           onNow + " on shift now, " + dueNow + " due."}
       >
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button className="btn" onClick={() => setEditingTimes(true)}>
+          <button data-tour="staff-shift-times" className="btn" onClick={() => setEditingTimes(true)}>
             <Clock size={15} /> Shift times
           </button>
           <button className="btn btn-gold" onClick={() => setAdding(true)}><Plus size={15} /> Add staff</button>
@@ -113,6 +113,15 @@ export default function Staff() {
                     {s.dueOn ? (
                       <span className={"shift-dot " + (s.onShift ? "sd-on" : "sd-late")}>
                         <i /> {s.dueShift === "night" ? "Night" : "Morning"} {s.dueWindow}
+                        {(s.dueToday || []).length === 2 && (
+                          <em style={{ fontStyle: "normal", color: "var(--gold-deep)" }}>· double</em>
+                        )}
+                      </span>
+                    ) : (s.dueToday || []).length ? (
+                      /* Rostered today, but not at this hour — the night shift
+                         seen from the morning. "Not today" would be a lie. */
+                      <span className="tc-meta">
+                        Later today ({(s.dueToday || []).join(" and ")})
                       </span>
                     ) : (
                       <span className="tc-meta">
