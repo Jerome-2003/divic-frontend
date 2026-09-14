@@ -745,16 +745,22 @@ html[data-theme="dark"] .divic .room.available,html[data-theme="dark"] .divic .l
 .roster-row{display:flex;align-items:center;gap:12px;padding:7px 9px;border-radius:2px;
   border:1px solid transparent;}
 .roster-row.on{background:var(--gold-wash);border-color:var(--gold-border);}
-.roster-day{display:flex;align-items:center;gap:8px;width:116px;flex-shrink:0;font-size:0.8125rem;
-  cursor:pointer;}
-.roster-day input{width:15px;flex-shrink:0;}
-.roster-times{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
-.roster-times input{width:110px;padding:5px 8px;font-size:0.8125rem;}
-.roster-dash{font-size:0.75rem;color:var(--slate-faint);}
-.roster-len{font-size:0.75rem;color:var(--slate-soft);display:inline-flex;align-items:center;gap:7px;}
-.roster-night{display:inline-flex;align-items:center;gap:3px;color:var(--gold-deep);font-size:0.6875rem;
-  text-transform:uppercase;letter-spacing:.04em;}
-.roster-off{font-size:0.75rem;color:var(--slate-faint);font-style:italic;}
+.roster-day{width:104px;flex-shrink:0;font-size:0.8125rem;}
+.roster-pick{display:flex;gap:5px;flex-wrap:wrap;}
+.roster-pick .chip-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;}
+/* The hours each shift covers, said once at the top — "Morning" on a button
+   tells a manager nothing at four in the afternoon. */
+.roster-key{display:flex;gap:16px;flex-wrap:wrap;font-size:0.7188rem;color:var(--slate-soft);
+  padding-bottom:8px;margin-bottom:4px;border-bottom:1px solid var(--line-soft);}
+.roster-key span{display:inline-flex;align-items:center;gap:5px;}
+
+.shift-times{padding:14px 0;border-bottom:1px solid var(--line-soft);}
+.shift-times:last-of-type{border-bottom:0;}
+.shift-times h4{font-size:0.6875rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--slate-faint);font-weight:500;margin:0 0 10px;}
+.shift-preview{display:flex;gap:18px;flex-wrap:wrap;margin-top:4px;font-size:0.8125rem;}
+.shift-preview span{display:inline-flex;align-items:center;gap:6px;color:var(--slate-soft);}
+.shift-preview em{font-style:normal;color:var(--gold-deep);}
 
 /* On shift, off shift, and whether they were meant to be. */
 .shift-dot{display:inline-flex;align-items:center;gap:5px;font-size:0.7188rem;white-space:nowrap;}

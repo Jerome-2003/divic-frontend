@@ -65,6 +65,10 @@ export const api = {
   endMyShift: () => request("/api/auth/end-shift", { method: "POST" }),
   endStaffShift: (id) => request(`/api/staff/${id}/end-shift`, { method: "POST" }),
   shiftsWorked: (from, to) => request("/api/staff/shifts", { params: { from, to } }),
+  // When the two shifts change over — a property's hours, not a person's.
+  shiftTimes: () => request("/api/staff/shift-times"),
+  setShiftTimes: (location, morningStartsAt, nightStartsAt) =>
+    request("/api/staff/shift-times", { method: "PUT", body: { location, morningStartsAt, nightStartsAt } }),
 
   // The filed record of a month or a year, across the business.
   performanceReport: (params) => request("/api/analytics/report", { params }),

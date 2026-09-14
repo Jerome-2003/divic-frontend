@@ -105,7 +105,9 @@ export default function ShiftsWorked() {
                     <td className="mono" style={{ fontSize: "0.7812rem" }}>{hours(r.minutes)}</td>
                     <td>
                       {r.wasRostered ? (
-                        <span className="shift-dot sd-on"><i /> {r.rosteredWindow}</span>
+                        <span className="shift-dot sd-on">
+                          <i /> {r.rosteredShift === "night" ? "Night" : "Morning"} {r.rosteredWindow}
+                        </span>
                       ) : (
                         <span className="shift-dot sd-extra"><i /> Not rostered</span>
                       )}
