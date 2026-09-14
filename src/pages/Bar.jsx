@@ -194,6 +194,7 @@ function Till({ facility, isManager, user, onSwitch }) {
                 user={user}
                 onChanged={reload}
                 onSettled={async (r) => { setReceipt(r); await reload(); }}
+                onDiscarded={async () => { setSelectedId(null); await reload(); }}
               />
             </>
           ) : (

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Minus, Plus, Trash2, Receipt as ReceiptIcon, BedDouble, Ban, Search, Printer,
+  Minus, Plus, Trash2, Receipt as ReceiptIcon, BedDouble, Ban, Search, Printer, XCircle,
 } from "lucide-react";
 import api from "../../lib/api";
 import { useOverride } from "../../lib/useOverride";
@@ -34,13 +34,14 @@ const CATEGORIES = [
  * fault, and staff need to be able to tell a guest it is off rather than
  * hunting for something that is no longer there.
  */
-export default function OrderWorkspace({ facility, tab, menu, isManager, user, onChanged, onSettled }) {
+export default function OrderWorkspace({ facility, tab, menu, isManager, user, onChanged, onSettled, onDiscarded }) {
   const { runWithOverride, overrideDialog } = useOverride();
   const [busy, setBusy] = useState(false);
   const [settling, setSettling] = useState(false);
   const [splitting, setSplitting] = useState(false);
   const [attaching, setAttaching] = useState(false);
   const [voiding, setVoiding] = useState(false);
+  const [discarding, setDiscarding] = useState(false);
   // A printed copy on screen: the bill before payment, or a second receipt after.
   const [printing, setPrinting] = useState(null);
   const [err, setErr] = useState(null);
@@ -79,6 +80,22 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, user, o
       setSettling(false);
       setSplitting(false);
       onSettled(res.receipt);
+    } catch (e) {
+      if (!e.cancelled) setErr(e.message);
+      setBusy(false);
+    }
+  };
+
+  // Closing a table that should never have been open — a name typed wrong, a
+  // party that left before ordering. Nothing has been paid, so there is no
+  // money to reverse; the table simply goes.
+  const discard = async (reason) => {
+    setErr(null);
+    setBusy(true);
+    try {
+      await runWithOverride((extra) => api.discardTab(facility.id, tab.id, reason, extra));
+      setDiscarding(false);
+      onDiscarded();
     } catch (e) {
       if (!e.cancelled) setErr(e.message);
       setBusy(false);
@@ -209,6 +226,10 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, user, o
                 </button>
               </>
             )}
+            <button className="btn btn-quiet" style={{ width: "100%", marginTop: 14 }}
+              onClick={() => setDiscarding(true)} disabled={busy}>
+              <XCircle size={15} /> Close this table without settling
+            </button>
           </section>
         </div>
       )}
@@ -263,6 +284,32 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, user, o
             What this undoes is the money: the charge comes off the guest&rsquo;s bill, the
             till payment is reversed, and the month&rsquo;s figures stop counting it. Your
             name and this reason go in the activity log.
+          </p>
+        </ConfirmModal>
+      )}
+
+      {discarding && (
+        <ConfirmModal
+          title={tab.lines.length ? "Discard " + tab.tableName + "?" : "Close " + tab.tableName + "?"}
+          blurb={tab.lines.length
+            ? tab.lines.length + " item" + (tab.lines.length === 1 ? "" : "s") + " · " + naira(tab.total)
+            : "Nothing has been ordered on it."}
+          destructive
+          confirmLabel={tab.lines.length ? "Discard it" : "Close it"}
+          cancelLabel="Keep it open"
+          busy={busy}
+          // A table with something on it has to say why; an empty one is just
+          // tidying up and asking would only train people to type "x".
+          requireReason={tab.lines.length > 0}
+          reasonLabel="Why is this being discarded?"
+          reasonPlaceholder="Opened on the wrong table"
+          onConfirm={discard}
+          onClose={() => setDiscarding(false)}
+        >
+          <p style={{ fontSize: "0.8438rem", color: "var(--slate-soft)", margin: 0, lineHeight: 1.6 }}>
+            {tab.lines.length
+              ? "Nothing has been paid, so there is no money to reverse — the table and everything on it go. Your name, what was on it and this reason go in the activity log."
+              : "The table is removed. Nothing was ordered on it, so nothing else changes."}
           </p>
         </ConfirmModal>
       )}
