@@ -49,14 +49,30 @@ export function TutorialProvider({ children }) {
     markTourSeen().catch(() => { /* the tour just stays offered next sign-in */ });
   }, [markTourSeen]);
 
+  // Which way the tour is travelling, so a step that has to be skipped is
+  // skipped onwards rather than bouncing between two unskippable neighbours.
+  const [dir, setDir] = useState(1);
+  const [missing, setMissing] = useState(false);
+
   const next = useCallback(() => {
+    setDir(1);
     if (stepIndex + 1 >= steps.length) { end(); return; }
     setStepIndex(stepIndex + 1);
   }, [stepIndex, steps.length, end]);
 
   const back = useCallback(() => {
+    setDir(-1);
     setStepIndex((i) => Math.max(0, i - 1));
   }, []);
+
+  /** Past the rest of this page's steps, to the first step of the next page. */
+  const skipSection = useCallback(() => {
+    setDir(1);
+    const here = steps[stepIndex]?.section;
+    let i = stepIndex + 1;
+    while (i < steps.length && steps[i].section === here) i++;
+    if (i >= steps.length) end(); else setStepIndex(i);
+  }, [stepIndex, steps, end]);
 
   // Navigate to whichever page the current step points at. A step can become
   // out of range if permissions change mid-tour (they won't in practice, but
@@ -68,10 +84,38 @@ export function TutorialProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, step?.path]);
 
+  // A step marked `optional` describes a control that is not always there — a
+  // manager-only button seen by a bartender, a panel that only exists once an
+  // order is open. When the overlay reports it absent, move past it in
+  // whichever direction the tour was already going. Steps carrying a `hint`
+  // are never skipped: they have something to say about how to reach the thing.
+  useEffect(() => {
+    if (!active || !step || !missing || !step.optional || step.hint) return;
+    if (dir === 1) {
+      if (stepIndex + 1 >= steps.length) end(); else setStepIndex(stepIndex + 1);
+    } else if (stepIndex > 0) {
+      setStepIndex(stepIndex - 1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [missing, stepIndex, active]);
+
+  // Where this step sits within its own page, so a long tour reads as
+  // "Bar · 4 of 9" instead of "step 27 of 58", which tells nobody anything.
+  const section = step?.section || step?.label || "";
+  const sectionSteps = steps.filter((s) => (s.section || s.label) === section);
+  const sectionIndex = sectionSteps.indexOf(step);
+
   const value = useMemo(() => ({
     active, step, stepIndex, stepCount: steps.length,
-    start, next, back, skip: end,
-  }), [active, step, stepIndex, steps.length, start, next, back, end]);
+    first: stepIndex === 0,
+    last: stepIndex === steps.length - 1,
+    sectionLabel: section,
+    sectionIndex: Math.max(0, sectionIndex),
+    sectionCount: sectionSteps.length,
+    missing, setMissing,
+    start, next, back, skipSection, skip: end,
+  }), [active, step, stepIndex, steps.length, section, sectionIndex, sectionSteps.length,
+    missing, start, next, back, skipSection, end]);
 
   return <TutorialContext.Provider value={value}>{children}</TutorialContext.Provider>;
 }

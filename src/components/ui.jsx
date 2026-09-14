@@ -215,7 +215,9 @@ export function Field({ label, htmlFor, children }) {
   );
 }
 
-export const Row = ({ children }) => <div className="frow">{children}</div>;
+// Rest props forwarded so a wrapper row can carry a data-tour anchor; the tour
+// points at whole groups of fields as well as single buttons.
+export const Row = ({ children, ...rest }) => <div className="frow" {...rest}>{children}</div>;
 
 /**
  * A password box with a reveal control. The toggle is a real button so it is

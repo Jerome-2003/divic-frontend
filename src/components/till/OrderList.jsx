@@ -49,7 +49,7 @@ export default function OrderList({
   });
 
   return (
-    <aside className="ol">
+    <aside className="ol" data-tour="bar-orders">
       <div className="ol-head">
         <h3>Today&rsquo;s orders</h3>
         <button className="btn btn-sm btn-gold" onClick={onNew} disabled={!canOpen}>
@@ -57,7 +57,7 @@ export default function OrderList({
         </button>
       </div>
 
-      <div className="ol-search">
+      <div className="ol-search" data-tour="bar-search">
         <Search size={14} />
         <input
           value={query}
@@ -67,7 +67,7 @@ export default function OrderList({
         />
       </div>
 
-      <div className="ol-tabs">
+      <div className="ol-tabs" data-tour="bar-filters">
         {FILTERS.map((f) => {
           const n = f.key === "all" ? orders.length : counts[f.key] || 0;
           return (
@@ -82,7 +82,7 @@ export default function OrderList({
         })}
       </div>
 
-      <div className="ol-cards">
+      <div className="ol-cards" data-tour="bar-cards">
         {shown.length === 0 ? (
           <p className="ol-none">
             {orders.length === 0

@@ -130,7 +130,7 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, user, o
           </p>
         </div>
         {!settled && (
-          <button className="btn btn-sm" onClick={() => setAttaching(true)} disabled={busy}>
+          <button data-tour="bar-room" className="btn btn-sm" onClick={() => setAttaching(true)} disabled={busy}>
             <BedDouble size={14} /> {tab.roomNumber ? "Change room" : "Attach a room"}
           </button>
         )}
@@ -146,7 +146,7 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, user, o
         />
       ) : (
         <div className="ws-body">
-          <section className="ws-menu">
+          <section className="ws-menu" data-tour="bar-menu-grid">
             {groups.length === 0 ? (
               <Empty
                 heading="Nothing on the menu"
@@ -176,7 +176,7 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, user, o
             ))}
           </section>
 
-          <section className="ws-cart">
+          <section className="ws-cart" data-tour="bar-cart">
             <h4>The bill</h4>
             {tab.lines.length === 0 ? (
               <p className="ol-none">Nothing ordered yet. Tap an item to add it.</p>
@@ -189,7 +189,7 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, user, o
                         {l.name}
                         <span className="tc-meta">{naira(l.unitPrice)} each</span>
                       </div>
-                      <div className="cl-qty">
+                      <div className="cl-qty" data-tour="bar-qty">
                         <button onClick={() => setQty(l, l.qty - 1)} disabled={busy}
                           aria-label={"One fewer " + l.name}><Minus size={13} /></button>
                         <span className="mono">{l.qty}</span>
@@ -208,11 +208,11 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, user, o
                   <strong className="mono">{naira(tab.total)}</strong>
                 </div>
 
-                <button className="btn btn-gold btn-big" style={{ width: "100%", marginTop: 12 }}
+                <button data-tour="bar-settle" className="btn btn-gold btn-big" style={{ width: "100%", marginTop: 12 }}
                   onClick={() => setSettling(true)} disabled={busy}>
                   <ReceiptIcon size={16} /> Settle &amp; print
                 </button>
-                <button className="btn" style={{ width: "100%", marginTop: 8 }}
+                <button data-tour="bar-split" className="btn" style={{ width: "100%", marginTop: 8 }}
                   onClick={() => setSplitting(true)} disabled={busy}>
                   Split this bill
                 </button>
@@ -220,13 +220,13 @@ export default function OrderWorkspace({ facility, tab, menu, isManager, user, o
                     to pay a figure they have never seen written down is a
                     guest who queries it, and a "receipt" printed for money not
                     yet taken is the paper that gets waved at a manager later. */}
-                <button className="btn" style={{ width: "100%", marginTop: 8 }}
+                <button data-tour="bar-printbill" className="btn" style={{ width: "100%", marginTop: 8 }}
                   onClick={() => setPrinting("bill")} disabled={busy}>
                   <Printer size={15} /> Print the bill first
                 </button>
               </>
             )}
-            <button className="btn btn-quiet" style={{ width: "100%", marginTop: 14 }}
+            <button data-tour="bar-discard" className="btn btn-quiet" style={{ width: "100%", marginTop: 14 }}
               onClick={() => setDiscarding(true)} disabled={busy}>
               <XCircle size={15} /> Close this table without settling
             </button>
