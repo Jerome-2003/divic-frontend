@@ -98,21 +98,21 @@ export default function FrontDesk() {
   return (
     <>
       <PageHead title="Front desk" blurb="Check guests in and out, and see who is in the building right now.">
-        <button className="btn btn-gold" onClick={() => setAdding(true)}><Plus size={15} /> Walk-in booking</button>
+        <button data-tour="fd-walkin" className="btn btn-gold" onClick={() => setAdding(true)}><Plus size={15} /> Walk-in booking</button>
       </PageHead>
 
-      <div className="tabs">
+      <div className="tabs" data-tour="fd-tabs">
         <button className={tab === "arrivals" ? "on" : ""} onClick={() => setTab("arrivals")}>Arrivals ({arrivals.length})</button>
         <button className={tab === "inhouse" ? "on" : ""} onClick={() => setTab("inhouse")}>Staying ({inHouse.length})</button>
         <button className={tab === "departures" ? "on" : ""} onClick={() => setTab("departures")}>Departures ({departures.length})</button>
         {showRequests && (
-          <button className={"tab-web" + (tab === "requests" ? " on" : "")} onClick={() => setTab("requests")}>
+          <button data-tour="fd-requests" className={"tab-web" + (tab === "requests" ? " on" : "")} onClick={() => setTab("requests")}>
             <Globe size={13} /> Website requests
             {waitingRequests > 0 && <i className="notif-dot" aria-label={waitingRequests + " new"} />}
           </button>
         )}
         {showBilling && (
-          <button className={tab === "billing" ? "on" : ""} onClick={() => setTab("billing")}>Bills</button>
+          <button data-tour="fd-bills" className={tab === "billing" ? "on" : ""} onClick={() => setTab("billing")}>Bills</button>
         )}
       </div>
 

@@ -26,12 +26,18 @@ import ReportDuePrompt from "../components/ReportDuePrompt";
 const MONTHS = ["January","February","March","April","May","June",
   "July","August","September","October","November","December"];
 
-/** The month that just ended — what somebody opening this usually wants. */
+/**
+ * The month that just ended — what somebody opening this usually wants.
+ *
+ * Derived from the hotel's own date. Taken from UTC, this returns the wrong
+ * month for the first hour of the first day of a month: it is still the old
+ * month in UTC, so "last month" comes back as the one before that.
+ */
 function lastMonth() {
-  const d = new Date();
-  d.setUTCDate(1);
-  d.setUTCMonth(d.getUTCMonth() - 1);
-  return d.toISOString().slice(0, 10).slice(0, 7);
+  const [y, m] = today().split("-").map(Number);
+  const year = m === 1 ? y - 1 : y;
+  const month = m === 1 ? 12 : m - 1;
+  return year + "-" + String(month).padStart(2, "0");
 }
 
 export default function Records() {
@@ -87,7 +93,7 @@ export default function Records() {
           ? "Sales and performance across both properties. Pick any two dates — the 9th to the 22nd of September, a single Saturday, a whole month — or take a named month or year."
           : "Sales and performance for this property. Pick any two dates — the 9th to the 22nd of September, a single Saturday, a whole month — or take a named month or year."}
       >
-        <button className="btn btn-gold" disabled={!data} onClick={takeCopy}>
+        <button data-tour="rec-print" className="btn btn-gold" disabled={!data} onClick={takeCopy}>
           <Printer size={15} /> Save as PDF or print
         </button>
       </PageHead>
@@ -99,7 +105,7 @@ export default function Records() {
           {/* Three buttons rather than a dropdown. Choosing your own dates is
               the everyday use of this page, and it was one option down a select
               that opened on "One month" — which is to say invisible. */}
-          <div className="tabs tabs-sub" style={{ marginBottom: 14 }}>
+          <div className="tabs tabs-sub" data-tour="rec-mode" style={{ marginBottom: 14 }}>
             <button className={kind === "range" ? "on" : ""} onClick={() => setKind("range")}>
               Choose the dates
             </button>
@@ -130,7 +136,7 @@ export default function Records() {
             </Row>
           ) : (
             <>
-              <Row>
+              <Row data-tour="rec-dates">
                 <Field label="First day" htmlFor="rf">
                   <input id="rf" type="date" value={from} max={to}
                     onChange={(e) => setFrom(e.target.value)} />
@@ -145,7 +151,7 @@ export default function Records() {
               <p className="tc-meta" style={{ margin: "2px 0 12px" }}>
                 Both days are counted — the 9th to the 22nd is fourteen days, not thirteen.
               </p>
-              <div className="quick-range">
+              <div className="quick-range" data-tour="rec-quick">
                 {[
                   ["Today", 0], ["Last 7 days", 6], ["Last 14 days", 13],
                   ["Last 30 days", 29], ["Last 90 days", 89],

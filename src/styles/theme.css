@@ -615,8 +615,14 @@ html[data-theme="dark"] .divic .room.available,html[data-theme="dark"] .divic .l
 .tour-spot{position:fixed;z-index:70;border-radius:4px;pointer-events:none;
   box-shadow:0 0 0 9999px rgba(44,42,41,.55),0 0 0 2px var(--gold),0 0 16px rgba(212,175,55,.55);
   transition:top .25s ease,left .25s ease,width .25s ease,height .25s ease;}
-.tour-card{position:fixed;top:90px;right:22px;z-index:71;width:360px;max-width:calc(100vw - 32px);
+/* The card moves to whichever corner is not covering the thing it is pointing
+   at. A popover anchored to the element would be nicer and would also need to
+   handle a target at the edge of the screen, inside a scrolling panel, or
+   taller than the viewport — a corner that simply gets out of the way is the
+   trade worth making. */
+.tour-card{position:fixed;z-index:71;width:360px;max-width:calc(100vw - 32px);
   max-height:calc(100vh - 112px);overflow-y:auto;
+  transition:top .2s ease,bottom .2s ease,left .2s ease,right .2s ease;
   background:var(--porcelain);border:1px solid var(--line);border-top:3px solid var(--gold);
   border-radius:3px;box-shadow:0 18px 50px var(--shadow-float);padding:18px 20px;}
 .tour-head{display:flex;align-items:center;justify-content:space-between;gap:10px;}
@@ -629,9 +635,20 @@ html[data-theme="dark"] .divic .room.available,html[data-theme="dark"] .divic .l
 .tour-note{margin:12px 0 0;font-size:0.75rem;color:var(--slate-faint);border-top:1px dashed var(--line);padding-top:10px;}
 .tour-foot{margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft);
   display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.tour-card.tc-right{right:22px;left:auto;}
+.tour-card.tc-left{left:250px;right:auto;}
+.tour-card.tc-top{top:90px;bottom:auto;}
+.tour-card.tc-bottom{bottom:22px;top:auto;}
+/* Said only when the control this step is about is not on screen. */
+.tour-hint{margin:12px 0 0;font-size:0.7812rem;color:var(--gold-deep);background:var(--gold-wash);
+  border:1px solid var(--gold-border);border-radius:2px;padding:9px 11px;line-height:1.55;}
+.tour-skips{display:flex;gap:4px;flex-wrap:wrap;}
 .tour-nav{display:flex;gap:8px;}
-@media (max-width:640px){
-  .tour-card{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:60vh;}
+@media (max-width:900px){
+  /* No room to dodge sideways, so it sits at the bottom and the spotlight
+     scrolls to the middle of what is left. */
+  .tour-card,.tour-card.tc-left,.tour-card.tc-right,.tour-card.tc-top,.tour-card.tc-bottom{
+    left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:58vh;}
 }
 /* ---- Facility screens: bar tables, pool/gym logs ---- */
 .settle-choice{display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:14px;}

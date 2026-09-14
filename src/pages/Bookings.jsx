@@ -4,7 +4,7 @@ import api from "../lib/api";
 import { useApi } from "../lib/useApi";
 import { useAuth } from "../context/AuthContext";
 import { LOCATIONS, BOOKING_STATUS } from "../lib/constants";
-import { naira, cap } from "../lib/format";
+import { naira, cap, today, hourNow } from "../lib/format";
 import { PageHead, Card, Empty, Loading, ErrorNote, Chip } from "../components/ui";
 import NewBookingModal from "../components/NewBookingModal";
 import MoveRoomModal from "../components/MoveRoomModal";
@@ -79,9 +79,10 @@ export default function Bookings() {
             </thead>
             <tbody>
               {data.map((b) => {
-                const now = new Date();
-                const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-                const checkoutAlert = b.status === "in-house" && b.checkOut === today && now.getHours() >= 12;
+                // Both the day and the hour read from the hotel's clock, not
+                // the browser's — a laptop set to another zone would otherwise
+                // raise this alert on the wrong day, or not at all.
+                const checkoutAlert = b.status === "in-house" && b.checkOut === today() && hourNow() >= 12;
                 return (
                 <tr key={b._id}>
                   <td className="mono" style={{ color: "var(--gold-deep)" }}>{b.ref}</td>

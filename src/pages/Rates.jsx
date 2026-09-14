@@ -48,7 +48,7 @@ export default function Rates() {
             </button>
           </div>
         ) : (
-          <button className="btn" onClick={() => setDraft({ ...current })}>Edit rates</button>
+          <button data-tour="rates-edit" className="btn" onClick={() => setDraft({ ...current })}>Edit rates</button>
         ))}
       </PageHead>
 
@@ -90,7 +90,7 @@ export default function Rates() {
       {/* Offers are their own section, not a column in the table above. On the
           website they are read as their own thing, and here a manager turns
           them on and off without touching a published rate. */}
-      <div style={{ marginTop: 24 }}>
+      <div style={{ marginTop: 24 }} data-tour="rates-discounts">
         <DiscountsCard location={location} typeOrder={data.typeOrder} editable={editable} />
       </div>
     </>

@@ -126,15 +126,15 @@ function Till({ facility, isManager, user, onSwitch }) {
           {onSwitch && <button className="btn" onClick={onSwitch}><ArrowLeft size={15} /> Switch</button>}
           {isManager && (
             <>
-              <button className={"btn" + (showSales ? " btn-gold" : "")} onClick={() => setShowSales(!showSales)}>
+              <button data-tour="bar-takings" className={"btn" + (showSales ? " btn-gold" : "")} onClick={() => setShowSales(!showSales)}>
                 <TrendingUp size={15} /> Takings
               </button>
-              <button className="btn" onClick={() => setEditingMenu(true)}>
+              <button data-tour="bar-menu" className="btn" onClick={() => setEditingMenu(true)}>
                 <Settings2 size={15} /> Menu
               </button>
             </>
           )}
-          <button className="btn btn-gold" onClick={() => setOpening(true)} disabled={!canOpen}>
+          <button data-tour="bar-open" className="btn btn-gold" onClick={() => setOpening(true)} disabled={!canOpen}>
             <Plus size={15} /> Open a table
           </button>
         </div>
