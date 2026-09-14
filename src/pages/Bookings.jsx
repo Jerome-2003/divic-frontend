@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Plus, Search, AlertTriangle, ArrowLeftRight, CalendarClock, Clock3 } from "lucide-react";
+import { Plus, Search, AlertTriangle, ArrowLeftRight, CalendarClock, Clock3, XCircle } from "lucide-react";
 import api from "../lib/api";
 import { useApi } from "../lib/useApi";
 import { useAuth } from "../context/AuthContext";
 import { LOCATIONS, BOOKING_STATUS } from "../lib/constants";
 import { naira, cap, today, hourNow } from "../lib/format";
-import { PageHead, Card, Empty, Loading, ErrorNote, Chip } from "../components/ui";
+import { PageHead, Card, Empty, Loading, ErrorNote, Chip, ConfirmModal } from "../components/ui";
 import NewBookingModal from "../components/NewBookingModal";
 import MoveRoomModal from "../components/MoveRoomModal";
 import BookingDatesModal from "../components/BookingDatesModal";
@@ -20,6 +20,16 @@ export default function Bookings() {
   const [adding, setAdding] = useState(false);
   const [moving, setMoving] = useState(null);
   const [editingDates, setEditingDates] = useState(null);
+  const [cancelling, setCancelling] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState(null);
+
+  const cancelBooking = async (reason) => {
+    setBusy(true); setActionError(null);
+    try { await api.cancelBooking(cancelling._id, reason); setCancelling(null); await reload(); }
+    catch (e) { setActionError(e.message); setCancelling(null); }
+    finally { setBusy(false); }
+  };
 
   const { data, loading, error, reload } = useApi(
     () => api.bookings(location, { status: status || undefined, q: q || undefined }),
@@ -47,7 +57,7 @@ export default function Bookings() {
         </select>
       </div>
 
-      <ErrorNote>{error}</ErrorNote>
+      <ErrorNote>{error || actionError}</ErrorNote>
 
       {/* Paid, but no room. The guest has a contract and nowhere to sleep, so it
           sits at the top of the page rather than in a row somewhere below. */}
@@ -127,6 +137,21 @@ export default function Bookings() {
                         <ArrowLeftRight size={13} />
                       </button>
                     )}
+                    {/* A guest ringing to cancel is an everyday call, and until
+                        now the desk had nowhere to record it: the page could
+                        filter by cancelled and never make one. A stay already
+                        finished cannot be cancelled — the server refuses it. */}
+                    {["confirmed", "in-house"].includes(b.status) && (
+                      <button
+                        className="btn btn-sm btn-quiet"
+                        style={{ marginRight: 6 }}
+                        onClick={() => setCancelling(b)}
+                        title="Cancel this booking"
+                        aria-label="Cancel this booking"
+                      >
+                        <XCircle size={13} />
+                      </button>
+                    )}
                     {naira(b.totalCharge)}
                     {b.balance > 0 && (
                       <div style={{ fontSize: "0.7188rem", color: "var(--clay)" }}>{naira(b.balance)} due</div>
@@ -139,6 +164,30 @@ export default function Bookings() {
           </table>
         )}
       </Card>
+
+      {cancelling && (
+        <ConfirmModal
+          title={"Cancel " + cancelling.ref + "?"}
+          blurb={(cancelling.guest?.name || "This guest") +
+            " · room " + (cancelling.roomNumber || "unplaced") +
+            " · " + cancelling.checkIn + " → " + cancelling.checkOut}
+          destructive
+          confirmLabel="Cancel the booking"
+          cancelLabel="Keep it"
+          busy={busy}
+          requireReason
+          reasonLabel="Why is it being cancelled?"
+          reasonPlaceholder="Guest rang to cancel"
+          onConfirm={cancelBooking}
+          onClose={() => setCancelling(null)}
+        >
+          <p style={{ fontSize: "0.8438rem", color: "var(--slate-soft)", margin: 0, lineHeight: 1.6 }}>
+            {cancelling.status === "in-house"
+              ? "This guest is checked in, so their room goes to housekeeping. Anything already on their bill stays owed — cancelling a booking does not write off money."
+              : "The room is released for those dates and can be sold again. Anything already paid is not refunded here — that is a separate conversation with the guest."}
+          </p>
+        </ConfirmModal>
+      )}
 
       {adding && <NewBookingModal onClose={() => setAdding(false)} onCreated={reload} />}
       {moving && <MoveRoomModal booking={moving} onClose={() => setMoving(null)} onMoved={reload} />}

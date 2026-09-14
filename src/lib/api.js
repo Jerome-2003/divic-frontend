@@ -141,10 +141,6 @@ export const api = {
   // is deliberately no endpoint that lists who is in house.
   facilityGuestLookup: (facilityId, room) =>
     request(`/api/facilities/${facilityId}/guest-lookup`, { params: { room } }),
-  facilityCharges: (facilityId, date) =>
-    request(`/api/facilities/${facilityId}/charges`, { params: { date } }),
-  postFacilityCharge: (facilityId, payload) =>
-    request(`/api/facilities/${facilityId}/charges`, { method: "POST", body: payload }),
   // Managers and owners only — the server refuses this from facility staff.
   voidFacilityCharge: (facilityId, chargeId, reason) =>
     request(`/api/facilities/${facilityId}/charges/${chargeId}/void`, { method: "POST", body: { reason } }),

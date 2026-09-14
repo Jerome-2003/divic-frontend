@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, CalendarDays, ConciergeBell, Sparkles, Users,
   Martini, TrendingUp, Tags, UserCog, ScrollText, Globe2, LogOut, FileText,
-  Moon, Sun, ListTodo, HelpCircle, Waves, Dumbbell,
+  Moon, Sun, ListTodo, HelpCircle, Waves, Dumbbell, KeyRound,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -11,6 +11,7 @@ import { useTutorial } from "../context/TutorialContext";
 import { useNotifications, WEBSITE_REQUEST_TYPES } from "../context/NotificationsContext";
 import { ROLE_LABEL, LOCATIONS } from "../lib/constants";
 import { ConfirmModal } from "./ui";
+import ChangePasswordModal from "./ChangePasswordModal";
 import api from "../lib/api";
 
 const ITEMS = [
@@ -52,6 +53,7 @@ export default function Sidebar() {
   // A stray click here would end the shift mid-task, so it asks first rather
   // than acting immediately.
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
   // Whether they have a shift open, so the dialog can ask the right question.
   const [shift, setShift] = useState(null);
   const [ending, setEnding] = useState(false);
@@ -117,6 +119,11 @@ export default function Sidebar() {
           <button className="signout" onClick={() => setConfirmingSignOut(true)}>
             <LogOut size={14} /> Sign out
           </button>
+          <button className="notif-btn" onClick={() => setChangingPassword(true)}
+            title="Change your password"
+            aria-label="Change your password">
+            <KeyRound size={15} />
+          </button>
           <button className="notif-btn" onClick={startTour}
             title="Take the guided tour"
             aria-label="Take the guided tour">
@@ -129,6 +136,8 @@ export default function Sidebar() {
           </button>
         </div>
       </div>
+
+      {changingPassword && <ChangePasswordModal onClose={() => setChangingPassword(false)} />}
 
       {confirmingSignOut && (
         <ConfirmModal
